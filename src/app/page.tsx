@@ -1648,9 +1648,9 @@ function AiAssistant({
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <StatCard label="KI-relevante Positionen" value={String(aiPositions.length)} detail={`${suggestedHours} kalkulierte Stunden`} tone="accent" />
-        <StatCard label="Empfohlene Abrechnung" value="Hybrid" detail="Pauschale Basis plus Nachträge" />
-        <StatCard label="Projektfokus" value="Angebots-KI" detail={project.client} />
+        <StatCard label="KI-relevante Positionen" value={String(aiPositions.length)} detail={`${suggestedHours} kalkulierte Stunden`} tone="accent" align="center" />
+        <StatCard label="Empfohlene Abrechnung" value="Hybrid" detail="Pauschale Basis plus Nachträge" align="center" />
+        <StatCard label="Projektfokus" value="Angebots-KI" detail={project.client} align="center" />
       </div>
 
       <div className="grid gap-6">
