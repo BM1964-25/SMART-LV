@@ -433,18 +433,17 @@ export default function HomePage() {
             <p className="text-sm text-muted">Angebote, Aufträge und Abrechnung in einem Prozess</p>
           </div>
         </div>
-        <button
-          type="button"
-          aria-label={sidebarCollapsed ? "Sidebar ausklappen" : "Sidebar einklappen"}
-          title={sidebarCollapsed ? "Sidebar ausklappen" : "Sidebar einklappen"}
-          onClick={() => setSidebarCollapsed((current) => !current)}
-          className={`mt-5 flex h-10 w-full items-center rounded-md border border-line bg-white text-sm font-semibold text-muted transition hover:border-slate-300 hover:text-ink ${
-            sidebarCollapsed ? "justify-center px-0" : "justify-between px-3"
-          }`}
-        >
-          {sidebarCollapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
-          <span className={sidebarCollapsed ? "hidden" : ""}>Sidebar einklappen</span>
-        </button>
+        <div className={`mt-5 flex ${sidebarCollapsed ? "justify-center" : "justify-end"}`}>
+          <button
+            type="button"
+            aria-label={sidebarCollapsed ? "Sidebar ausklappen" : "Sidebar einklappen"}
+            title={sidebarCollapsed ? "Sidebar ausklappen" : "Sidebar einklappen"}
+            onClick={() => setSidebarCollapsed((current) => !current)}
+            className="flex h-9 w-9 items-center justify-center rounded-md text-muted transition hover:bg-slate-50 hover:text-ink"
+          >
+            {sidebarCollapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+          </button>
+        </div>
         <nav className="mt-8 grid gap-1">
           {navItems.map((item) => (
             <button
