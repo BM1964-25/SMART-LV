@@ -1,3 +1,10 @@
 import nextVitals from "eslint-config-next/core-web-vitals";
 
-export default nextVitals;
+const eslintConfig = [
+  {
+    ignores: [".next/**", "_next/**", "out/**", "404/**", "_not-found/**"]
+  },
+  ...nextVitals
+];
+
+export default eslintConfig;

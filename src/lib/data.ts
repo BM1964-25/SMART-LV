@@ -102,13 +102,13 @@ export const sampleProject: Project = {
   companyId: "builtsmart-ai",
   client: "Musterbau Immobilien GmbH",
   contactPerson: "Dr. Julia Hartmann",
-  projectName: "KI-gestützte Angebots- und Wissensplattform",
-  shortDescription: "Konzeption und Entwicklung einer KI-Anwendung zur strukturierten Auswertung, Angebotserstellung und Wissensbereitstellung.",
+  projectName: "KI-gestützte Angebotsplattform",
+  shortDescription: "Konzeption und Entwicklung einer KI-Anwendung zur strukturierten Auswertung, Angebotserstellung und Angebotsvorbereitung.",
   objective:
     "Ziel ist eine leistungsfähige, anwenderfreundliche und zukunftsfähige Lösung, die wiederkehrende Arbeitsabläufe beschleunigt, Informationen konsolidiert und fundierte Entscheidungen unterstützt.",
   technicalContext:
     "Webbasierte Anwendung mit rollenfähiger Architektur, vorbereiteter Cloud-Speicherung, RAG-Komponenten, API-Anbindungen und späterer Mandantenverwaltung.",
-  modules: ["Projekt-Dashboard", "Dokumenten-KI", "RAG-Wissensdatenbank", "Workflow-Automation", "Export-Center"],
+  modules: ["Projekt-Dashboard", "Dokumenten-KI", "Angebotsassistenz", "Workflow-Automation", "Export-Center"],
   calculationType: "Hybrid",
   status: "Entwurf",
   offerNumber: "BSAI-2026-001",

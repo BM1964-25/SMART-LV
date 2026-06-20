@@ -45,3 +45,19 @@ export function renumberGroups(groups: PositionGroup[]): PositionGroup[] {
 export function getActivePositions(groups: PositionGroup[]): Position[] {
   return groups.flatMap((group) => group.positions.filter((position) => position.active));
 }
+
+export function groupNumber(groups: PositionGroup[], groupId: string): string {
+  const groupIndex = groups.findIndex((group) => group.id === groupId);
+  return groupIndex >= 0 ? String(groupIndex + 1) : "";
+}
+
+export function positionNumber(groups: PositionGroup[], groupId: string, positionId: string): string {
+  const groupIndex = groups.findIndex((group) => group.id === groupId);
+  const group = groups[groupIndex];
+  if (!group) return "";
+
+  const activePositionIndex = group.positions.filter((position) => position.active).findIndex((position) => position.id === positionId);
+  if (activePositionIndex < 0) return "entfällt";
+
+  return `${groupIndex + 1}.${activePositionIndex + 1}`;
+}

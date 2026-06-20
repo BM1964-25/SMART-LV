@@ -25,7 +25,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { OfferPreview } from "@/components/OfferPreview";
 import { Field, IconButton, SectionTitle, Select, StatCard, TextArea, TextInput } from "@/components/ui";
-import { calculateSummary, formatCurrency, groupTotal, positionTotal, renumberGroups } from "@/lib/calculations";
+import { calculateSummary, formatCurrency, groupNumber, groupTotal, positionNumber, positionTotal, renumberGroups } from "@/lib/calculations";
 import { companyProfiles, initialGroups, rateLabels, sampleProject } from "@/lib/data";
 import { Position, PositionGroup, Project } from "@/lib/types";
 
@@ -70,7 +70,13 @@ export default function HomePage() {
     try {
       const parsed = JSON.parse(saved) as { project: Project; groups: PositionGroup[] };
       queueMicrotask(() => {
-        setProject(parsed.project);
+        setProject({
+          ...parsed.project,
+          projectName: parsed.project.projectName
+            .replace("KI-gestützte Angebots- und Wissensplattform", "KI-gestützte Angebotsplattform")
+            .replace("K. I. Gestützte Angebots und Wissensplattform", "KI-gestützte Angebotsplattform"),
+          shortDescription: parsed.project.shortDescription.replace(" und Wissensbereitstellung", "")
+        });
         setGroups(parsed.groups);
       });
     } catch {
@@ -205,12 +211,12 @@ export default function HomePage() {
 
   function exportCsv() {
     const rows = [
-      ["Positionsnummer", "Titel", "Beschreibung", "Einheit", "Menge", "Einzelpreis", "Gesamtpreis", "Kategorie", "Status"],
+      ["Positionsnummer", "Titel", "Beschreibung", "Einheit", "Menge", "Einheitspreis", "Gesamtpreis", "Leistungsbereich", "Status"],
       ...groups.flatMap((group) =>
         group.positions
           .filter((position) => position.active)
           .map((position) => [
-            position.number,
+            positionNumber(groups, group.id, position.id),
             position.title,
             position.description,
             position.unit,
@@ -406,11 +412,28 @@ function Dashboard({
           <div className="mt-5 divide-y divide-line">
             {groups.map((group) => (
               <div key={group.id} className="flex items-center justify-between py-3 text-sm">
-                <span className="text-muted">{group.title}</span>
+                <span className="text-muted">
+                  {groupNumber(groups, group.id)} {group.title}
+                </span>
                 <span className="font-semibold text-ink">{formatCurrency(groupTotal(group))}</span>
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
+        <SectionTitle title="KI-Unterstützung im LV" kicker="Leistungsbausteine" />
+        <p className="mt-3 max-w-4xl text-sm leading-6 text-muted">
+          Die KI-Unterstützung wird im Leistungsverzeichnis über konkrete Umsetzungspositionen abgebildet, nicht als unscharfes Schlagwort.
+          Relevant sind insbesondere Daten- und KI-Konzept, Prompt Engineering, RAG-System, KI-Agentenlogik, Dokumenten-KI und automatisierte Workflows.
+        </p>
+        <div className="mt-5 grid gap-3 md:grid-cols-3">
+          {["Prompt Engineering", "RAG-System", "KI-Agentenlogik", "Dokumenten-KI", "Angebotsassistenz", "Workflow-Automation"].map((item) => (
+            <div key={item} className="rounded-md border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-800">
+              {item}
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -561,7 +584,9 @@ function LvEditor({
             <div key={group.id} className="rounded-lg border border-line bg-white shadow-sm">
               <div className="flex flex-col gap-3 border-b border-line p-5 md:flex-row md:items-start md:justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-ink">{group.title}</h2>
+                  <h2 className="text-lg font-semibold text-ink">
+                    {groupNumber(allGroups, group.id)} {group.title}
+                  </h2>
                   <p className="mt-1 max-w-3xl text-sm leading-6 text-muted">{group.intro}</p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -575,31 +600,61 @@ function LvEditor({
                     {group.positions.map((position, index) => (
                       <Draggable key={position.id} draggableId={position.id} index={index} isDragDisabled={hasFilters}>
                         {(draggableProvided) => (
-                          <div ref={draggableProvided.innerRef} {...draggableProvided.draggableProps} className="grid gap-4 p-4 xl:grid-cols-[36px_72px_1fr_130px_130px_130px_120px]">
+                          <div ref={draggableProvided.innerRef} {...draggableProvided.draggableProps} className="grid gap-4 p-4">
                             <button
                               type="button"
                               title="Verschieben"
                               aria-label="Verschieben"
                               {...draggableProvided.dragHandleProps}
-                              className="flex h-10 w-9 items-center justify-center rounded-md text-muted hover:bg-slate-50"
+                              className="row-start-1 flex h-10 w-9 items-center justify-center rounded-md text-muted hover:bg-slate-50"
                             >
                               <GripVertical className="h-4 w-4" />
                             </button>
-                            <Field label="Nr.">
-                              <TextInput value={position.number} onChange={(event) => updatePosition(position.groupId, position.id, { number: event.target.value })} />
-                            </Field>
-                            <div className="grid gap-3">
-                              <Field label="Titel">
-                                <TextInput value={position.title} onChange={(event) => updatePosition(position.groupId, position.id, { title: event.target.value })} />
-                              </Field>
+                            <div className="grid gap-4 xl:grid-cols-[36px_1fr]">
+                              <div className="hidden xl:block" />
+                              <div className="grid gap-3">
+                                <div className="grid gap-3 md:grid-cols-[88px_1fr]">
+                                  <div>
+                                    <p className="text-sm font-medium text-ink">LV-Nr.</p>
+                                    <p className="mt-2 flex h-10 items-center rounded-md bg-slate-50 px-3 text-sm font-semibold text-ink">
+                                      {positionNumber(allGroups, position.groupId, position.id)}
+                                    </p>
+                                  </div>
+                                  <Field label="Titel">
+                                    <TextInput value={position.title} onChange={(event) => updatePosition(position.groupId, position.id, { title: event.target.value })} />
+                                  </Field>
+                                </div>
+                                <div className="grid gap-3 md:grid-cols-4">
+                                  <Field label="Einheit">
+                                    <Select value={position.unit} onChange={(event) => updatePosition(position.groupId, position.id, { unit: event.target.value as Position["unit"] })}>
+                                      <option>Std.</option>
+                                      <option>Pauschal</option>
+                                      <option>Tag</option>
+                                      <option>Monat</option>
+                                    </Select>
+                                  </Field>
+                                  <Field label="Menge">
+                                    <TextInput type="number" value={position.quantity} onChange={(event) => updatePosition(position.groupId, position.id, { quantity: Number(event.target.value) })} />
+                                  </Field>
+                                  <Field label="Einheitspreis">
+                                    <TextInput type="number" value={position.unitPrice} onChange={(event) => updatePosition(position.groupId, position.id, { unitPrice: Number(event.target.value) })} />
+                                  </Field>
+                                  <div>
+                                    <p className="text-sm font-medium text-ink">Gesamtpreis</p>
+                                    <p className="mt-2 flex h-10 items-center rounded-md bg-slate-50 px-3 text-sm font-semibold text-ink">{formatCurrency(positionTotal(position))}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="grid gap-3 xl:pl-[52px]">
                               <Field label="Leistungsbeschreibung">
                                 <TextArea value={position.description} onChange={(event) => updatePosition(position.groupId, position.id, { description: event.target.value })} />
                               </Field>
                               <div className="grid gap-3 md:grid-cols-3">
-                                <Field label="Kategorie">
+                                <Field label="Leistungsbereich für Suche/Filter">
                                   <TextInput value={position.category} onChange={(event) => updatePosition(position.groupId, position.id, { category: event.target.value })} />
                                 </Field>
-                                <Field label="Hinweis">
+                                <Field label="Interner oder angebotsbezogener Hinweis">
                                   <TextInput value={position.note} onChange={(event) => updatePosition(position.groupId, position.id, { note: event.target.value })} />
                                 </Field>
                                 <Field label="Status">
@@ -611,24 +666,6 @@ function LvEditor({
                                   </Select>
                                 </Field>
                               </div>
-                            </div>
-                            <Field label="Einheit">
-                              <Select value={position.unit} onChange={(event) => updatePosition(position.groupId, position.id, { unit: event.target.value as Position["unit"] })}>
-                                <option>Std.</option>
-                                <option>Pauschal</option>
-                                <option>Tag</option>
-                                <option>Monat</option>
-                              </Select>
-                            </Field>
-                            <Field label="Menge">
-                              <TextInput type="number" value={position.quantity} onChange={(event) => updatePosition(position.groupId, position.id, { quantity: Number(event.target.value) })} />
-                            </Field>
-                            <Field label="Einzelpreis">
-                              <TextInput type="number" value={position.unitPrice} onChange={(event) => updatePosition(position.groupId, position.id, { unitPrice: Number(event.target.value) })} />
-                            </Field>
-                            <div className="grid gap-3">
-                              <p className="text-sm font-medium text-ink">Gesamtpreis</p>
-                              <p className="flex h-10 items-center rounded-md bg-slate-50 px-3 text-sm font-semibold text-ink">{formatCurrency(positionTotal(position))}</p>
                               <div className="flex gap-2">
                                 <IconButton icon={CheckCircle2} label="Position aktivieren/deaktivieren" active={position.active} onClick={() => updatePosition(position.groupId, position.id, { active: !position.active })} />
                                 <IconButton icon={Copy} label="Position duplizieren" onClick={() => duplicatePosition(position.groupId, position.id)} />
@@ -711,7 +748,7 @@ function PositionLibrary({ groups }: { groups: PositionGroup[] }) {
             <tr>
               <th className="px-4 py-3 font-semibold">Nr.</th>
               <th className="px-4 py-3 font-semibold">Titel</th>
-              <th className="px-4 py-3 font-semibold">Kategorie</th>
+              <th className="px-4 py-3 font-semibold">Leistungsbereich</th>
               <th className="px-4 py-3 font-semibold">Einheit</th>
               <th className="px-4 py-3 font-semibold">Pflicht</th>
               <th className="px-4 py-3 font-semibold">Stundensatzlogik</th>
@@ -721,7 +758,7 @@ function PositionLibrary({ groups }: { groups: PositionGroup[] }) {
             {groups.flatMap((group) =>
               group.positions.map((position) => (
                 <tr key={position.id}>
-                  <td className="px-4 py-3 font-medium text-muted">{position.number}</td>
+                  <td className="px-4 py-3 font-medium text-muted">{positionNumber(groups, group.id, position.id)}</td>
                   <td className="px-4 py-3 font-semibold text-ink">{position.title}</td>
                   <td className="px-4 py-3 text-muted">{position.category}</td>
                   <td className="px-4 py-3 text-muted">{position.unit}</td>

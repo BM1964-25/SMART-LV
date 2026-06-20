@@ -1,5 +1,5 @@
 import { companyProfiles } from "@/lib/data";
-import { calculateSummary, formatCurrency, groupTotal, positionTotal } from "@/lib/calculations";
+import { calculateSummary, formatCurrency, groupNumber, groupTotal, positionNumber, positionTotal } from "@/lib/calculations";
 import { PositionGroup, Project } from "@/lib/types";
 
 export function OfferPreview({ project, groups }: { project: Project; groups: PositionGroup[] }) {
@@ -68,7 +68,9 @@ export function OfferPreview({ project, groups }: { project: Project; groups: Po
               <div key={group.id} className="border-b border-line last:border-b-0">
                 <div className="flex items-start justify-between gap-4 bg-slate-50 px-5 py-4">
                   <div>
-                    <h3 className="font-semibold text-ink">{group.title}</h3>
+                    <h3 className="font-semibold text-ink">
+                      {groupNumber(groups, group.id)} {group.title}
+                    </h3>
                     <p className="mt-1 text-sm text-muted">{group.intro}</p>
                   </div>
                   <p className="shrink-0 text-sm font-semibold text-ink">{formatCurrency(groupTotal(group))}</p>
@@ -76,7 +78,7 @@ export function OfferPreview({ project, groups }: { project: Project; groups: Po
                 <div className="divide-y divide-line">
                   {activePositions.map((position) => (
                     <div key={position.id} className="grid gap-4 px-5 py-4 lg:grid-cols-[72px_1fr_100px_120px]">
-                      <p className="text-sm font-semibold text-muted">{position.number}</p>
+                      <p className="text-sm font-semibold text-muted">{positionNumber(groups, group.id, position.id)}</p>
                       <div>
                         <p className="font-medium text-ink">{position.title}</p>
                         <p className="mt-1 text-sm leading-6 text-muted">{position.description}</p>
