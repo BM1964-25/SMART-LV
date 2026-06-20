@@ -1635,7 +1635,7 @@ function AiAssistant({
         <StatCard label="Projektfokus" value="Angebots-KI" detail={project.client} />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1fr_420px]">
+      <div className="grid gap-6">
         <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
           <SectionTitle title="KI-Leistungsvorschläge" />
           <div className="mt-5 grid gap-3">
@@ -1674,29 +1674,28 @@ function AiAssistant({
           </div>
         </div>
 
-        <div className="grid gap-6">
-          <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
-            <SectionTitle title="Textvorschlag" />
-            <p className="mt-4 text-sm leading-7 text-muted">
-              Für das Projekt <strong className="text-ink">{project.projectName}</strong> empfiehlt die Assistenz eine hybride Kalkulation:
-              transparente interne Stundenplanung, extern wahlweise Abschnittspauschalen und gesondert beauftragbare KI-Erweiterungen.
-              Besonders prüfungsrelevant sind Datenquellen, Antwortqualität, Rechtekonzept, Prompt-Verhalten und Abnahmekriterien.
-            </p>
+        <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
+          <SectionTitle title="Textvorschlag" />
+          <p className="mt-4 text-sm leading-7 text-muted">
+            Für das Projekt <strong className="text-ink">{project.projectName}</strong> empfiehlt die Assistenz eine hybride Kalkulation:
+            transparente interne Stundenplanung, extern wahlweise Abschnittspauschalen und gesondert beauftragbare KI-Erweiterungen.
+            Besonders prüfungsrelevant sind Datenquellen, Antwortqualität, Rechtekonzept, Prompt-Verhalten und Abnahmekriterien.
+          </p>
+        </div>
+
+        <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
+          <SectionTitle title="Prüfpunkte" />
+          <div className="mt-4 grid gap-3 text-sm md:grid-cols-2">
+            {["Datenquellen und Nutzungsrechte klären", "Halluzinationsrisiken und Freigaben definieren", "RAG-Qualität mit Testfragen messen", "Abrechnung von Nachträgen vorsehen", "Betrieb, Monitoring und Support kalkulieren"].map((item) => (
+              <div key={item} className="flex items-center gap-3 rounded-md border border-line px-4 py-3">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                <span className="font-medium text-ink">{item}</span>
+              </div>
+            ))}
           </div>
-          <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
-            <SectionTitle title="Prüfpunkte" />
-            <div className="mt-4 grid gap-3 text-sm">
-              {["Datenquellen und Nutzungsrechte klären", "Halluzinationsrisiken und Freigaben definieren", "RAG-Qualität mit Testfragen messen", "Abrechnung von Nachträgen vorsehen", "Betrieb, Monitoring und Support kalkulieren"].map((item) => (
-                <div key={item} className="flex items-center gap-3 rounded-md border border-line px-4 py-3">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                  <span className="font-medium text-ink">{item}</span>
-                </div>
-              ))}
-            </div>
-            <button type="button" onClick={() => setActiveView("LV bearbeiten")} className="mt-5 rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white">
-              Zum LV-Editor
-            </button>
-          </div>
+          <button type="button" onClick={() => setActiveView("LV bearbeiten")} className="mt-5 rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white">
+            Zum LV-Editor
+          </button>
         </div>
       </div>
     </div>
