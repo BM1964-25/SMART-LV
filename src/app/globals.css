@@ -66,4 +66,9 @@ input[type="number"]::-webkit-outer-spin-button {
     border: none !important;
     border-radius: 0 !important;
   }
+
+  .break-inside-avoid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
 }
