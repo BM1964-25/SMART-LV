@@ -1187,7 +1187,8 @@ function parseEuroInput(value: string): number {
 
 function anthropicApiUrl() {
   if (typeof window === "undefined") return "/api/anthropic-lv/";
-  const basePath = window.location.pathname.startsWith("/SMART-LV") ? "/SMART-LV" : "";
+  const pageBasePaths = ["/SMART-OfferFlow", "/SMART-LV"];
+  const basePath = pageBasePaths.find((path) => window.location.pathname.startsWith(path)) ?? "";
   return new URL(`${basePath}/api/anthropic-lv/`, window.location.origin).toString();
 }
 

@@ -7,8 +7,8 @@ const nextConfig = {
     unoptimized: true
   },
   trailingSlash: true,
-  basePath: isGithubPages ? "/SMART-LV" : undefined,
-  assetPrefix: isGithubPages ? "/SMART-LV/" : undefined
+  basePath: isGithubPages ? "/SMART-OfferFlow" : undefined,
+  assetPrefix: isGithubPages ? "/SMART-OfferFlow/" : undefined
 };
 
 export default nextConfig;

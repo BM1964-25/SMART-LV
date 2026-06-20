@@ -40,10 +40,10 @@ GitHub Pages bleibt statisch. Fuer die echte Anthropic-Generierung ist ein Serve
 
 ## GitHub Pages
 
-Der statische Export für GitHub Pages wird mit dem Base Path `/SMART-LV` gebaut:
+Der statische Export für GitHub Pages wird mit dem Base Path `/SMART-OfferFlow` gebaut:
 
 ```bash
 npm run build:pages
 ```
 
-Der Workflow unter `.github/workflows/pages.yml` deployed den Inhalt aus `out` automatisch nach GitHub Pages.
+Die veröffentlichte Anwendung ist unter `https://bm1964-25.github.io/SMART-OfferFlow/` erreichbar.
