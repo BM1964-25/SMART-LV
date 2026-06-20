@@ -31,6 +31,7 @@ import { OfferPreview } from "@/components/OfferPreview";
 import { Field, IconButton, SectionTitle, Select, StatCard, TextArea, TextInput } from "@/components/ui";
 import { activeGroups, calculateSummary, formatCurrency, groupNumber, groupTotal, positionNumber, positionTotal, renumberGroups } from "@/lib/calculations";
 import { companyProfiles, initialGroups, rateLabels, sampleOrderBilling, sampleProject } from "@/lib/data";
+import { printElement } from "@/lib/print";
 import { ChangeOrder, InvoicePlanItem, OrderBilling, Position, PositionGroup, Project, WorkLogItem } from "@/lib/types";
 
 type View =
@@ -387,6 +388,10 @@ export default function HomePage() {
     URL.revokeObjectURL(url);
   }
 
+  function printOfferArea() {
+    printElement(".print-area", `${project.offerNumber} ${project.projectName}`.trim());
+  }
+
   function duplicateOffer() {
     setProject((current) => ({
       ...current,
@@ -442,7 +447,7 @@ export default function HomePage() {
               <IconButton icon={Copy} label="Angebot duplizieren" onClick={duplicateOffer} />
               <IconButton icon={Download} label="CSV exportieren" onClick={exportCsv} />
               <IconButton icon={Braces} label="JSON exportieren" onClick={exportJson} />
-              <IconButton icon={Printer} label="PDF/DOCX über Druckdialog vorbereiten" onClick={() => window.print()} />
+              <IconButton icon={Printer} label="PDF/DOCX über Druckdialog vorbereiten" onClick={printOfferArea} />
             </div>
           </div>
           <div className="mt-4 flex gap-2 overflow-x-auto pb-1 lg:hidden">

@@ -3,6 +3,7 @@
 import { Printer } from "lucide-react";
 import { companyProfiles } from "@/lib/data";
 import { activeGroups, calculateSummary, formatCurrency, groupNumber, groupTotal, positionNumber, positionTotal } from "@/lib/calculations";
+import { printElement } from "@/lib/print";
 import { PositionGroup, Project } from "@/lib/types";
 
 export function OfferPreview({ project, groups }: { project: Project; groups: PositionGroup[] }) {
@@ -12,12 +13,7 @@ export function OfferPreview({ project, groups }: { project: Project; groups: Po
   const visibleGroups = activeGroups(groups).filter((group) => group.positions.some((position) => position.active));
   const subtotal = summary.net + summary.discount;
   const printOffer = () => {
-    const originalTitle = document.title;
-    document.title = `${project.offerNumber} ${project.projectName}`.trim();
-    window.print();
-    window.setTimeout(() => {
-      document.title = originalTitle;
-    }, 500);
+    printElement(".print-area", `${project.offerNumber} ${project.projectName}`.trim());
   };
 
   return (
