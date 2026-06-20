@@ -1485,6 +1485,7 @@ function AiAssistant({
   );
   const aiPositions = aiGroups.flatMap((group) => group.positions.filter((position) => position.active));
   const suggestedHours = aiPositions.reduce((sum, position) => sum + position.quantity, 0);
+  const canUseAnthropicBackend = !isStaticGithubPages();
 
   async function generateLvWithAnthropic() {
     setGenerationStatus("loading");
@@ -1580,6 +1581,11 @@ function AiAssistant({
           Die Generierung nutzt serverseitig die Anthropic Messages API. Lokal oder auf einem Server muss dafuer `ANTHROPIC_API_KEY`
           gesetzt sein; auf GitHub Pages kann der geheime Schluessel nicht sicher ausgefuehrt werden.
         </p>
+        <p className={`mt-3 rounded-md border px-3 py-2 text-sm ${canUseAnthropicBackend ? "border-emerald-100 bg-emerald-50 text-emerald-800" : "border-amber-100 bg-amber-50 text-amber-800"}`}>
+          {canUseAnthropicBackend
+            ? "Anthropic-Backend ist in dieser Umgebung erreichbar."
+            : "Server-Backend erforderlich: Auf GitHub Pages koennen Key-Pruefung und LV-Generierung nicht ausgefuehrt werden."}
+        </p>
         <div className="mt-5 grid gap-3 rounded-lg border border-line bg-slate-50 p-4">
           <Field label="Anthropic API-Key">
             <div className="grid gap-2 lg:grid-cols-[1fr_auto_auto_auto_auto]">
@@ -1605,7 +1611,7 @@ function AiAssistant({
               <button
                 type="button"
                 onClick={checkAnthropicKey}
-                disabled={keyStatus === "checking"}
+                disabled={keyStatus === "checking" || !canUseAnthropicBackend}
                 className="h-10 rounded-md bg-ink px-4 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {keyStatus === "checking" ? "Pruefe..." : "Key ueberpruefen"}
@@ -1626,7 +1632,7 @@ function AiAssistant({
             <button
               type="button"
               onClick={generateLvWithAnthropic}
-              disabled={generationStatus === "loading"}
+              disabled={generationStatus === "loading" || !canUseAnthropicBackend}
               className="inline-flex h-10 items-center justify-center rounded-md bg-ink px-4 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {generationStatus === "loading" ? "Generiere..." : "LV generieren"}
