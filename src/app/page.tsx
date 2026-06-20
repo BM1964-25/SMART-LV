@@ -874,6 +874,12 @@ function Templates({ project, groups }: { project: Project; groups: PositionGrou
   );
 }
 
+function parseEuroInput(value: string): number {
+  const normalized = value.replace(/[^\d,.-]/g, "").replace(/\./g, "").replace(",", ".");
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
 function OrderBillingWorkspace({
   project,
   groups,
@@ -958,10 +964,21 @@ function OrderBillingWorkspace({
                 <TextInput value={item.title} onChange={(event) => updateInvoicePlanItem(item.id, { title: event.target.value })} />
               </Field>
               <Field label="Anteil %">
-                <TextInput type="number" value={item.percentage} onChange={(event) => updateInvoicePlanItem(item.id, { percentage: Number(event.target.value) })} />
+                <TextInput
+                  type="number"
+                  value={item.percentage}
+                  onChange={(event) => updateInvoicePlanItem(item.id, { percentage: Number(event.target.value) })}
+                  className="text-right"
+                />
               </Field>
               <Field label="Betrag netto">
-                <TextInput type="number" value={item.amount} onChange={(event) => updateInvoicePlanItem(item.id, { amount: Number(event.target.value) })} />
+                <TextInput
+                  inputMode="decimal"
+                  value={formatCurrency(item.amount)}
+                  onFocus={(event) => event.target.select()}
+                  onChange={(event) => updateInvoicePlanItem(item.id, { amount: parseEuroInput(event.target.value) })}
+                  className="text-right"
+                />
               </Field>
               <Field label="Fälligkeit">
                 <TextInput value={item.due} onChange={(event) => updateInvoicePlanItem(item.id, { due: event.target.value })} />
