@@ -16,6 +16,8 @@ import {
   Home,
   LayoutTemplate,
   Library,
+  PanelLeftClose,
+  PanelLeftOpen,
   Plus,
   Printer,
   ReceiptText,
@@ -82,6 +84,7 @@ export default function HomePage() {
   const [groups, setGroups] = useState<PositionGroup[]>(initialGroups);
   const [libraryPositions, setLibraryPositions] = useState<Position[]>(createInitialLibraryPositions);
   const [orderBilling, setOrderBilling] = useState<OrderBilling>(sampleOrderBilling);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [query, setQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("Alle Kategorien");
   const [statusFilter, setStatusFilter] = useState("Alle Status");
@@ -422,32 +425,45 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-canvas">
-      <aside className="no-print fixed inset-y-0 left-0 z-30 hidden w-72 border-r border-line bg-white px-4 py-5 lg:block">
-        <div className="flex items-center gap-3 px-2">
+      <aside className={`no-print fixed inset-y-0 left-0 z-30 hidden border-r border-line bg-white px-4 py-5 transition-all lg:block ${sidebarCollapsed ? "w-20" : "w-72"}`}>
+        <div className={`flex items-center gap-3 px-2 ${sidebarCollapsed ? "justify-center" : ""}`}>
           <div className="flex h-11 w-11 items-center justify-center rounded-md bg-ink text-sm font-bold text-white">OF</div>
-          <div>
+          <div className={sidebarCollapsed ? "hidden" : ""}>
             <p className="font-semibold text-ink">SMART OfferFlow</p>
             <p className="text-sm text-muted">Angebote, Aufträge und Abrechnung in einem Prozess</p>
           </div>
         </div>
+        <button
+          type="button"
+          aria-label={sidebarCollapsed ? "Sidebar ausklappen" : "Sidebar einklappen"}
+          title={sidebarCollapsed ? "Sidebar ausklappen" : "Sidebar einklappen"}
+          onClick={() => setSidebarCollapsed((current) => !current)}
+          className={`mt-5 flex h-10 w-full items-center rounded-md border border-line bg-white text-sm font-semibold text-muted transition hover:border-slate-300 hover:text-ink ${
+            sidebarCollapsed ? "justify-center px-0" : "justify-between px-3"
+          }`}
+        >
+          {sidebarCollapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+          <span className={sidebarCollapsed ? "hidden" : ""}>Sidebar einklappen</span>
+        </button>
         <nav className="mt-8 grid gap-1">
           {navItems.map((item) => (
             <button
               key={item.label}
               type="button"
+              title={item.label}
               onClick={() => setActiveView(item.label)}
-              className={`flex h-11 items-center gap-3 rounded-md px-3 text-left text-sm font-medium transition ${
+              className={`flex h-11 items-center gap-3 rounded-md px-3 text-left text-sm font-medium transition ${sidebarCollapsed ? "justify-center" : ""} ${
                 activeView === item.label ? "bg-slate-100 text-ink" : "text-muted hover:bg-slate-50 hover:text-ink"
               }`}
             >
               <item.icon className="h-4 w-4" />
-              {item.label}
+              <span className={sidebarCollapsed ? "hidden" : ""}>{item.label}</span>
             </button>
           ))}
         </nav>
       </aside>
 
-      <section className="lg:pl-72">
+      <section className={`transition-all ${sidebarCollapsed ? "lg:pl-20" : "lg:pl-72"}`}>
         <header className="no-print sticky top-0 z-20 border-b border-line bg-white/90 px-4 py-4 backdrop-blur md:px-8">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div className="min-w-0">
