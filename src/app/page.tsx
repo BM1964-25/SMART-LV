@@ -4,6 +4,7 @@ import { DragDropContext, Draggable, Droppable, DropResult } from "@hello-pangea
 import {
   Archive,
   Bot,
+  Braces,
   Building2,
   CheckCircle2,
   Copy,
@@ -278,6 +279,25 @@ export default function HomePage() {
     URL.revokeObjectURL(url);
   }
 
+  function exportJson() {
+    const payload = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      project,
+      groups,
+      orderBilling,
+      summary: calculateSummary(groups, project)
+    };
+    const json = JSON.stringify(payload, null, 2);
+    const blob = new Blob([json], { type: "application/json;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${project.offerNumber}-smart-lv.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   function duplicateOffer() {
     setProject((current) => ({
       ...current,
@@ -332,6 +352,7 @@ export default function HomePage() {
               <IconButton icon={Save} label="Als Vorlage speichern" onClick={saveAsTemplate} />
               <IconButton icon={Copy} label="Angebot duplizieren" onClick={duplicateOffer} />
               <IconButton icon={Download} label="CSV exportieren" onClick={exportCsv} />
+              <IconButton icon={Braces} label="JSON exportieren" onClick={exportJson} />
               <IconButton icon={Printer} label="PDF/DOCX über Druckdialog vorbereiten" onClick={() => window.print()} />
             </div>
           </div>

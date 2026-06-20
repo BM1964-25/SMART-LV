@@ -54,6 +54,16 @@ input[type="number"]::-webkit-outer-spin-button {
     -webkit-print-color-adjust: exact;
   }
 
+  html,
+  body,
+  main,
+  main > section,
+  main > section > div {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
   .no-print {
     display: none !important;
   }
