@@ -114,6 +114,7 @@ export type ChangeOrder = {
   description: string;
   amount: number;
   status: "Vorgeschlagen" | "Beauftragt" | "Abgerechnet";
+  billable: boolean;
 };
 
 export type WorkLogItem = {
@@ -121,6 +122,7 @@ export type WorkLogItem = {
   positionTitle: string;
   hours: number;
   status: "Geplant" | "In Arbeit" | "Abgenommen";
+  billable: boolean;
 };
 
 export type OrderBilling = {

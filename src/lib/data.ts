@@ -138,13 +138,14 @@ export const sampleOrderBilling: OrderBilling = {
       title: "Zusätzliche Datenquelle anbinden",
       description: "Optionale Erweiterung für weitere Dokumenten- oder Fachsystemquellen nach technischer Prüfung.",
       amount: 3600,
-      status: "Vorgeschlagen"
+      status: "Vorgeschlagen",
+      billable: false
     }
   ],
   workLog: [
-    { id: "wl-1", positionTitle: "Kick-off-Workshop", hours: 6, status: "Geplant" },
-    { id: "wl-2", positionTitle: "Daten- und KI-Konzept", hours: 18, status: "Geplant" },
-    { id: "wl-3", positionTitle: "Prompt Engineering", hours: 18, status: "Geplant" }
+    { id: "wl-1", positionTitle: "Kick-off-Workshop", hours: 6, status: "Geplant", billable: true },
+    { id: "wl-2", positionTitle: "Daten- und KI-Konzept", hours: 18, status: "Geplant", billable: true },
+    { id: "wl-3", positionTitle: "Prompt Engineering", hours: 18, status: "Geplant", billable: true }
   ]
 };
 

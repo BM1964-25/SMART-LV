@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   Copy,
   Download,
+  Edit3,
   Eye,
   FileText,
   GripVertical,
@@ -101,7 +102,12 @@ export default function HomePage() {
         });
         setGroups(parsed.groups.map((group) => ({ ...group, active: group.active ?? true })));
         setLibraryPositions(parsed.libraryPositions ?? createInitialLibraryPositions());
-        setOrderBilling(parsed.orderBilling ?? sampleOrderBilling);
+        const billing = parsed.orderBilling ?? sampleOrderBilling;
+        setOrderBilling({
+          ...billing,
+          changeOrders: billing.changeOrders.map((item) => ({ ...item, billable: item.billable ?? item.status === "Beauftragt" })),
+          workLog: billing.workLog.map((item) => ({ ...item, billable: item.billable ?? true }))
+        });
       });
     } catch {
       window.localStorage.removeItem(storageKey);
@@ -179,11 +185,43 @@ export default function HomePage() {
     }));
   }
 
+  function duplicateChangeOrder(itemId: string) {
+    setOrderBilling((current) => {
+      const source = current.changeOrders.find((item) => item.id === itemId);
+      if (!source) return current;
+      const index = current.changeOrders.findIndex((item) => item.id === itemId);
+      const copy = { ...source, id: `co-${Date.now()}`, title: `${source.title} Kopie`, status: "Vorgeschlagen" as const, billable: false };
+      const changeOrders = [...current.changeOrders];
+      changeOrders.splice(index + 1, 0, copy);
+      return { ...current, changeOrders };
+    });
+  }
+
+  function deleteChangeOrder(itemId: string) {
+    setOrderBilling((current) => ({ ...current, changeOrders: current.changeOrders.filter((item) => item.id !== itemId) }));
+  }
+
   function updateWorkLog(itemId: string, changes: Partial<WorkLogItem>) {
     setOrderBilling((current) => ({
       ...current,
       workLog: current.workLog.map((item) => (item.id === itemId ? { ...item, ...changes } : item))
     }));
+  }
+
+  function duplicateWorkLog(itemId: string) {
+    setOrderBilling((current) => {
+      const source = current.workLog.find((item) => item.id === itemId);
+      if (!source) return current;
+      const index = current.workLog.findIndex((item) => item.id === itemId);
+      const copy = { ...source, id: `wl-${Date.now()}`, positionTitle: `${source.positionTitle} Kopie`, billable: false };
+      const workLog = [...current.workLog];
+      workLog.splice(index + 1, 0, copy);
+      return { ...current, workLog };
+    });
+  }
+
+  function deleteWorkLog(itemId: string) {
+    setOrderBilling((current) => ({ ...current, workLog: current.workLog.filter((item) => item.id !== itemId) }));
   }
 
   function updateLibraryPosition(positionId: string, changes: Partial<Position>) {
@@ -469,7 +507,11 @@ export default function HomePage() {
               updateOrderBilling={updateOrderBilling}
               updateInvoicePlanItem={updateInvoicePlanItem}
               updateChangeOrder={updateChangeOrder}
+              duplicateChangeOrder={duplicateChangeOrder}
+              deleteChangeOrder={deleteChangeOrder}
               updateWorkLog={updateWorkLog}
+              duplicateWorkLog={duplicateWorkLog}
+              deleteWorkLog={deleteWorkLog}
             />
           ) : null}
 
@@ -1067,7 +1109,11 @@ function OrderBillingWorkspace({
   updateOrderBilling,
   updateInvoicePlanItem,
   updateChangeOrder,
-  updateWorkLog
+  duplicateChangeOrder,
+  deleteChangeOrder,
+  updateWorkLog,
+  duplicateWorkLog,
+  deleteWorkLog
 }: {
   project: Project;
   groups: PositionGroup[];
@@ -1075,12 +1121,18 @@ function OrderBillingWorkspace({
   updateOrderBilling: <K extends keyof OrderBilling>(key: K, value: OrderBilling[K]) => void;
   updateInvoicePlanItem: (itemId: string, changes: Partial<InvoicePlanItem>) => void;
   updateChangeOrder: (itemId: string, changes: Partial<ChangeOrder>) => void;
+  duplicateChangeOrder: (itemId: string) => void;
+  deleteChangeOrder: (itemId: string) => void;
   updateWorkLog: (itemId: string, changes: Partial<WorkLogItem>) => void;
+  duplicateWorkLog: (itemId: string) => void;
+  deleteWorkLog: (itemId: string) => void;
 }) {
+  const [editingChangeOrders, setEditingChangeOrders] = useState<Record<string, boolean>>({});
+  const [editingWorkLogs, setEditingWorkLogs] = useState<Record<string, boolean>>({});
   const summary = calculateSummary(groups, project);
   const invoiceTotal = orderBilling.invoicePlan.reduce((sum, item) => sum + item.amount, 0);
-  const loggedHours = orderBilling.workLog.reduce((sum, item) => sum + item.hours, 0);
-  const changeOrderTotal = orderBilling.changeOrders.reduce((sum, item) => sum + item.amount, 0);
+  const loggedHours = orderBilling.workLog.filter((item) => item.billable).reduce((sum, item) => sum + item.hours, 0);
+  const changeOrderTotal = orderBilling.changeOrders.filter((item) => item.billable).reduce((sum, item) => sum + item.amount, 0);
 
   return (
     <div className="grid gap-6">
@@ -1176,26 +1228,52 @@ function OrderBillingWorkspace({
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid gap-6">
         <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
-          <SectionTitle title="Nachträge" />
+          <SectionTitle title="Nachträge" kicker="Nachträgliche Beauftragung" />
+          <p className="mt-2 text-sm leading-6 text-muted">
+            Nachträge sind zusätzliche Leistungen außerhalb des ursprünglichen Angebots. Sie werden erst abrechnungsrelevant, wenn sie beauftragt oder zur Rechnung markiert sind.
+          </p>
           <div className="mt-5 grid gap-3">
             {orderBilling.changeOrders.map((item) => (
               <div key={item.id} className="rounded-lg border border-line p-4">
-                <div className="grid gap-3 md:grid-cols-[1fr_160px]">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3">
+                  <label className="inline-flex items-center gap-2 text-sm font-semibold text-ink">
+                    <input type="checkbox" checked={item.billable} onChange={(event) => updateChangeOrder(item.id, { billable: event.target.checked })} />
+                    In Rechnung übernehmen
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <IconButton
+                      icon={Edit3}
+                      label="Nachtrag bearbeiten"
+                      active={editingChangeOrders[item.id] ?? true}
+                      onClick={() => setEditingChangeOrders((current) => ({ ...current, [item.id]: !(current[item.id] ?? true) }))}
+                    />
+                    <IconButton icon={Copy} label="Nachtrag duplizieren" onClick={() => duplicateChangeOrder(item.id)} />
+                    <IconButton icon={Trash2} label="Nachtrag löschen" onClick={() => deleteChangeOrder(item.id)} />
+                  </div>
+                </div>
+                <div className="mt-4 grid gap-3 md:grid-cols-[1fr_180px]">
                   <Field label="Titel">
-                    <TextInput value={item.title} onChange={(event) => updateChangeOrder(item.id, { title: event.target.value })} />
+                    <TextInput disabled={!(editingChangeOrders[item.id] ?? true)} value={item.title} onChange={(event) => updateChangeOrder(item.id, { title: event.target.value })} />
                   </Field>
                   <Field label="Betrag netto">
-                    <TextInput type="number" value={item.amount} onChange={(event) => updateChangeOrder(item.id, { amount: Number(event.target.value) })} />
+                    <TextInput
+                      disabled={!(editingChangeOrders[item.id] ?? true)}
+                      inputMode="decimal"
+                      value={formatCurrency(item.amount)}
+                      onFocus={(event) => event.target.select()}
+                      onChange={(event) => updateChangeOrder(item.id, { amount: parseEuroInput(event.target.value) })}
+                      className="text-right"
+                    />
                   </Field>
                 </div>
                 <div className="mt-3 grid gap-3 md:grid-cols-[1fr_180px]">
                   <Field label="Beschreibung">
-                    <TextArea value={item.description} onChange={(event) => updateChangeOrder(item.id, { description: event.target.value })} />
+                    <TextArea disabled={!(editingChangeOrders[item.id] ?? true)} value={item.description} onChange={(event) => updateChangeOrder(item.id, { description: event.target.value })} />
                   </Field>
                   <Field label="Status">
-                    <Select value={item.status} onChange={(event) => updateChangeOrder(item.id, { status: event.target.value as ChangeOrder["status"] })}>
+                    <Select disabled={!(editingChangeOrders[item.id] ?? true)} value={item.status} onChange={(event) => updateChangeOrder(item.id, { status: event.target.value as ChangeOrder["status"] })}>
                       <option>Vorgeschlagen</option>
                       <option>Beauftragt</option>
                       <option>Abgerechnet</option>
@@ -1208,23 +1286,50 @@ function OrderBillingWorkspace({
         </div>
 
         <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
-          <SectionTitle title="Leistungsnachweis" />
+          <SectionTitle title="Leistungsnachweis" kicker="Stunden- und Tätigkeitsnachweis" />
+          <p className="mt-2 text-sm leading-6 text-muted">
+            Leistungsnachweise dokumentieren erbrachte Stunden oder Tätigkeiten. Sie sind der Nachweis zur Abrechnung nach Aufwand oder zur internen Kontrolle bei Pauschalen.
+          </p>
           <div className="mt-5 grid gap-3">
             {orderBilling.workLog.map((item) => (
-              <div key={item.id} className="grid gap-3 rounded-lg border border-line p-4 md:grid-cols-[1fr_110px_150px]">
-                <Field label="Position">
-                  <TextInput value={item.positionTitle} onChange={(event) => updateWorkLog(item.id, { positionTitle: event.target.value })} />
-                </Field>
-                <Field label="Stunden">
-                  <TextInput type="number" value={item.hours} onChange={(event) => updateWorkLog(item.id, { hours: Number(event.target.value) })} />
-                </Field>
-                <Field label="Status">
-                  <Select value={item.status} onChange={(event) => updateWorkLog(item.id, { status: event.target.value as WorkLogItem["status"] })}>
-                    <option>Geplant</option>
-                    <option>In Arbeit</option>
-                    <option>Abgenommen</option>
-                  </Select>
-                </Field>
+              <div key={item.id} className="rounded-lg border border-line p-4">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3">
+                  <label className="inline-flex items-center gap-2 text-sm font-semibold text-ink">
+                    <input type="checkbox" checked={item.billable} onChange={(event) => updateWorkLog(item.id, { billable: event.target.checked })} />
+                    In Rechnung übernehmen
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <IconButton
+                      icon={Edit3}
+                      label="Leistungsnachweis bearbeiten"
+                      active={editingWorkLogs[item.id] ?? true}
+                      onClick={() => setEditingWorkLogs((current) => ({ ...current, [item.id]: !(current[item.id] ?? true) }))}
+                    />
+                    <IconButton icon={Copy} label="Leistungsnachweis duplizieren" onClick={() => duplicateWorkLog(item.id)} />
+                    <IconButton icon={Trash2} label="Leistungsnachweis löschen" onClick={() => deleteWorkLog(item.id)} />
+                  </div>
+                </div>
+                <div className="mt-4 grid gap-3 md:grid-cols-[1fr_120px_180px]">
+                  <Field label="Position">
+                    <TextInput disabled={!(editingWorkLogs[item.id] ?? true)} value={item.positionTitle} onChange={(event) => updateWorkLog(item.id, { positionTitle: event.target.value })} />
+                  </Field>
+                  <Field label="Stunden">
+                    <TextInput
+                      disabled={!(editingWorkLogs[item.id] ?? true)}
+                      type="number"
+                      value={item.hours}
+                      onChange={(event) => updateWorkLog(item.id, { hours: Number(event.target.value) })}
+                      className="text-right"
+                    />
+                  </Field>
+                  <Field label="Status">
+                    <Select disabled={!(editingWorkLogs[item.id] ?? true)} value={item.status} onChange={(event) => updateWorkLog(item.id, { status: event.target.value as WorkLogItem["status"] })}>
+                      <option>Geplant</option>
+                      <option>In Arbeit</option>
+                      <option>Abgenommen</option>
+                    </Select>
+                  </Field>
+                </div>
               </div>
             ))}
           </div>
