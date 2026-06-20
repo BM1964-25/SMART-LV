@@ -1,5 +1,5 @@
 import { companyProfiles } from "@/lib/data";
-import { calculateSummary, formatCurrency, groupNumber, groupTotal, positionNumber, positionTotal } from "@/lib/calculations";
+import { activeGroups, calculateSummary, formatCurrency, groupNumber, groupTotal, positionNumber, positionTotal } from "@/lib/calculations";
 import { PositionGroup, Project } from "@/lib/types";
 
 export function OfferPreview({ project, groups }: { project: Project; groups: PositionGroup[] }) {
@@ -64,7 +64,7 @@ export function OfferPreview({ project, groups }: { project: Project; groups: Po
           Kalkulation als Abschnittspauschale angeboten werden, wenn einzelne Stundensätze im Angebot nicht offengelegt werden sollen.
         </p>
         <div className="mt-5 overflow-hidden rounded-lg border border-line">
-          {groups.map((group) => {
+          {activeGroups(groups).map((group) => {
             const activePositions = group.positions.filter((position) => position.active);
             if (activePositions.length === 0) return null;
 

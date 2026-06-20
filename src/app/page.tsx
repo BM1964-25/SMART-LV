@@ -3,6 +3,7 @@
 import { DragDropContext, Draggable, Droppable, DropResult } from "@hello-pangea/dnd";
 import {
   Archive,
+  Bot,
   Building2,
   CheckCircle2,
   Copy,
@@ -15,6 +16,7 @@ import {
   Library,
   Plus,
   Printer,
+  ReceiptText,
   Save,
   Search,
   Settings,
@@ -25,9 +27,9 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { OfferPreview } from "@/components/OfferPreview";
 import { Field, IconButton, SectionTitle, Select, StatCard, TextArea, TextInput } from "@/components/ui";
-import { calculateSummary, formatCurrency, groupNumber, groupTotal, positionNumber, positionTotal, renumberGroups } from "@/lib/calculations";
-import { companyProfiles, initialGroups, rateLabels, sampleProject } from "@/lib/data";
-import { Position, PositionGroup, Project } from "@/lib/types";
+import { activeGroups, calculateSummary, formatCurrency, groupNumber, groupTotal, positionNumber, positionTotal, renumberGroups } from "@/lib/calculations";
+import { companyProfiles, initialGroups, rateLabels, sampleOrderBilling, sampleProject } from "@/lib/data";
+import { ChangeOrder, InvoicePlanItem, OrderBilling, Position, PositionGroup, Project, WorkLogItem } from "@/lib/types";
 
 type View =
   | "Dashboard"
@@ -35,6 +37,8 @@ type View =
   | "Neues Angebot"
   | "LV bearbeiten"
   | "LV-Vorschau"
+  | "Auftrag & Abrechnung"
+  | "KI-Assistenz"
   | "Firmenprofile"
   | "Mandanten"
   | "Positionsbibliothek"
@@ -47,6 +51,8 @@ const navItems: { label: View; icon: typeof Home }[] = [
   { label: "Neues Angebot", icon: Plus },
   { label: "LV bearbeiten", icon: FileText },
   { label: "LV-Vorschau", icon: Eye },
+  { label: "Auftrag & Abrechnung", icon: ReceiptText },
+  { label: "KI-Assistenz", icon: Bot },
   { label: "Firmenprofile", icon: Building2 },
   { label: "Mandanten", icon: Users },
   { label: "Positionsbibliothek", icon: Library },
@@ -60,6 +66,7 @@ export default function HomePage() {
   const [activeView, setActiveView] = useState<View>("Dashboard");
   const [project, setProject] = useState<Project>(sampleProject);
   const [groups, setGroups] = useState<PositionGroup[]>(initialGroups);
+  const [orderBilling, setOrderBilling] = useState<OrderBilling>(sampleOrderBilling);
   const [query, setQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("Alle Kategorien");
   const [statusFilter, setStatusFilter] = useState("Alle Status");
@@ -68,7 +75,7 @@ export default function HomePage() {
     const saved = window.localStorage.getItem(storageKey);
     if (!saved) return;
     try {
-      const parsed = JSON.parse(saved) as { project: Project; groups: PositionGroup[] };
+      const parsed = JSON.parse(saved) as { project: Project; groups: PositionGroup[]; orderBilling?: OrderBilling };
       queueMicrotask(() => {
         setProject({
           ...parsed.project,
@@ -77,7 +84,8 @@ export default function HomePage() {
             .replace("K. I. Gestützte Angebots und Wissensplattform", "KI-gestützte Angebotsplattform"),
           shortDescription: parsed.project.shortDescription.replace(" und Wissensbereitstellung", "")
         });
-        setGroups(parsed.groups);
+        setGroups(parsed.groups.map((group) => ({ ...group, active: group.active ?? true })));
+        setOrderBilling(parsed.orderBilling ?? sampleOrderBilling);
       });
     } catch {
       window.localStorage.removeItem(storageKey);
@@ -85,12 +93,13 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem(storageKey, JSON.stringify({ project, groups }));
-  }, [project, groups]);
+    window.localStorage.setItem(storageKey, JSON.stringify({ project, groups, orderBilling }));
+  }, [project, groups, orderBilling]);
 
   const company = companyProfiles.find((profile) => profile.id === project.companyId) ?? companyProfiles[0];
   const summary = calculateSummary(groups, project);
-  const activePositions = groups.flatMap((group) => group.positions.filter((position) => position.active));
+  const visibleGroups = activeGroups(groups);
+  const activePositions = visibleGroups.flatMap((group) => group.positions.filter((position) => position.active));
   const optionalPositions = activePositions.filter((position) => !position.required);
   const categories = ["Alle Kategorien", ...Array.from(new Set(groups.flatMap((group) => group.positions.map((position) => position.category))))];
   const statuses = ["Alle Status", ...Array.from(new Set(groups.flatMap((group) => group.positions.map((position) => position.status))))];
@@ -130,6 +139,35 @@ export default function HomePage() {
           : group
       )
     );
+  }
+
+  function updateGroup(groupId: string, changes: Partial<PositionGroup>) {
+    setGroups((current) => current.map((group) => (group.id === groupId ? { ...group, ...changes } : group)));
+  }
+
+  function updateOrderBilling<K extends keyof OrderBilling>(key: K, value: OrderBilling[K]) {
+    setOrderBilling((current) => ({ ...current, [key]: value }));
+  }
+
+  function updateInvoicePlanItem(itemId: string, changes: Partial<InvoicePlanItem>) {
+    setOrderBilling((current) => ({
+      ...current,
+      invoicePlan: current.invoicePlan.map((item) => (item.id === itemId ? { ...item, ...changes } : item))
+    }));
+  }
+
+  function updateChangeOrder(itemId: string, changes: Partial<ChangeOrder>) {
+    setOrderBilling((current) => ({
+      ...current,
+      changeOrders: current.changeOrders.map((item) => (item.id === itemId ? { ...item, ...changes } : item))
+    }));
+  }
+
+  function updateWorkLog(itemId: string, changes: Partial<WorkLogItem>) {
+    setOrderBilling((current) => ({
+      ...current,
+      workLog: current.workLog.map((item) => (item.id === itemId ? { ...item, ...changes } : item))
+    }));
   }
 
   function deletePosition(groupId: string, positionId: string) {
@@ -212,7 +250,7 @@ export default function HomePage() {
   function exportCsv() {
     const rows = [
       ["Positionsnummer", "Titel", "Beschreibung", "Einheit", "Menge", "Einheitspreis", "Gesamtpreis", "Leistungsbereich", "Status"],
-      ...groups.flatMap((group) =>
+      ...activeGroups(groups).flatMap((group) =>
         group.positions
           .filter((position) => position.active)
           .map((position) => [
@@ -315,6 +353,7 @@ export default function HomePage() {
           {activeView === "Dashboard" ? (
             <Dashboard
               project={project}
+              orderBilling={orderBilling}
               summary={summary}
               activePositions={activePositions.length}
               optionalPositions={optionalPositions.length}
@@ -338,6 +377,7 @@ export default function HomePage() {
               categories={categories}
               statuses={statuses}
               updatePosition={updatePosition}
+              updateGroup={updateGroup}
               deletePosition={deletePosition}
               duplicatePosition={duplicatePosition}
               addPosition={addPosition}
@@ -346,6 +386,20 @@ export default function HomePage() {
           ) : null}
 
           {activeView === "LV-Vorschau" ? <OfferPreview project={project} groups={groups} /> : null}
+
+          {activeView === "Auftrag & Abrechnung" ? (
+            <OrderBillingWorkspace
+              project={project}
+              groups={groups}
+              orderBilling={orderBilling}
+              updateOrderBilling={updateOrderBilling}
+              updateInvoicePlanItem={updateInvoicePlanItem}
+              updateChangeOrder={updateChangeOrder}
+              updateWorkLog={updateWorkLog}
+            />
+          ) : null}
+
+          {activeView === "KI-Assistenz" ? <AiAssistant project={project} groups={groups} updatePosition={updatePosition} setActiveView={setActiveView} /> : null}
 
           {activeView === "Firmenprofile" ? <CompanyProfiles selectedCompanyId={project.companyId} /> : null}
 
@@ -364,6 +418,7 @@ export default function HomePage() {
 
 function Dashboard({
   project,
+  orderBilling,
   summary,
   activePositions,
   optionalPositions,
@@ -371,19 +426,22 @@ function Dashboard({
   setActiveView
 }: {
   project: Project;
+  orderBilling: OrderBilling;
   summary: ReturnType<typeof calculateSummary>;
   activePositions: number;
   optionalPositions: number;
   groups: PositionGroup[];
   setActiveView: (view: View) => void;
 }) {
+  const visibleGroups = activeGroups(groups);
+
   return (
     <div className="grid gap-6">
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Angebotswert netto" value={formatCurrency(summary.net)} detail={`${project.vatRate} % Umsatzsteuer vorbereitet`} tone="accent" />
         <StatCard label="Aktive Positionen" value={String(activePositions)} detail={`${optionalPositions} optionale Positionen enthalten`} />
-        <StatCard label="Hauptgruppen" value={String(groups.length)} detail="Automatische Positionsnummerierung" />
-        <StatCard label="Status" value={project.status} detail={project.offerNumber} />
+        <StatCard label="Aktive Hauptgruppen" value={String(visibleGroups.length)} detail="Nummerierung ohne Lücken" />
+        <StatCard label="Auftrag" value={orderBilling.orderNumber} detail={orderBilling.billingMode} />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
@@ -405,12 +463,15 @@ function Dashboard({
             <button type="button" onClick={() => setActiveView("LV-Vorschau")} className="rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold text-ink">
               Vorschau öffnen
             </button>
+            <button type="button" onClick={() => setActiveView("KI-Assistenz")} className="rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold text-ink">
+              KI-Assistenz öffnen
+            </button>
           </div>
         </div>
         <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
           <SectionTitle title="Kalkulationsübersicht" />
           <div className="mt-5 divide-y divide-line">
-            {groups.map((group) => (
+            {visibleGroups.map((group) => (
               <div key={group.id} className="flex items-center justify-between py-3 text-sm">
                 <span className="text-muted">
                   {groupNumber(groups, group.id)} {group.title}
@@ -529,6 +590,7 @@ function LvEditor({
   categories,
   statuses,
   updatePosition,
+  updateGroup,
   deletePosition,
   duplicatePosition,
   addPosition,
@@ -545,6 +607,7 @@ function LvEditor({
   categories: string[];
   statuses: string[];
   updatePosition: (groupId: string, positionId: string, changes: Partial<Position>) => void;
+  updateGroup: (groupId: string, changes: Partial<PositionGroup>) => void;
   deletePosition: (groupId: string, positionId: string) => void;
   duplicatePosition: (groupId: string, positionId: string) => void;
   addPosition: (groupId: string) => void;
@@ -585,11 +648,20 @@ function LvEditor({
               <div className="flex flex-col gap-3 border-b border-line p-5 md:flex-row md:items-start md:justify-between">
                 <div>
                   <h2 className="text-lg font-semibold text-ink">
-                    {groupNumber(allGroups, group.id)} {group.title}
+                    {group.active ? groupNumber(allGroups, group.id) : "entfällt"} {group.title}
                   </h2>
                   <p className="mt-1 max-w-3xl text-sm leading-6 text-muted">{group.intro}</p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => updateGroup(group.id, { active: !group.active })}
+                    className={`rounded-md border px-3 py-2 text-sm font-semibold ${
+                      group.active ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-slate-200 bg-slate-50 text-muted"
+                    }`}
+                  >
+                    {group.active ? "Hauptgruppe aktiv" : "Hauptgruppe entfällt"}
+                  </button>
                   <p className="rounded-md bg-slate-100 px-3 py-2 text-sm font-semibold text-ink">{formatCurrency(groupTotal(group))}</p>
                   <IconButton icon={Plus} label="Position hinzufügen" onClick={() => addPosition(group.id)} disabled={hasFilters} />
                 </div>
@@ -784,6 +856,273 @@ function Templates({ project, groups }: { project: Project; groups: PositionGrou
           <p className="mt-3 text-sm leading-6 text-muted">{groups.length} Hauptgruppen, Firmenprofil {project.companyId}, Statuslogik und Exportlayout vorbereitet.</p>
         </div>
       ))}
+    </div>
+  );
+}
+
+function OrderBillingWorkspace({
+  project,
+  groups,
+  orderBilling,
+  updateOrderBilling,
+  updateInvoicePlanItem,
+  updateChangeOrder,
+  updateWorkLog
+}: {
+  project: Project;
+  groups: PositionGroup[];
+  orderBilling: OrderBilling;
+  updateOrderBilling: <K extends keyof OrderBilling>(key: K, value: OrderBilling[K]) => void;
+  updateInvoicePlanItem: (itemId: string, changes: Partial<InvoicePlanItem>) => void;
+  updateChangeOrder: (itemId: string, changes: Partial<ChangeOrder>) => void;
+  updateWorkLog: (itemId: string, changes: Partial<WorkLogItem>) => void;
+}) {
+  const summary = calculateSummary(groups, project);
+  const invoiceTotal = orderBilling.invoicePlan.reduce((sum, item) => sum + item.amount, 0);
+  const loggedHours = orderBilling.workLog.reduce((sum, item) => sum + item.hours, 0);
+  const changeOrderTotal = orderBilling.changeOrders.reduce((sum, item) => sum + item.amount, 0);
+
+  return (
+    <div className="grid gap-6">
+      <div className="grid gap-4 md:grid-cols-3">
+        <StatCard label="Auftragswert netto" value={formatCurrency(summary.net)} detail={orderBilling.orderNumber} tone="accent" />
+        <StatCard label="Rechnungsplan" value={formatCurrency(invoiceTotal)} detail={`${orderBilling.invoicePlan.length} Teilrechnungen`} />
+        <StatCard label="Nachträge" value={formatCurrency(changeOrderTotal)} detail={`${loggedHours} geplante Leistungsstunden`} />
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
+        <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
+          <SectionTitle title="Auftrag" kicker="Vom Angebot zur Beauftragung" />
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <Field label="Auftragsnummer">
+              <TextInput value={orderBilling.orderNumber} onChange={(event) => updateOrderBilling("orderNumber", event.target.value)} />
+            </Field>
+            <Field label="Beauftragungsdatum">
+              <TextInput value={orderBilling.orderDate} onChange={(event) => updateOrderBilling("orderDate", event.target.value)} />
+            </Field>
+            <Field label="Leistungszeitraum">
+              <TextInput value={orderBilling.servicePeriod} onChange={(event) => updateOrderBilling("servicePeriod", event.target.value)} />
+            </Field>
+            <Field label="Abrechnungsart">
+              <Select value={orderBilling.billingMode} onChange={(event) => updateOrderBilling("billingMode", event.target.value as OrderBilling["billingMode"])}>
+                <option>Pauschale</option>
+                <option>Nach Aufwand</option>
+                <option>Hybrid</option>
+              </Select>
+            </Field>
+          </div>
+          <p className="mt-5 rounded-md border border-blue-100 bg-blue-50 px-4 py-3 text-sm leading-6 text-blue-900">
+            Aus einem Angebot kann hier ein Auftrag mit Leistungszeitraum, Abrechnungsart, Abschlagsplan, Nachträgen und Leistungsnachweisen geführt werden.
+          </p>
+        </div>
+
+        <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
+          <SectionTitle title="Abrechnungslogik" />
+          <div className="mt-5 grid gap-3 text-sm">
+            <div className="rounded-md border border-line p-4">
+              <p className="font-semibold text-ink">Pauschale</p>
+              <p className="mt-1 text-muted">Stunden bleiben intern, extern erscheinen Abschnitts- oder Gesamtsummen.</p>
+            </div>
+            <div className="rounded-md border border-line p-4">
+              <p className="font-semibold text-ink">Nach Aufwand</p>
+              <p className="mt-1 text-muted">Abrechnung erfolgt über Leistungsnachweis mit Stunden und Stundensätzen.</p>
+            </div>
+            <div className="rounded-md border border-line p-4">
+              <p className="font-semibold text-ink">Hybrid</p>
+              <p className="mt-1 text-muted">Fest definierte Pakete plus variable Nachträge und Erweiterungen.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
+        <SectionTitle title="Rechnungsplan" kicker="Abschläge und Schlussrechnung" />
+        <div className="mt-5 grid gap-3">
+          {orderBilling.invoicePlan.map((item) => (
+            <div key={item.id} className="grid gap-3 rounded-lg border border-line p-4 lg:grid-cols-[1fr_120px_160px_150px_140px]">
+              <Field label="Rechnung">
+                <TextInput value={item.title} onChange={(event) => updateInvoicePlanItem(item.id, { title: event.target.value })} />
+              </Field>
+              <Field label="Anteil %">
+                <TextInput type="number" value={item.percentage} onChange={(event) => updateInvoicePlanItem(item.id, { percentage: Number(event.target.value) })} />
+              </Field>
+              <Field label="Betrag netto">
+                <TextInput type="number" value={item.amount} onChange={(event) => updateInvoicePlanItem(item.id, { amount: Number(event.target.value) })} />
+              </Field>
+              <Field label="Fälligkeit">
+                <TextInput value={item.due} onChange={(event) => updateInvoicePlanItem(item.id, { due: event.target.value })} />
+              </Field>
+              <Field label="Status">
+                <Select value={item.status} onChange={(event) => updateInvoicePlanItem(item.id, { status: event.target.value as InvoicePlanItem["status"] })}>
+                  <option>Entwurf</option>
+                  <option>Offen</option>
+                  <option>Bezahlt</option>
+                  <option>Überfällig</option>
+                </Select>
+              </Field>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-2">
+        <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
+          <SectionTitle title="Nachträge" />
+          <div className="mt-5 grid gap-3">
+            {orderBilling.changeOrders.map((item) => (
+              <div key={item.id} className="rounded-lg border border-line p-4">
+                <div className="grid gap-3 md:grid-cols-[1fr_160px]">
+                  <Field label="Titel">
+                    <TextInput value={item.title} onChange={(event) => updateChangeOrder(item.id, { title: event.target.value })} />
+                  </Field>
+                  <Field label="Betrag netto">
+                    <TextInput type="number" value={item.amount} onChange={(event) => updateChangeOrder(item.id, { amount: Number(event.target.value) })} />
+                  </Field>
+                </div>
+                <div className="mt-3 grid gap-3 md:grid-cols-[1fr_180px]">
+                  <Field label="Beschreibung">
+                    <TextArea value={item.description} onChange={(event) => updateChangeOrder(item.id, { description: event.target.value })} />
+                  </Field>
+                  <Field label="Status">
+                    <Select value={item.status} onChange={(event) => updateChangeOrder(item.id, { status: event.target.value as ChangeOrder["status"] })}>
+                      <option>Vorgeschlagen</option>
+                      <option>Beauftragt</option>
+                      <option>Abgerechnet</option>
+                    </Select>
+                  </Field>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
+          <SectionTitle title="Leistungsnachweis" />
+          <div className="mt-5 grid gap-3">
+            {orderBilling.workLog.map((item) => (
+              <div key={item.id} className="grid gap-3 rounded-lg border border-line p-4 md:grid-cols-[1fr_110px_150px]">
+                <Field label="Position">
+                  <TextInput value={item.positionTitle} onChange={(event) => updateWorkLog(item.id, { positionTitle: event.target.value })} />
+                </Field>
+                <Field label="Stunden">
+                  <TextInput type="number" value={item.hours} onChange={(event) => updateWorkLog(item.id, { hours: Number(event.target.value) })} />
+                </Field>
+                <Field label="Status">
+                  <Select value={item.status} onChange={(event) => updateWorkLog(item.id, { status: event.target.value as WorkLogItem["status"] })}>
+                    <option>Geplant</option>
+                    <option>In Arbeit</option>
+                    <option>Abgenommen</option>
+                  </Select>
+                </Field>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AiAssistant({
+  project,
+  groups,
+  updatePosition,
+  setActiveView
+}: {
+  project: Project;
+  groups: PositionGroup[];
+  updatePosition: (groupId: string, positionId: string, changes: Partial<Position>) => void;
+  setActiveView: (view: View) => void;
+}) {
+  const aiGroups = activeGroups(groups).filter((group) =>
+    [group.title, group.intro, ...group.positions.map((position) => `${position.title} ${position.description} ${position.category}`)]
+      .join(" ")
+      .toLowerCase()
+      .includes("ki")
+  );
+  const aiPositions = aiGroups.flatMap((group) => group.positions.filter((position) => position.active));
+  const suggestedHours = aiPositions.reduce((sum, position) => sum + position.quantity, 0);
+
+  return (
+    <div className="grid gap-6">
+      <div className="rounded-lg border border-blue-100 bg-blue-50 p-6 shadow-sm">
+        <SectionTitle title="KI-Assistenz" kicker="Regelbasierte erste Version" />
+        <p className="mt-3 max-w-4xl text-sm leading-6 text-blue-900">
+          Diese Version arbeitet lokal mit Regeln und Projektkontext. Sie markiert relevante KI-Leistungen, erzeugt Textvorschläge,
+          prüft fehlende Bausteine und hilft bei Aufwand, Risiken und Abrechnung. Eine echte Modell-API kann später an dieselbe Stelle angeschlossen werden.
+        </p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <StatCard label="KI-relevante Positionen" value={String(aiPositions.length)} detail={`${suggestedHours} kalkulierte Stunden`} tone="accent" />
+        <StatCard label="Empfohlene Abrechnung" value="Hybrid" detail="Pauschale Basis plus Nachträge" />
+        <StatCard label="Projektfokus" value="Angebots-KI" detail={project.client} />
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[1fr_420px]">
+        <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
+          <SectionTitle title="KI-Leistungsvorschläge" />
+          <div className="mt-5 grid gap-3">
+            {aiPositions.map((position) => (
+              <div key={position.id} className="rounded-lg border border-line p-4">
+                <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-muted">{positionNumber(groups, position.groupId, position.id)}</p>
+                    <h3 className="mt-1 font-semibold text-ink">{position.title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-muted">{position.description}</p>
+                  </div>
+                  <p className="shrink-0 rounded-md bg-slate-50 px-3 py-2 text-sm font-semibold text-ink">{formatCurrency(positionTotal(position))}</p>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      updatePosition(position.groupId, position.id, {
+                        note: "KI-relevant: Anforderungen, Datenqualität, Prompt-Verhalten und Abnahmekriterien gesondert prüfen."
+                      })
+                    }
+                    className="rounded-md border border-line px-3 py-2 text-sm font-semibold text-ink"
+                  >
+                    KI-Hinweis übernehmen
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updatePosition(position.groupId, position.id, { quantity: Math.ceil(position.quantity * 1.15) })}
+                    className="rounded-md border border-line px-3 py-2 text-sm font-semibold text-ink"
+                  >
+                    Risikoaufschlag +15 %
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid gap-6">
+          <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
+            <SectionTitle title="Textvorschlag" />
+            <p className="mt-4 text-sm leading-7 text-muted">
+              Für das Projekt <strong className="text-ink">{project.projectName}</strong> empfiehlt die Assistenz eine hybride Kalkulation:
+              transparente interne Stundenplanung, extern wahlweise Abschnittspauschalen und gesondert beauftragbare KI-Erweiterungen.
+              Besonders prüfungsrelevant sind Datenquellen, Antwortqualität, Rechtekonzept, Prompt-Verhalten und Abnahmekriterien.
+            </p>
+          </div>
+          <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
+            <SectionTitle title="Prüfpunkte" />
+            <div className="mt-4 grid gap-3 text-sm">
+              {["Datenquellen und Nutzungsrechte klären", "Halluzinationsrisiken und Freigaben definieren", "RAG-Qualität mit Testfragen messen", "Abrechnung von Nachträgen vorsehen", "Betrieb, Monitoring und Support kalkulieren"].map((item) => (
+                <div key={item} className="flex items-center gap-3 rounded-md border border-line px-4 py-3">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                  <span className="font-medium text-ink">{item}</span>
+                </div>
+              ))}
+            </div>
+            <button type="button" onClick={() => setActiveView("LV bearbeiten")} className="mt-5 rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white">
+              Zum LV-Editor
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

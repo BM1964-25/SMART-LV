@@ -82,6 +82,7 @@ export type PositionGroup = {
   id: string;
   title: string;
   intro: string;
+  active: boolean;
   positions: Position[];
 };
 
@@ -90,4 +91,42 @@ export type Summary = {
   discount: number;
   vat: number;
   gross: number;
+};
+
+export type BillingMode = "Pauschale" | "Nach Aufwand" | "Hybrid";
+
+export type InvoiceStatus = "Entwurf" | "Offen" | "Bezahlt" | "Überfällig";
+
+export type InvoicePlanItem = {
+  id: string;
+  title: string;
+  percentage: number;
+  amount: number;
+  due: string;
+  status: InvoiceStatus;
+};
+
+export type ChangeOrder = {
+  id: string;
+  title: string;
+  description: string;
+  amount: number;
+  status: "Vorgeschlagen" | "Beauftragt" | "Abgerechnet";
+};
+
+export type WorkLogItem = {
+  id: string;
+  positionTitle: string;
+  hours: number;
+  status: "Geplant" | "In Arbeit" | "Abgenommen";
+};
+
+export type OrderBilling = {
+  orderNumber: string;
+  orderDate: string;
+  servicePeriod: string;
+  billingMode: BillingMode;
+  invoicePlan: InvoicePlanItem[];
+  changeOrders: ChangeOrder[];
+  workLog: WorkLogItem[];
 };

@@ -6,6 +6,7 @@ export function positionTotal(position: Position): number {
 }
 
 export function groupTotal(group: PositionGroup): number {
+  if (!group.active) return 0;
   return group.positions.reduce((sum, position) => sum + positionTotal(position), 0);
 }
 
@@ -43,17 +44,22 @@ export function renumberGroups(groups: PositionGroup[]): PositionGroup[] {
 }
 
 export function getActivePositions(groups: PositionGroup[]): Position[] {
-  return groups.flatMap((group) => group.positions.filter((position) => position.active));
+  return groups.flatMap((group) => (group.active ? group.positions.filter((position) => position.active) : []));
+}
+
+export function activeGroups(groups: PositionGroup[]): PositionGroup[] {
+  return groups.filter((group) => group.active);
 }
 
 export function groupNumber(groups: PositionGroup[], groupId: string): string {
-  const groupIndex = groups.findIndex((group) => group.id === groupId);
+  const groupIndex = activeGroups(groups).findIndex((group) => group.id === groupId);
   return groupIndex >= 0 ? String(groupIndex + 1) : "";
 }
 
 export function positionNumber(groups: PositionGroup[], groupId: string, positionId: string): string {
-  const groupIndex = groups.findIndex((group) => group.id === groupId);
-  const group = groups[groupIndex];
+  const visibleGroups = activeGroups(groups);
+  const groupIndex = visibleGroups.findIndex((group) => group.id === groupId);
+  const group = visibleGroups[groupIndex];
   if (!group) return "";
 
   const activePositionIndex = group.positions.filter((position) => position.active).findIndex((position) => position.id === positionId);

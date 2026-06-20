@@ -1,4 +1,4 @@
-import { CompanyProfile, PositionGroup, Project, RateCard } from "./types";
+import { CompanyProfile, OrderBilling, PositionGroup, Project, RateCard } from "./types";
 
 export const standardRates: RateCard = {
   strategy: 250,
@@ -120,6 +120,32 @@ export const sampleProject: Project = {
   rates: standardRates
 };
 
+export const sampleOrderBilling: OrderBilling = {
+  orderNumber: "AB-2026-001",
+  orderDate: "2026-06-20",
+  servicePeriod: "Juli bis Oktober 2026",
+  billingMode: "Hybrid",
+  invoicePlan: [
+    { id: "inv-1", title: "Abschlag bei Beauftragung", percentage: 40, amount: 40464, due: "bei Auftragserteilung", status: "Entwurf" },
+    { id: "inv-2", title: "Abschlag nach Beta-Bereitstellung", percentage: 40, amount: 40464, due: "nach Beta-Version", status: "Entwurf" },
+    { id: "inv-3", title: "Schlussrechnung nach Abnahme", percentage: 20, amount: 20232, due: "nach Abnahme", status: "Entwurf" }
+  ],
+  changeOrders: [
+    {
+      id: "co-1",
+      title: "Zusätzliche Datenquelle anbinden",
+      description: "Optionale Erweiterung für weitere Dokumenten- oder Fachsystemquellen nach technischer Prüfung.",
+      amount: 3600,
+      status: "Vorgeschlagen"
+    }
+  ],
+  workLog: [
+    { id: "wl-1", positionTitle: "Kick-off-Workshop", hours: 6, status: "Geplant" },
+    { id: "wl-2", positionTitle: "Daten- und KI-Konzept", hours: 18, status: "Geplant" },
+    { id: "wl-3", positionTitle: "Prompt Engineering", hours: 18, status: "Geplant" }
+  ]
+};
+
 const description = {
   kickOff:
     "Strukturierter Auftakt zur Klärung von Zielbild, Stakeholdern, Entscheidungswegen, Datenlage, Erfolgskriterien und Projektorganisation.",
@@ -138,6 +164,7 @@ export const initialGroups: PositionGroup[] = [
     id: "analysis",
     title: "Analyse und Konzeption",
     intro: "Grundlage für ein belastbares Projektverständnis, klare Prioritäten und eine wirtschaftlich sinnvolle Umsetzungsplanung.",
+    active: true,
     positions: [
       { id: "p-001", groupId: "analysis", number: "1.1", title: "Kick-off-Workshop", description: description.kickOff, unit: "Std.", quantity: 6, rateKey: "strategy", unitPrice: 250, category: "Analyse", required: true, note: "Vor Ort oder remote möglich", status: "Offen", active: true },
       { id: "p-002", groupId: "analysis", number: "1.2", title: "Prozessanalyse", description: "Analyse bestehender Arbeitsabläufe, Medienbrüche, Rollen, Entscheidungspunkte und Automatisierungspotenziale.", unit: "Std.", quantity: 14, rateKey: "strategy", unitPrice: 250, category: "Analyse", required: true, note: "", status: "Offen", active: true },
@@ -148,6 +175,7 @@ export const initialGroups: PositionGroup[] = [
     id: "technical",
     title: "Technische Konzeption",
     intro: "Technische Übersetzung der fachlichen Anforderungen in eine robuste, erweiterbare und integrationsfähige Lösungsarchitektur.",
+    active: true,
     positions: [
       { id: "p-004", groupId: "technical", number: "2.1", title: "Systemarchitektur", description: description.architecture, unit: "Std.", quantity: 16, rateKey: "concept", unitPrice: 250, category: "Architektur", required: true, note: "", status: "Offen", active: true },
       { id: "p-005", groupId: "technical", number: "2.2", title: "Daten- und KI-Konzept", description: "Definition von Datenquellen, KI-Modellen, Prompt-Strategien, Retrieval-Logik, Governance und Prüfmechanismen.", unit: "Std.", quantity: 18, rateKey: "ai", unitPrice: 220, category: "KI-Konzept", required: true, note: "", status: "Offen", active: true },
@@ -158,6 +186,7 @@ export const initialGroups: PositionGroup[] = [
     id: "uxui",
     title: "UX/UI-Design",
     intro: "Nutzerzentrierte Gestaltung der Anwendung mit klarer Informationsarchitektur, effizienter Bedienung und hochwertiger Oberfläche.",
+    active: true,
     positions: [
       { id: "p-007", groupId: "uxui", number: "3.1", title: "UX-Konzept", description: "Erarbeitung von Nutzerflüssen, Navigationsstruktur, Formularlogik, Zuständen und Interaktionsmustern.", unit: "Std.", quantity: 14, rateKey: "ux", unitPrice: 180, category: "UX/UI", required: true, note: "", status: "Offen", active: true },
       { id: "p-008", groupId: "uxui", number: "3.2", title: "UI-Design", description: "Gestaltung moderner Screens, Komponenten, Tabellen, Dashboards und Vorschauflächen im abgestimmten Corporate Design.", unit: "Std.", quantity: 22, rateKey: "ux", unitPrice: 180, category: "UX/UI", required: true, note: "", status: "Offen", active: true }
@@ -167,6 +196,7 @@ export const initialGroups: PositionGroup[] = [
     id: "development",
     title: "Softwareentwicklung",
     intro: "Umsetzung der Anwendung mit modularer Codebasis, sauberer Komponentenstruktur und vorbereiteter Erweiterbarkeit.",
+    active: true,
     positions: [
       { id: "p-009", groupId: "development", number: "4.1", title: "Frontend-Entwicklung", description: "Entwicklung der webbasierten Nutzeroberfläche inklusive Dashboard, Formularen, Tabellen, Vorschau und responsiver Bedienung.", unit: "Std.", quantity: 48, rateKey: "development", unitPrice: 180, category: "Entwicklung", required: true, note: "", status: "Offen", active: true },
       { id: "p-010", groupId: "development", number: "4.2", title: "Backend-Entwicklung", description: "Implementierung von Datenmodellen, Angebotslogik, Speicherstruktur, API-Schichten und vorbereiteter Nutzerverwaltung.", unit: "Std.", quantity: 52, rateKey: "development", unitPrice: 180, category: "Entwicklung", required: true, note: "", status: "Offen", active: true },
@@ -177,6 +207,7 @@ export const initialGroups: PositionGroup[] = [
     id: "ai",
     title: "KI-Implementierung",
     intro: "Produktive KI-Komponenten mit nachvollziehbarer Quellenlogik, fachlich kontrollierten Prompts und belastbaren Workflows.",
+    active: true,
     positions: [
       { id: "p-012", groupId: "ai", number: "5.1", title: "Prompt Engineering", description: "Entwicklung, Test und Dokumentation robuster System- und Aufgabenprompts für die priorisierten Anwendungsfälle.", unit: "Std.", quantity: 18, rateKey: "prompt", unitPrice: 220, category: "KI", required: true, note: "", status: "Offen", active: true },
       { id: "p-013", groupId: "ai", number: "5.2", title: "RAG-System", description: description.rag, unit: "Std.", quantity: 34, rateKey: "ai", unitPrice: 220, category: "KI", required: true, note: "", status: "Offen", active: true },
@@ -188,6 +219,7 @@ export const initialGroups: PositionGroup[] = [
     id: "qa",
     title: "Qualitätssicherung",
     intro: "Systematische Prüfung von Funktionalität, KI-Ausgaben, Nutzerflüssen und Betriebsfähigkeit vor produktiver Nutzung.",
+    active: true,
     positions: [
       { id: "p-016", groupId: "qa", number: "6.1", title: "Funktionstests", description: "Planung und Durchführung funktionaler Tests für Kernprozesse, Rollen, Formulare, Berechnungen und Schnittstellen.", unit: "Std.", quantity: 20, rateKey: "development", unitPrice: 180, category: "Qualität", required: true, note: "", status: "Offen", active: true },
       { id: "p-017", groupId: "qa", number: "6.2", title: "Praxistests", description: "Begleitete Tests mit realistischen Anwendungsfällen, Auswertung von Rückmeldungen und Priorisierung notwendiger Anpassungen.", unit: "Std.", quantity: 16, rateKey: "project", unitPrice: 220, category: "Qualität", required: true, note: "", status: "Offen", active: true }
@@ -197,6 +229,7 @@ export const initialGroups: PositionGroup[] = [
     id: "deployment",
     title: "Deployment und Inbetriebnahme",
     intro: "Bereitstellung der Lösung in einer abgestimmten Umgebung inklusive Konfiguration, Übergabe und Startbegleitung.",
+    active: true,
     positions: [
       { id: "p-018", groupId: "deployment", number: "7.1", title: "Deployment", description: "Einrichtung der Zielumgebung, Build-Konfiguration, Umgebungsvariablen, Deployment-Prozess und technische Abnahme.", unit: "Std.", quantity: 14, rateKey: "deployment", unitPrice: 180, category: "Deployment", required: true, note: "", status: "Offen", active: true },
       { id: "p-019", groupId: "deployment", number: "7.2", title: "Domain- und Hostingkonfiguration", description: "Konfiguration von Domain, DNS, Hosting, SSL, grundlegender Sicherheit und Betriebsparametern.", unit: "Std.", quantity: 8, rateKey: "deployment", unitPrice: 180, category: "Deployment", required: false, note: "Externe Hostingkosten nicht enthalten", status: "Optional", active: true }
@@ -206,6 +239,7 @@ export const initialGroups: PositionGroup[] = [
     id: "training",
     title: "Schulung und Einführung",
     intro: "Strukturierte Einführung für Anwender und Administratoren, damit die Lösung sicher und effizient genutzt werden kann.",
+    active: true,
     positions: [
       { id: "p-020", groupId: "training", number: "8.1", title: "Anwenderdokumentation", description: "Erstellung einer verständlichen Dokumentation für zentrale Arbeitsabläufe, Rollen, KI-Funktionen und typische Nutzungsszenarien.", unit: "Std.", quantity: 12, rateKey: "training", unitPrice: 220, category: "Schulung", required: true, note: "", status: "Offen", active: true },
       { id: "p-021", groupId: "training", number: "8.2", title: "Administratorendokumentation", description: "Dokumentation von Konfiguration, Nutzerverwaltung, Datenquellen, Betriebshinweisen und Wartungsaufgaben.", unit: "Std.", quantity: 10, rateKey: "training", unitPrice: 220, category: "Schulung", required: false, note: "", status: "Optional", active: true },
@@ -217,6 +251,7 @@ export const initialGroups: PositionGroup[] = [
     id: "support",
     title: "Wartung, Support und Weiterentwicklung",
     intro: "Planbare Betreuung nach Inbetriebnahme, damit Stabilität, Qualität und fachliche Weiterentwicklung gesichert bleiben.",
+    active: true,
     positions: [
       { id: "p-024", groupId: "support", number: "9.1", title: "Support", description: "Laufende Unterstützung bei Anwenderfragen, kleineren Anpassungen, Monitoring-Hinweisen und Fehleranalyse.", unit: "Monat", quantity: 3, rateKey: "support", unitPrice: 1800, category: "Support", required: false, note: "Monatliches Kontingent", status: "Optional", active: true },
       { id: "p-025", groupId: "support", number: "9.2", title: "Wartung", description: "Regelmäßige Prüfung von Abhängigkeiten, Sicherheitsupdates, Betriebsparametern und technischer Stabilität.", unit: "Monat", quantity: 3, rateKey: "support", unitPrice: 1200, category: "Support", required: false, note: "", status: "Optional", active: true },
@@ -227,6 +262,7 @@ export const initialGroups: PositionGroup[] = [
     id: "optional",
     title: "Optionale Zusatzleistungen",
     intro: "Ergänzende Leistungen, die je Projektumfang, Datenlage und gewünschter Automatisierungstiefe beauftragt werden können.",
+    active: true,
     positions: [
       { id: "p-027", groupId: "optional", number: "10.1", title: "Wissensdatenbank", description: "Strukturierung, Bereinigung und redaktionelle Aufbereitung bestehender Inhalte für die Nutzung in KI-gestützten Such- und Antwortsystemen.", unit: "Std.", quantity: 24, rateKey: "ai", unitPrice: 220, category: "KI", required: false, note: "", status: "Optional", active: false },
       { id: "p-028", groupId: "optional", number: "10.2", title: "Zusätzliche Integrationen", description: "Anbindung weiterer Fachsysteme, Datenquellen oder Exportformate nach gesonderter technischer Prüfung.", unit: "Std.", quantity: 20, rateKey: "development", unitPrice: 180, category: "Integration", required: false, note: "Nach Aufwand", status: "Optional", active: false }
