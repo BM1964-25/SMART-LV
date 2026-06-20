@@ -5,15 +5,17 @@ export function StatCard({
   label,
   value,
   detail,
-  tone = "default"
+  tone = "default",
+  align = "left"
 }: {
   label: string;
   value: string;
   detail: string;
   tone?: "default" | "accent";
+  align?: "left" | "center";
 }) {
   return (
-    <div className={clsx("rounded-lg border border-line bg-white p-5 shadow-sm", tone === "accent" && "border-blue-100 bg-blue-50/70")}>
+    <div className={clsx("rounded-lg border border-line bg-white p-5 shadow-sm", align === "center" && "text-center", tone === "accent" && "border-blue-100 bg-blue-50/70")}>
       <p className="text-sm font-medium text-muted">{label}</p>
       <p className="mt-3 text-2xl font-semibold tracking-normal text-ink">{value}</p>
       <p className="mt-2 text-sm text-muted">{detail}</p>
