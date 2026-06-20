@@ -63,10 +63,22 @@ const navItems: { label: View; icon: typeof Home }[] = [
 
 const storageKey = "smart-lv-state-v1";
 
+function createInitialLibraryPositions() {
+  return initialGroups.flatMap((group) =>
+    group.positions.map((position) => ({
+      ...position,
+      id: `lib-${position.id}`,
+      number: "",
+      active: true
+    }))
+  );
+}
+
 export default function HomePage() {
   const [activeView, setActiveView] = useState<View>("Dashboard");
   const [project, setProject] = useState<Project>(sampleProject);
   const [groups, setGroups] = useState<PositionGroup[]>(initialGroups);
+  const [libraryPositions, setLibraryPositions] = useState<Position[]>(createInitialLibraryPositions);
   const [orderBilling, setOrderBilling] = useState<OrderBilling>(sampleOrderBilling);
   const [query, setQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("Alle Kategorien");
@@ -76,7 +88,7 @@ export default function HomePage() {
     const saved = window.localStorage.getItem(storageKey);
     if (!saved) return;
     try {
-      const parsed = JSON.parse(saved) as { project: Project; groups: PositionGroup[]; orderBilling?: OrderBilling };
+      const parsed = JSON.parse(saved) as { project: Project; groups: PositionGroup[]; libraryPositions?: Position[]; orderBilling?: OrderBilling };
       queueMicrotask(() => {
         setProject({
           ...parsed.project,
@@ -88,6 +100,7 @@ export default function HomePage() {
           skontoDays: parsed.project.skontoDays ?? 10
         });
         setGroups(parsed.groups.map((group) => ({ ...group, active: group.active ?? true })));
+        setLibraryPositions(parsed.libraryPositions ?? createInitialLibraryPositions());
         setOrderBilling(parsed.orderBilling ?? sampleOrderBilling);
       });
     } catch {
@@ -96,8 +109,8 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem(storageKey, JSON.stringify({ project, groups, orderBilling }));
-  }, [project, groups, orderBilling]);
+    window.localStorage.setItem(storageKey, JSON.stringify({ project, groups, libraryPositions, orderBilling }));
+  }, [project, groups, libraryPositions, orderBilling]);
 
   const company = companyProfiles.find((profile) => profile.id === project.companyId) ?? companyProfiles[0];
   const summary = calculateSummary(groups, project);
@@ -171,6 +184,44 @@ export default function HomePage() {
       ...current,
       workLog: current.workLog.map((item) => (item.id === itemId ? { ...item, ...changes } : item))
     }));
+  }
+
+  function updateLibraryPosition(positionId: string, changes: Partial<Position>) {
+    setLibraryPositions((current) => current.map((position) => (position.id === positionId ? { ...position, ...changes } : position)));
+  }
+
+  function addLibraryPosition() {
+    setLibraryPositions((current) => [
+      ...current,
+      {
+        id: `lib-${Date.now()}`,
+        groupId: groups[0]?.id ?? "analysis",
+        number: "",
+        title: "Neue Bibliotheksposition",
+        description: "Wiederverwendbare Leistungsbeschreibung mit klarem Ergebnisbezug und anpassbarer Kalkulation.",
+        unit: "Std.",
+        quantity: 4,
+        rateKey: "development",
+        unitPrice: project.rates.development,
+        category: "Bibliothek",
+        required: false,
+        note: "",
+        status: "Offen",
+        active: true
+      }
+    ]);
+  }
+
+  function addLibraryPositionToGroup(position: Position, targetGroupId: string) {
+    const copy: Position = {
+      ...position,
+      id: `p-${Date.now()}-${Math.round(Math.random() * 1000)}`,
+      groupId: targetGroupId,
+      number: "0.0",
+      active: true
+    };
+    setGroups((current) => renumberGroups(current.map((group) => (group.id === targetGroupId ? { ...group, positions: [...group.positions, copy] } : group))));
+    setActiveView("LV bearbeiten");
   }
 
   function deletePosition(groupId: string, positionId: string) {
@@ -428,7 +479,15 @@ export default function HomePage() {
 
           {activeView === "Mandanten" ? <Tenants /> : null}
 
-          {activeView === "Positionsbibliothek" ? <PositionLibrary groups={groups} /> : null}
+          {activeView === "Positionsbibliothek" ? (
+            <PositionLibrary
+              groups={groups}
+              positions={libraryPositions}
+              updateLibraryPosition={updateLibraryPosition}
+              addLibraryPosition={addLibraryPosition}
+              addLibraryPositionToGroup={addLibraryPositionToGroup}
+            />
+          ) : null}
 
           {activeView === "Vorlagen" ? <Templates project={project} groups={groups} /> : null}
 
@@ -845,37 +904,137 @@ function Tenants() {
   );
 }
 
-function PositionLibrary({ groups }: { groups: PositionGroup[] }) {
+function PositionLibrary({
+  groups,
+  positions,
+  updateLibraryPosition,
+  addLibraryPosition,
+  addLibraryPositionToGroup
+}: {
+  groups: PositionGroup[];
+  positions: Position[];
+  updateLibraryPosition: (positionId: string, changes: Partial<Position>) => void;
+  addLibraryPosition: () => void;
+  addLibraryPositionToGroup: (position: Position, targetGroupId: string) => void;
+}) {
+  const [targetGroups, setTargetGroups] = useState<Record<string, string>>({});
+  const rateEntries = Object.entries(rateLabels) as [Position["rateKey"], string][];
+
   return (
-    <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
-      <SectionTitle title="Positionsbibliothek" />
-      <div className="mt-6 overflow-hidden rounded-lg border border-line">
-        <table className="w-full min-w-[900px] border-collapse text-left text-sm">
-          <thead className="bg-slate-50 text-muted">
-            <tr>
-              <th className="px-4 py-3 font-semibold">Nr.</th>
-              <th className="px-4 py-3 font-semibold">Titel</th>
-              <th className="px-4 py-3 font-semibold">Leistungsbereich</th>
-              <th className="px-4 py-3 font-semibold">Einheit</th>
-              <th className="px-4 py-3 font-semibold">Pflicht</th>
-              <th className="px-4 py-3 font-semibold">Stundensatzlogik</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-line">
-            {groups.flatMap((group) =>
-              group.positions.map((position) => (
-                <tr key={position.id}>
-                  <td className="px-4 py-3 font-medium text-muted">{positionNumber(groups, group.id, position.id)}</td>
-                  <td className="px-4 py-3 font-semibold text-ink">{position.title}</td>
-                  <td className="px-4 py-3 text-muted">{position.category}</td>
-                  <td className="px-4 py-3 text-muted">{position.unit}</td>
-                  <td className="px-4 py-3 text-muted">{position.required ? "Ja" : "Optional"}</td>
-                  <td className="px-4 py-3 text-muted">{rateLabels[position.rateKey]}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+    <div className="grid gap-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-line bg-white p-6 shadow-sm">
+        <SectionTitle title="Positionsbibliothek" />
+        <button type="button" onClick={addLibraryPosition} className="inline-flex h-10 items-center gap-2 rounded-md bg-ink px-4 text-sm font-semibold text-white transition hover:bg-slate-700">
+          <Plus className="h-4 w-4" />
+          Neue Position
+        </button>
+      </div>
+
+      <div className="grid gap-4">
+        {positions.map((position) => {
+          const targetGroupId = targetGroups[position.id] ?? position.groupId ?? groups[0]?.id;
+          return (
+            <div key={position.id} className="rounded-lg border border-line bg-white p-5 shadow-sm">
+              <div className="grid gap-4 xl:grid-cols-[1fr_280px]">
+                <div className="grid gap-4">
+                  <div className="grid gap-3 md:grid-cols-[1fr_150px_130px_150px]">
+                    <Field label="Titel">
+                      <TextInput value={position.title} onChange={(event) => updateLibraryPosition(position.id, { title: event.target.value })} />
+                    </Field>
+                    <Field label="Einheit">
+                      <Select value={position.unit} onChange={(event) => updateLibraryPosition(position.id, { unit: event.target.value as Position["unit"] })}>
+                        <option>Std.</option>
+                        <option>Pauschal</option>
+                        <option>Tag</option>
+                        <option>Monat</option>
+                      </Select>
+                    </Field>
+                    <Field label="Menge">
+                      <TextInput
+                        type="number"
+                        value={position.quantity}
+                        onChange={(event) => updateLibraryPosition(position.id, { quantity: Number(event.target.value) })}
+                        className="text-right"
+                      />
+                    </Field>
+                    <Field label="Einheitspreis">
+                      <TextInput
+                        inputMode="decimal"
+                        value={formatCurrency(position.unitPrice)}
+                        onFocus={(event) => event.target.select()}
+                        onChange={(event) => updateLibraryPosition(position.id, { unitPrice: parseEuroInput(event.target.value) })}
+                        className="text-right"
+                      />
+                    </Field>
+                  </div>
+
+                  <Field label="Beschreibung">
+                    <TextArea value={position.description} onChange={(event) => updateLibraryPosition(position.id, { description: event.target.value })} />
+                  </Field>
+
+                  <div className="grid gap-3 md:grid-cols-[180px_1fr_180px_160px]">
+                    <Field label="Kategorie">
+                      <TextInput value={position.category} onChange={(event) => updateLibraryPosition(position.id, { category: event.target.value })} />
+                    </Field>
+                    <Field label="Hinweis">
+                      <TextInput value={position.note} onChange={(event) => updateLibraryPosition(position.id, { note: event.target.value })} />
+                    </Field>
+                    <Field label="Status">
+                      <Select value={position.status} onChange={(event) => updateLibraryPosition(position.id, { status: event.target.value as Position["status"] })}>
+                        <option>Offen</option>
+                        <option>Abgestimmt</option>
+                        <option>Optional</option>
+                        <option>Zurückgestellt</option>
+                      </Select>
+                    </Field>
+                    <Field label="Pflicht">
+                      <Select value={position.required ? "Ja" : "Optional"} onChange={(event) => updateLibraryPosition(position.id, { required: event.target.value === "Ja" })}>
+                        <option>Ja</option>
+                        <option>Optional</option>
+                      </Select>
+                    </Field>
+                  </div>
+                </div>
+
+                <div className="grid content-start gap-3 rounded-md border border-line bg-slate-50 p-4">
+                  <Field label="Stundensatzlogik">
+                    <Select value={position.rateKey} onChange={(event) => updateLibraryPosition(position.id, { rateKey: event.target.value as Position["rateKey"] })}>
+                      {rateEntries.map(([key, label]) => (
+                        <option key={key} value={key}>
+                          {label}
+                        </option>
+                      ))}
+                    </Select>
+                  </Field>
+                  <Field label="Ziel-Titel">
+                    <Select
+                      value={targetGroupId}
+                      onChange={(event) => setTargetGroups((current) => ({ ...current, [position.id]: event.target.value }))}
+                    >
+                      {groups.map((group) => (
+                        <option key={group.id} value={group.id}>
+                          {groupNumber(groups, group.id)} {group.title}
+                        </option>
+                      ))}
+                    </Select>
+                  </Field>
+                  <button
+                    type="button"
+                    onClick={() => addLibraryPositionToGroup(position, targetGroupId)}
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-line bg-white px-4 text-sm font-semibold text-ink transition hover:border-slate-300"
+                  >
+                    <Copy className="h-4 w-4" />
+                    In Angebot übernehmen
+                  </button>
+                  <div className="flex items-center justify-between border-t border-line pt-3 text-sm">
+                    <span className="text-muted">Positionssumme</span>
+                    <span className="font-semibold text-ink">{formatCurrency(positionTotal(position))}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
