@@ -38,6 +38,10 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 @media print {
+  @page {
+    margin: 14mm;
+  }
+
   body {
     background: #fff;
   }
@@ -46,8 +50,20 @@ input[type="number"]::-webkit-outer-spin-button {
     display: none !important;
   }
 
+  main > section,
+  .lg\:pl-72 {
+    padding-left: 0 !important;
+  }
+
+  main > section > div {
+    padding: 0 !important;
+  }
+
   .print-area {
+    width: 100% !important;
+    max-width: none !important;
     box-shadow: none !important;
     border: none !important;
+    border-radius: 0 !important;
   }
 }
