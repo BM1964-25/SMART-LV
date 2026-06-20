@@ -434,13 +434,13 @@ export default function HomePage() {
             <p className="text-sm text-muted">Angebote, Aufträge und Abrechnung in einem Prozess</p>
           </div>
         </div>
-        <div className={`mt-5 flex ${sidebarCollapsed ? "justify-center" : "justify-end"}`}>
+        <div className={`mt-5 flex ${sidebarCollapsed ? "justify-center" : "justify-start"}`}>
           <button
             type="button"
             aria-label={sidebarCollapsed ? "Sidebar ausklappen" : "Sidebar einklappen"}
             title={sidebarCollapsed ? "Sidebar ausklappen" : "Sidebar einklappen"}
             onClick={() => setSidebarCollapsed((current) => !current)}
-            className="flex h-9 w-9 items-center justify-center rounded-md text-muted transition hover:bg-slate-50 hover:text-ink"
+            className="flex h-10 w-10 items-center justify-center rounded-md text-muted transition hover:bg-slate-50 hover:text-ink"
           >
             {sidebarCollapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
           </button>
