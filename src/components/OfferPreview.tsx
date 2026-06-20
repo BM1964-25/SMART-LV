@@ -83,29 +83,35 @@ export function OfferPreview({ project, groups }: { project: Project; groups: Po
                     Abschnitt netto {formatCurrency(groupTotal(group))}
                   </p>
                 </div>
+                <div className="border-y border-line bg-white px-5 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-muted">
+                  <div className="grid gap-4 lg:grid-cols-[56px_minmax(260px,1fr)_76px_68px_116px_126px]">
+                    <span>Nr.</span>
+                    <span>Leistung</span>
+                    <span>Einheit</span>
+                    <span>Menge</span>
+                    <span>Stundensatz</span>
+                    <span>Positionssumme</span>
+                  </div>
+                </div>
                 <div className="divide-y divide-line">
                   {activePositions.map((position) => (
-                    <div key={position.id} className="break-inside-avoid px-5 py-5">
-                      <div className="grid gap-4 lg:grid-cols-[72px_minmax(0,1fr)_150px]">
-                        <p className="text-sm font-semibold text-muted">{positionNumber(groups, group.id, position.id)}</p>
-                        <div>
-                          <p className="font-semibold text-ink">{position.title}</p>
-                          <p className="mt-2 text-sm leading-6 text-muted">{position.description}</p>
-                          {position.note ? <p className="mt-2 text-xs font-medium text-slate-500">{position.note}</p> : null}
-                        </div>
-                        <div className="rounded-md border border-line bg-slate-50 px-3 py-2 text-sm lg:text-right">
-                          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted">Positionssumme</p>
-                          <p className="mt-1 font-semibold text-ink">{formatCurrency(positionTotal(position))}</p>
-                        </div>
+                    <div
+                      key={position.id}
+                      className="break-inside-avoid grid gap-4 px-5 py-4 text-sm lg:grid-cols-[56px_minmax(260px,1fr)_76px_68px_116px_126px]"
+                    >
+                      <p className="font-semibold text-muted">{positionNumber(groups, group.id, position.id)}</p>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-ink">{position.title}</p>
+                        <p className="mt-1 leading-6 text-muted">{position.description}</p>
+                        {position.note ? <p className="mt-2 text-xs font-medium text-slate-500">{position.note}</p> : null}
                       </div>
-                      <div className="mt-4 grid gap-3 rounded-md border border-line bg-white p-3 text-sm sm:grid-cols-3">
-                        <CalculationMeta label="Einheit" value={position.unit} />
-                        <CalculationMeta label="Menge" value={String(position.quantity)} />
-                        <CalculationMeta
-                          label={position.unit === "Std." ? "Stundensatz" : "Einheitspreis"}
-                          value={`${formatCurrency(position.unitPrice)}${position.unit === "Std." ? "/Std." : ""}`}
-                        />
-                      </div>
+                      <p className="text-muted">{position.unit}</p>
+                      <p className="text-muted">{position.quantity}</p>
+                      <p className="text-muted">
+                        {formatCurrency(position.unitPrice)}
+                        {position.unit === "Std." ? "/Std." : null}
+                      </p>
+                      <p className="font-semibold text-ink">{formatCurrency(positionTotal(position))}</p>
                     </div>
                   ))}
                 </div>
@@ -191,15 +197,6 @@ export function OfferPreview({ project, groups }: { project: Project; groups: Po
         </p>
       </footer>
     </article>
-  );
-}
-
-function CalculationMeta({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted">{label}</p>
-      <p className="mt-1 font-medium text-ink">{value}</p>
-    </div>
   );
 }
 
