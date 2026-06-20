@@ -1188,7 +1188,15 @@ function parseEuroInput(value: string): number {
 function anthropicApiUrl() {
   if (typeof window === "undefined") return "/api/anthropic-lv/";
   const basePath = window.location.pathname.startsWith("/SMART-LV") ? "/SMART-LV" : "";
-  return `${basePath}/api/anthropic-lv/`;
+  return new URL(`${basePath}/api/anthropic-lv/`, window.location.origin).toString();
+}
+
+function isStaticGithubPages() {
+  return typeof window !== "undefined" && window.location.hostname.endsWith("github.io");
+}
+
+function cleanAnthropicKey(value: string) {
+  return value.replace(/\s+/g, "").trim();
 }
 
 async function readAnthropicJson<T>(response: Response): Promise<T> {
@@ -1202,7 +1210,7 @@ async function readAnthropicJson<T>(response: Response): Promise<T> {
 function readableAnthropicError(error: unknown) {
   if (!(error instanceof Error)) return "Anthropic konnte nicht erreicht werden.";
   if (error.message.includes("expected pattern")) {
-    return "Der Anthropic-Aufruf konnte nicht gestartet werden. Bitte Key prüfen und sicherstellen, dass die App mit Backend läuft.";
+    return "Der Anthropic-Aufruf konnte nicht gestartet werden. Bitte Key ohne Leerzeichen/Zeilenumbrüche eingeben und lokal mit Backend prüfen.";
   }
   return error.message;
 }
@@ -1484,10 +1492,14 @@ function AiAssistant({
     setGeneratedGroups(null);
 
     try {
+      if (isStaticGithubPages()) {
+        throw new Error("LV-Generierung mit Anthropic braucht ein Server-Backend. GitHub Pages kann diese API nicht ausführen.");
+      }
+      const cleanedKey = cleanAnthropicKey(anthropicKey);
       const response = await fetch(anthropicApiUrl(), {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ project, prompt: lvPrompt, apiKey: anthropicKey.trim() || undefined })
+        body: JSON.stringify({ project, prompt: lvPrompt, apiKey: cleanedKey || undefined })
       });
       const result = await readAnthropicJson<{ groups?: PositionGroup[]; error?: string }>(response);
       if (!response.ok || !result.groups?.length) {
@@ -1503,7 +1515,7 @@ function AiAssistant({
   }
 
   function saveAnthropicKey() {
-    const trimmed = anthropicKey.trim();
+    const trimmed = cleanAnthropicKey(anthropicKey);
     if (!trimmed) {
       setKeyStatus("error");
       setKeyMessage("Bitte zuerst einen Anthropic-Key eingeben.");
@@ -1524,7 +1536,7 @@ function AiAssistant({
   }
 
   async function checkAnthropicKey() {
-    const trimmed = anthropicKey.trim();
+    const trimmed = cleanAnthropicKey(anthropicKey);
     if (!trimmed) {
       setKeyStatus("error");
       setKeyMessage("Bitte zuerst einen Anthropic-Key eingeben.");
@@ -1534,6 +1546,9 @@ function AiAssistant({
     setKeyStatus("checking");
     setKeyMessage("");
     try {
+      if (isStaticGithubPages()) {
+        throw new Error("Key-Prüfung braucht ein Server-Backend. GitHub Pages kann diese API nicht ausführen.");
+      }
       const response = await fetch(anthropicApiUrl(), {
         method: "POST",
         headers: { "content-type": "application/json" },

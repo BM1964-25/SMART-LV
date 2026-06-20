@@ -7,7 +7,7 @@ const allowedStatuses = ["Offen", "Abgestimmt", "Optional", "Zurückgestellt"] a
 
 export async function POST(request: NextRequest) {
   const body = (await request.json()) as { project?: Project; prompt?: string; apiKey?: string; mode?: "check" | "generate" };
-  const apiKey = body.apiKey?.trim() || process.env.ANTHROPIC_API_KEY;
+  const apiKey = cleanAnthropicKey(body.apiKey || process.env.ANTHROPIC_API_KEY || "");
   if (!apiKey) {
     return NextResponse.json({ error: "Bitte Anthropic API-Key eingeben oder ANTHROPIC_API_KEY auf dem Server setzen." }, { status: 503 });
   }
@@ -174,4 +174,8 @@ function slug(value: string) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 48);
+}
+
+function cleanAnthropicKey(value: string) {
+  return value.replace(/\s+/g, "").trim();
 }
