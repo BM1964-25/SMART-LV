@@ -11,6 +11,7 @@ import {
   Download,
   Edit3,
   Eye,
+  EyeOff,
   FileText,
   GripVertical,
   Home,
@@ -1440,6 +1441,12 @@ function AiAssistant({
   const [generatedGroups, setGeneratedGroups] = useState<PositionGroup[] | null>(null);
   const [generationStatus, setGenerationStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const [generationMessage, setGenerationMessage] = useState("");
+  const [anthropicKey, setAnthropicKey] = useState(() =>
+    typeof window === "undefined" ? "" : window.localStorage.getItem("smart-offerflow-anthropic-key") ?? ""
+  );
+  const [showAnthropicKey, setShowAnthropicKey] = useState(false);
+  const [keyStatus, setKeyStatus] = useState<"idle" | "checking" | "valid" | "error" | "saved">("idle");
+  const [keyMessage, setKeyMessage] = useState("");
   const aiGroups = activeGroups(groups).filter((group) =>
     [group.title, group.intro, ...group.positions.map((position) => `${position.title} ${position.description} ${position.category}`)]
       .join(" ")
@@ -1458,7 +1465,7 @@ function AiAssistant({
       const response = await fetch("api/anthropic-lv/", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ project, prompt: lvPrompt })
+        body: JSON.stringify({ project, prompt: lvPrompt, apiKey: anthropicKey.trim() || undefined })
       });
       const result = (await response.json()) as { groups?: PositionGroup[]; error?: string };
       if (!response.ok || !result.groups?.length) {
@@ -1474,6 +1481,53 @@ function AiAssistant({
           ? error.message
           : "Anthropic konnte nicht erreicht werden. Auf GitHub Pages ist dafuer ein serverseitiges Backend erforderlich."
       );
+    }
+  }
+
+  function saveAnthropicKey() {
+    const trimmed = anthropicKey.trim();
+    if (!trimmed) {
+      setKeyStatus("error");
+      setKeyMessage("Bitte zuerst einen Anthropic-Key eingeben.");
+      return;
+    }
+    window.localStorage.setItem("smart-offerflow-anthropic-key", trimmed);
+    setAnthropicKey(trimmed);
+    setKeyStatus("saved");
+    setKeyMessage("Key wurde lokal gespeichert.");
+  }
+
+  function deleteAnthropicKey() {
+    window.localStorage.removeItem("smart-offerflow-anthropic-key");
+    setAnthropicKey("");
+    setShowAnthropicKey(false);
+    setKeyStatus("idle");
+    setKeyMessage("Key wurde geloescht.");
+  }
+
+  async function checkAnthropicKey() {
+    const trimmed = anthropicKey.trim();
+    if (!trimmed) {
+      setKeyStatus("error");
+      setKeyMessage("Bitte zuerst einen Anthropic-Key eingeben.");
+      return;
+    }
+
+    setKeyStatus("checking");
+    setKeyMessage("");
+    try {
+      const response = await fetch("api/anthropic-lv/", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ apiKey: trimmed, mode: "check" })
+      });
+      const result = (await response.json()) as { ok?: boolean; error?: string };
+      if (!response.ok || !result.ok) throw new Error(result.error || "Key konnte nicht verifiziert werden.");
+      setKeyStatus("valid");
+      setKeyMessage("Key ist gueltig.");
+    } catch (error) {
+      setKeyStatus("error");
+      setKeyMessage(error instanceof Error ? error.message : "Key konnte nicht verifiziert werden.");
     }
   }
 
@@ -1493,6 +1547,44 @@ function AiAssistant({
           Die Generierung nutzt serverseitig die Anthropic Messages API. Lokal oder auf einem Server muss dafuer `ANTHROPIC_API_KEY`
           gesetzt sein; auf GitHub Pages kann der geheime Schluessel nicht sicher ausgefuehrt werden.
         </p>
+        <div className="mt-5 grid gap-3 rounded-lg border border-line bg-slate-50 p-4">
+          <Field label="Anthropic API-Key">
+            <div className="grid gap-2 lg:grid-cols-[1fr_auto_auto_auto_auto]">
+              <TextInput
+                type={showAnthropicKey ? "text" : "password"}
+                value={anthropicKey}
+                onChange={(event) => {
+                  setAnthropicKey(event.target.value);
+                  setKeyStatus("idle");
+                  setKeyMessage("");
+                }}
+                placeholder="sk-ant-..."
+              />
+              <IconButton
+                icon={showAnthropicKey ? EyeOff : Eye}
+                label={showAnthropicKey ? "Key verbergen" : "Key anzeigen"}
+                onClick={() => setShowAnthropicKey((current) => !current)}
+              />
+              <IconButton icon={Trash2} label="Key löschen" onClick={deleteAnthropicKey} disabled={!anthropicKey} />
+              <button type="button" onClick={saveAnthropicKey} className="h-10 rounded-md border border-line bg-white px-4 text-sm font-semibold text-ink transition hover:border-slate-300">
+                Key speichern
+              </button>
+              <button
+                type="button"
+                onClick={checkAnthropicKey}
+                disabled={keyStatus === "checking"}
+                className="h-10 rounded-md bg-ink px-4 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {keyStatus === "checking" ? "Pruefe..." : "Key ueberpruefen"}
+              </button>
+            </div>
+          </Field>
+          {keyMessage ? (
+            <p className={`text-sm ${keyStatus === "error" ? "text-rose-700" : keyStatus === "valid" ? "text-emerald-700" : "text-muted"}`}>
+              {keyMessage}
+            </p>
+          ) : null}
+        </div>
         <div className="mt-5 grid gap-4 xl:grid-cols-[1fr_280px]">
           <Field label="Anforderung an das neue LV">
             <TextArea value={lvPrompt} onChange={(event) => setLvPrompt(event.target.value)} className="min-h-32" />

@@ -6,12 +6,16 @@ const allowedUnits = ["Std.", "Pauschal", "Tag", "Monat"] as const;
 const allowedStatuses = ["Offen", "Abgestimmt", "Optional", "Zurückgestellt"] as const;
 
 export async function POST(request: NextRequest) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const body = (await request.json()) as { project?: Project; prompt?: string; apiKey?: string; mode?: "check" | "generate" };
+  const apiKey = body.apiKey?.trim() || process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    return NextResponse.json({ error: "ANTHROPIC_API_KEY ist auf dem Server nicht gesetzt." }, { status: 503 });
+    return NextResponse.json({ error: "Bitte Anthropic API-Key eingeben oder ANTHROPIC_API_KEY auf dem Server setzen." }, { status: 503 });
   }
 
-  const body = (await request.json()) as { project?: Project; prompt?: string };
+  if (body.mode === "check") {
+    return checkAnthropicKey(apiKey);
+  }
+
   if (!body.project || !body.prompt?.trim()) {
     return NextResponse.json({ error: "Projekt und Beschreibung sind erforderlich." }, { status: 400 });
   }
@@ -47,6 +51,29 @@ export async function POST(request: NextRequest) {
   const groups = normalizeGroups(parseGroups(text));
 
   return NextResponse.json({ groups });
+}
+
+async function checkAnthropicKey(apiKey: string) {
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01"
+    },
+    body: JSON.stringify({
+      model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-5-20250929",
+      max_tokens: 8,
+      messages: [{ role: "user", content: "Antworte nur mit OK." }]
+    })
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    return NextResponse.json({ error: "Anthropic-Key konnte nicht verifiziert werden.", detail }, { status: response.status });
+  }
+
+  return NextResponse.json({ ok: true });
 }
 
 function buildPrompt(project: Project, userPrompt: string) {
