@@ -276,7 +276,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
         </section>
       ) : null}
 
-      <section className="print-section grid gap-6 border-t border-line py-8 lg:grid-cols-[1fr_360px]">
+      <section className="print-section border-t border-line py-8">
         <div>
           <h2 className="text-lg font-semibold text-ink">Zahlungsbedingungen</h2>
           <p className="mt-3 leading-7 text-muted">{project.paymentTerms}</p>
@@ -298,32 +298,6 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
           <p className="mt-3 leading-7 text-muted">{project.validityText || `Dieses Angebot ist ${project.validUntil} gültig.`}</p>
           <h2 className="mt-6 text-lg font-semibold text-ink">Angebotsgrundlagen</h2>
           <p className="mt-3 leading-7 text-muted">{project.offerClarification}</p>
-        </div>
-        <div className="rounded-lg border border-line bg-slate-50 p-5">
-          <div className="flex justify-between py-2 text-sm">
-            <span className="text-muted">Summe netto</span>
-            <span className="font-semibold text-ink">{formatCurrency(summary.net)}</span>
-          </div>
-          {summary.discount > 0 ? (
-            <div className="flex justify-between py-2 text-sm">
-              <span className="text-muted">Nachlass</span>
-              <span className="font-semibold text-ink">-{formatCurrency(summary.discount)}</span>
-            </div>
-          ) : null}
-          {project.skontoPercent > 0 ? (
-            <div className="flex justify-between py-2 text-sm">
-              <span className="text-muted">Skonto bei Zahlung binnen {project.skontoDays} Tagen</span>
-              <span className="font-semibold text-ink">{project.skontoPercent} %</span>
-            </div>
-          ) : null}
-          <div className="flex justify-between py-2 text-sm">
-            <span className="text-muted">Umsatzsteuer {project.vatRate} %</span>
-            <span className="font-semibold text-ink">{formatCurrency(summary.vat)}</span>
-          </div>
-          <div className="mt-3 flex justify-between border-t border-line pt-4 text-lg font-semibold text-ink">
-            <span>Gesamt brutto</span>
-            <span>{formatCurrency(summary.gross)}</span>
-          </div>
         </div>
       </section>
 
