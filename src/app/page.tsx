@@ -29,6 +29,7 @@ import {
   Search,
   Settings,
   SlidersHorizontal,
+  RotateCcw,
   Trash2,
   Upload
 } from "lucide-react";
@@ -2085,6 +2086,62 @@ function CompanyProfiles({
   const activeProfile = profiles.find((profile) => profile.id === selectedCompanyId) ?? profiles[0];
   const profileTemplates = templates.filter((template) => template.companyId === activeProfile.id);
   const previewAddressLines = formatProfileAddressLines(activeProfile);
+  const profileFileInputRef = useRef<HTMLInputElement>(null);
+  const [profileStorageMessage, setProfileStorageMessage] = useState("Profil wird automatisch im Arbeitsstand gespeichert.");
+
+  function exportCompanyProfile() {
+    const payload = {
+      version: 1,
+      type: "smart-offerflow-company-profile",
+      exportedAt: new Date().toISOString(),
+      profile: activeProfile
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${activeProfile.name.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").toLowerCase()}-firmenprofil.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setProfileStorageMessage("Profil wurde als JSON-Datei gespeichert.");
+  }
+
+  function importCompanyProfile(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(String(reader.result)) as Partial<CompanyProfile> & { profile?: Partial<CompanyProfile> };
+        const importedProfile = parsed.profile ?? parsed;
+        if (!importedProfile.name || !importedProfile.logoText) throw new Error("invalid-profile");
+        if (!window.confirm(`Aktuelles Profil "${activeProfile.name}" mit Daten aus "${file.name}" überschreiben?`)) return;
+        updateCompanyProfile(activeProfile.id, {
+          ...activeProfile,
+          ...importedProfile,
+          id: activeProfile.id,
+          colors: {
+            ...activeProfile.colors,
+            ...(importedProfile.colors ?? {})
+          }
+        });
+        setProfileStorageMessage(`Profil wurde aus ${file.name} geladen.`);
+      } catch {
+        setProfileStorageMessage("Profil-Datei konnte nicht geladen werden.");
+      } finally {
+        event.target.value = "";
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function resetCompanyProfile() {
+    const defaultProfile = companyProfiles.find((profile) => profile.id === activeProfile.id);
+    if (!defaultProfile) return;
+    if (!window.confirm(`Profil "${activeProfile.name}" auf Standardwerte zurücksetzen?`)) return;
+    updateCompanyProfile(activeProfile.id, defaultProfile);
+    setProfileStorageMessage("Profil wurde auf Standardwerte zurückgesetzt.");
+  }
 
   return (
     <div className="grid gap-6">
@@ -2121,18 +2178,25 @@ function CompanyProfiles({
         <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <SectionTitle title="Firmenprofil bearbeiten" kicker={activeProfile.name} />
-            <button
-              type="button"
-              onClick={() => {
-                applyProfileToProject(activeProfile.id);
-                setActiveView("Neues LV");
-              }}
-              disabled={activeProfile.id === activeProjectCompanyId}
-              className="inline-flex h-10 items-center justify-center rounded-md bg-ink px-4 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              {activeProfile.id === activeProjectCompanyId ? "Im aktuellen Angebot aktiv" : "Für aktuelles Angebot verwenden"}
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <input ref={profileFileInputRef} type="file" accept="application/json,.json" onChange={importCompanyProfile} className="hidden" />
+              <IconButton icon={Save} label="Firmenprofil als JSON speichern" onClick={exportCompanyProfile} />
+              <IconButton icon={Upload} label="Firmenprofil aus JSON laden" onClick={() => profileFileInputRef.current?.click()} />
+              <IconButton icon={RotateCcw} label="Firmenprofil zurücksetzen" onClick={resetCompanyProfile} />
+              <button
+                type="button"
+                onClick={() => {
+                  applyProfileToProject(activeProfile.id);
+                  setActiveView("Neues LV");
+                }}
+                disabled={activeProfile.id === activeProjectCompanyId}
+                className="inline-flex h-10 items-center justify-center rounded-md bg-ink px-4 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {activeProfile.id === activeProjectCompanyId ? "Im aktuellen Angebot aktiv" : "Für aktuelles Angebot verwenden"}
+              </button>
+            </div>
           </div>
+          <p className="mt-3 text-sm text-muted">{profileStorageMessage}</p>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             <Field label="Profilname">
               <TextInput value={activeProfile.name} onChange={(event) => updateCompanyProfile(activeProfile.id, { name: event.target.value })} />
