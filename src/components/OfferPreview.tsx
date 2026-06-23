@@ -161,12 +161,6 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
             <p className="mt-3 leading-7 text-black">{project.plannedProjectStart}</p>
           </div>
         ) : null}
-        {project.serviceExclusion ? (
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold text-ink">Leistungsabgrenzung</h2>
-            <p className="mt-3 leading-7 text-black">{project.serviceExclusion}</p>
-          </div>
-        ) : null}
         <h2 className="text-lg font-semibold text-ink">Leistungsverzeichnis</h2>
         {project.serviceDirectoryIntro ? <p className="mt-2 max-w-4xl text-base leading-7 text-black">{project.serviceDirectoryIntro}</p> : null}
         <div className="print-table mt-5 overflow-hidden rounded-lg border border-line">
@@ -257,6 +251,13 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
           </div>
         </div>
       </section>
+
+      {project.serviceExclusion ? (
+        <section className="print-section print-compact border-t border-line py-6">
+          <h2 className="text-lg font-semibold text-ink">Leistungsabgrenzung</h2>
+          <p className="mt-3 leading-7 text-black">{project.serviceExclusion}</p>
+        </section>
+      ) : null}
 
       {project.changeTerms ? (
         <section className="print-section print-compact border-t border-line py-6">
