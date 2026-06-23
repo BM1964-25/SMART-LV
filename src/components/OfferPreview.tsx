@@ -30,8 +30,10 @@ function LinkedAgbText({ text, url }: { text: string; url?: string }) {
 }
 
 function formatCompanyAddressLines(profile: CompanyProfile) {
+  const nameWithoutSeparators = profile.name.replace(/\s*-\s*/g, " ");
   const withoutDuplicateName = profile.address
     .replace(profile.name, "")
+    .replace(nameWithoutSeparators, "")
     .replace(/^,\s*/, "")
     .replace(/\s*,\s*/g, "\n");
   return withoutDuplicateName
@@ -86,7 +88,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
             <p className="mt-4 max-w-3xl text-base leading-7 text-muted">{project.offerIntro}</p>
           </div>
           <div className="min-w-64 rounded-lg border border-line p-4 text-sm text-muted">
-            <p className="font-semibold text-ink">{company.name}</p>
+            <p className="text-base font-semibold leading-6 text-ink">{company.name}</p>
             <div className="mt-2 grid gap-1">
               {companyAddressLines.map((line) => (
                 <p key={line}>{line}</p>
