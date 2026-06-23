@@ -2530,6 +2530,13 @@ function Customers({
   deleteCustomer: (customerId: string) => void;
   applyCustomerToProject: (customerId: string) => void;
 }) {
+  const [appliedCustomerId, setAppliedCustomerId] = useState<string | null>(null);
+
+  function handleApplyCustomer(customerId: string) {
+    applyCustomerToProject(customerId);
+    setAppliedCustomerId(customerId);
+  }
+
   return (
     <div className="grid gap-5">
       <div className="flex flex-col gap-4 rounded-lg border border-line bg-white p-6 shadow-sm md:flex-row md:items-end md:justify-between">
@@ -2588,8 +2595,15 @@ function Customers({
                 </div>
               </div>
               <div className="grid content-start gap-3 rounded-md border border-line bg-slate-50 p-4">
-                <button type="button" onClick={() => applyCustomerToProject(customer.id)} className="rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700">
-                  In Angebot übernehmen
+                <button
+                  type="button"
+                  onClick={() => handleApplyCustomer(customer.id)}
+                  className={`inline-flex h-10 items-center justify-center gap-2 rounded-md px-4 text-sm font-semibold transition ${
+                    appliedCustomerId === customer.id ? "bg-emerald-600 text-white hover:bg-emerald-700" : "bg-ink text-white hover:bg-slate-700"
+                  }`}
+                >
+                  {appliedCustomerId === customer.id ? <CheckCircle2 className="h-4 w-4" /> : null}
+                  {appliedCustomerId === customer.id ? "Übernommen" : "In Angebot übernehmen"}
                 </button>
                 <button type="button" onClick={() => deleteCustomer(customer.id)} className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-line bg-white px-4 text-sm font-semibold text-ink transition hover:border-slate-300">
                   <Trash2 className="h-4 w-4" />
