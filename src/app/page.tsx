@@ -35,7 +35,7 @@ import { Field, IconButton, SectionTitle, Select, StatCard, TextArea, TextInput 
 import { activeGroups, calculateSummary, formatCurrency, groupNumber, groupTotal, positionNumber, positionTotal, renumberGroups } from "@/lib/calculations";
 import { companyProfiles, initialGroups, rateLabels, sampleOrderBilling, sampleProject } from "@/lib/data";
 import { printElement } from "@/lib/print";
-import { ChangeOrder, InvoicePlanItem, OrderBilling, Position, PositionGroup, Project, WorkLogItem } from "@/lib/types";
+import { ChangeOrder, CompanyProfile, InvoicePlanItem, OrderBilling, Position, PositionGroup, Project, WorkLogItem } from "@/lib/types";
 
 type View =
   | "Dashboard"
@@ -98,9 +98,9 @@ function cloneGroups(groups: PositionGroup[]) {
   );
 }
 
-function createInitialProfileTemplates(): LvTemplate[] {
+function createInitialProfileTemplates(profiles: CompanyProfile[] = companyProfiles): LvTemplate[] {
   const createdAt = "2026-06-20T00:00:00.000Z";
-  return companyProfiles.map((profile) => ({
+  return profiles.map((profile) => ({
     id: `template-${profile.id}-standard`,
     companyId: profile.id,
     name: `${profile.name} Standard-LV`,
@@ -115,6 +115,7 @@ export default function HomePage() {
   const [activeView, setActiveView] = useState<View>("Dashboard");
   const [project, setProject] = useState<Project>(sampleProject);
   const [groups, setGroups] = useState<PositionGroup[]>(initialGroups);
+  const [profiles, setProfiles] = useState<CompanyProfile[]>(companyProfiles);
   const [libraryPositions, setLibraryPositions] = useState<Position[]>(createInitialLibraryPositions);
   const [lvTemplates, setLvTemplates] = useState<LvTemplate[]>(createInitialProfileTemplates);
   const [orderBilling, setOrderBilling] = useState<OrderBilling>(sampleOrderBilling);
@@ -130,6 +131,7 @@ export default function HomePage() {
       const parsed = JSON.parse(saved) as {
         project: Project;
         groups: PositionGroup[];
+        profiles?: CompanyProfile[];
         libraryPositions?: Position[];
         lvTemplates?: LvTemplate[];
         orderBilling?: OrderBilling;
@@ -145,8 +147,10 @@ export default function HomePage() {
           skontoDays: parsed.project.skontoDays ?? 10
         });
         setGroups(parsed.groups.map((group) => ({ ...group, active: group.active ?? true })));
+        const savedProfiles = parsed.profiles ?? companyProfiles;
+        setProfiles(savedProfiles);
         setLibraryPositions(parsed.libraryPositions ?? createInitialLibraryPositions());
-        setLvTemplates(parsed.lvTemplates ?? createInitialProfileTemplates());
+        setLvTemplates(parsed.lvTemplates ?? createInitialProfileTemplates(savedProfiles));
         const billing = parsed.orderBilling ?? sampleOrderBilling;
         setOrderBilling({
           ...billing,
@@ -160,10 +164,10 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem(storageKey, JSON.stringify({ project, groups, libraryPositions, lvTemplates, orderBilling }));
-  }, [project, groups, libraryPositions, lvTemplates, orderBilling]);
+    window.localStorage.setItem(storageKey, JSON.stringify({ project, groups, profiles, libraryPositions, lvTemplates, orderBilling }));
+  }, [project, groups, profiles, libraryPositions, lvTemplates, orderBilling]);
 
-  const company = companyProfiles.find((profile) => profile.id === project.companyId) ?? companyProfiles[0];
+  const company = profiles.find((profile) => profile.id === project.companyId) ?? profiles[0];
   const summary = calculateSummary(groups, project);
   const visibleGroups = activeGroups(groups);
   const activePositions = visibleGroups.flatMap((group) => group.positions.filter((position) => position.active));
@@ -197,6 +201,16 @@ export default function HomePage() {
 
   function selectCompany(companyId: Project["companyId"]) {
     updateProject("companyId", companyId);
+  }
+
+  function updateCompanyProfile(profileId: Project["companyId"], changes: Partial<CompanyProfile>) {
+    setProfiles((current) => current.map((profile) => (profile.id === profileId ? { ...profile, ...changes } : profile)));
+  }
+
+  function updateCompanyProfileColors(profileId: Project["companyId"], changes: Partial<CompanyProfile["colors"]>) {
+    setProfiles((current) =>
+      current.map((profile) => (profile.id === profileId ? { ...profile, colors: { ...profile.colors, ...changes } } : profile))
+    );
   }
 
   function updatePosition(groupId: string, positionId: string, changes: Partial<Position>) {
@@ -400,7 +414,7 @@ export default function HomePage() {
 
   function saveAsTemplate() {
     const now = new Date().toISOString();
-    const companyName = companyProfiles.find((profile) => profile.id === project.companyId)?.name ?? "Firmenprofil";
+    const companyName = profiles.find((profile) => profile.id === project.companyId)?.name ?? "Firmenprofil";
     const template: LvTemplate = {
       id: `template-${Date.now()}`,
       companyId: project.companyId,
@@ -561,7 +575,7 @@ export default function HomePage() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Select value={project.companyId} onChange={(event) => selectCompany(event.target.value as Project["companyId"])} className="w-56">
-                {companyProfiles.map((profile) => (
+                {profiles.map((profile) => (
                   <option key={profile.id} value={profile.id}>
                     {profile.name}
                   </option>
@@ -626,7 +640,7 @@ export default function HomePage() {
             />
           ) : null}
 
-          {activeView === "LV-Vorschau" ? <OfferPreview project={project} groups={groups} /> : null}
+          {activeView === "LV-Vorschau" ? <OfferPreview project={project} groups={groups} profiles={profiles} /> : null}
 
           {activeView === "Auftrag & Abrechnung" ? (
             <OrderBillingWorkspace
@@ -650,7 +664,10 @@ export default function HomePage() {
             <CompanyProfiles
               selectedCompanyId={project.companyId}
               templates={lvTemplates}
+              profiles={profiles}
               selectCompany={selectCompany}
+              updateCompanyProfile={updateCompanyProfile}
+              updateCompanyProfileColors={updateCompanyProfileColors}
               setActiveView={setActiveView}
             />
           ) : null}
@@ -672,6 +689,7 @@ export default function HomePage() {
               project={project}
               groups={groups}
               templates={lvTemplates}
+              profiles={profiles}
               updateTemplate={updateLvTemplate}
               applyTemplate={applyLvTemplate}
               duplicateTemplate={duplicateLvTemplate}
@@ -1089,63 +1107,149 @@ function LvEditor({
 function CompanyProfiles({
   selectedCompanyId,
   templates,
+  profiles,
   selectCompany,
+  updateCompanyProfile,
+  updateCompanyProfileColors,
   setActiveView
 }: {
   selectedCompanyId: string;
   templates: LvTemplate[];
+  profiles: CompanyProfile[];
   selectCompany: (companyId: Project["companyId"]) => void;
+  updateCompanyProfile: (profileId: Project["companyId"], changes: Partial<CompanyProfile>) => void;
+  updateCompanyProfileColors: (profileId: Project["companyId"], changes: Partial<CompanyProfile["colors"]>) => void;
   setActiveView: (view: View) => void;
 }) {
+  const activeProfile = profiles.find((profile) => profile.id === selectedCompanyId) ?? profiles[0];
+  const profileTemplates = templates.filter((template) => template.companyId === activeProfile.id);
+
   return (
-    <div className="grid gap-5 md:grid-cols-2">
-      {companyProfiles.map((profile) => {
-        const profileTemplates = templates.filter((template) => template.companyId === profile.id);
-        return (
-          <div key={profile.id} className={`rounded-lg border bg-white p-6 shadow-sm ${profile.id === selectedCompanyId ? "border-blue-200" : "border-line"}`}>
-            <div className="flex items-start gap-4">
-              <div className="flex h-14 min-w-14 items-center justify-center rounded-md px-3 text-sm font-bold text-white" style={{ background: profile.colors.primary }}>
+    <div className="grid gap-6">
+      <div className="rounded-lg border border-line bg-white p-2 shadow-sm">
+        <div className="flex gap-2 overflow-x-auto">
+          {profiles.map((profile) => (
+            <button
+              key={profile.id}
+              type="button"
+              onClick={() => selectCompany(profile.id)}
+              className={`flex min-w-52 items-center gap-3 rounded-md px-3 py-3 text-left transition ${
+                profile.id === activeProfile.id ? "bg-slate-100 text-ink" : "text-muted hover:bg-slate-50 hover:text-ink"
+              }`}
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-xs font-bold text-white" style={{ background: profile.colors.primary }}>
                 {profile.logoText}
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold text-ink">{profile.name}</h2>
-                <p className="mt-2 text-sm leading-6 text-muted">{profile.address}</p>
-              </div>
-            </div>
-            <div className="mt-5 grid gap-3 text-sm text-muted">
-              <p>{profile.email} · {profile.phone}</p>
-              <p>{profile.website}</p>
-              <p>{profile.vatId}</p>
-              <p>{profile.bank}</p>
-            </div>
-            <div className="mt-5 flex gap-2">
-              <span className="h-8 w-8 rounded-md border border-line" style={{ background: profile.colors.primary }} />
-              <span className="h-8 w-8 rounded-md border border-line" style={{ background: profile.colors.secondary }} />
-              <span className="h-8 w-8 rounded-md border border-line" style={{ background: profile.colors.accent }} />
-            </div>
-            <p className="mt-5 text-sm leading-6 text-muted">{profile.footer}</p>
-            <div className="mt-5 rounded-md border border-line bg-slate-50 px-4 py-3">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-ink">Profil-LVs</p>
-                  <p className="mt-1 text-sm text-muted">{profileTemplates.length} gespeicherte LV-Vorlagen</p>
+              </span>
+              <span className="min-w-0">
+                <span className="block truncate text-sm font-semibold">{profile.name}</span>
+                <span className="block text-xs">{templates.filter((template) => template.companyId === profile.id).length} Profil-LVs</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
+        <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
+          <SectionTitle title="Firmenprofil bearbeiten" kicker={activeProfile.name} />
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <Field label="Profilname">
+              <TextInput value={activeProfile.name} onChange={(event) => updateCompanyProfile(activeProfile.id, { name: event.target.value })} />
+            </Field>
+            <Field label="Logo-Kürzel">
+              <TextInput value={activeProfile.logoText} onChange={(event) => updateCompanyProfile(activeProfile.id, { logoText: event.target.value })} />
+            </Field>
+            <Field label="Adresse">
+              <TextArea value={activeProfile.address} onChange={(event) => updateCompanyProfile(activeProfile.id, { address: event.target.value })} />
+            </Field>
+            <Field label="Kontaktperson">
+              <TextInput value={activeProfile.contact} onChange={(event) => updateCompanyProfile(activeProfile.id, { contact: event.target.value })} />
+            </Field>
+            <Field label="E-Mail">
+              <TextInput value={activeProfile.email} onChange={(event) => updateCompanyProfile(activeProfile.id, { email: event.target.value })} />
+            </Field>
+            <Field label="Telefon">
+              <TextInput value={activeProfile.phone} onChange={(event) => updateCompanyProfile(activeProfile.id, { phone: event.target.value })} />
+            </Field>
+            <Field label="Website">
+              <TextInput value={activeProfile.website} onChange={(event) => updateCompanyProfile(activeProfile.id, { website: event.target.value })} />
+            </Field>
+            <Field label="USt-ID / Steuernummer">
+              <TextInput value={activeProfile.vatId} onChange={(event) => updateCompanyProfile(activeProfile.id, { vatId: event.target.value })} />
+            </Field>
+            <Field label="Bankverbindung">
+              <TextArea value={activeProfile.bank} onChange={(event) => updateCompanyProfile(activeProfile.id, { bank: event.target.value })} />
+            </Field>
+            <Field label="Exportlayout">
+              <TextArea value={activeProfile.exportLayout} onChange={(event) => updateCompanyProfile(activeProfile.id, { exportLayout: event.target.value })} />
+            </Field>
+            <Field label="Angebotseinleitung">
+              <TextArea value={activeProfile.offerText} onChange={(event) => updateCompanyProfile(activeProfile.id, { offerText: event.target.value })} />
+            </Field>
+            <Field label="Footer">
+              <TextArea value={activeProfile.footer} onChange={(event) => updateCompanyProfile(activeProfile.id, { footer: event.target.value })} />
+            </Field>
+            <Field label="Haftungs- und Angebotsklarstellung">
+              <TextArea value={activeProfile.liability} onChange={(event) => updateCompanyProfile(activeProfile.id, { liability: event.target.value })} />
+            </Field>
+          </div>
+        </div>
+
+        <div className="grid content-start gap-6">
+          <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
+            <SectionTitle title="Vorschau" />
+            <div className="mt-5 rounded-md border border-line p-4">
+              <div className="flex items-start gap-4">
+                <div className="flex h-14 min-w-14 items-center justify-center rounded-md px-3 text-sm font-bold text-white" style={{ background: activeProfile.colors.primary }}>
+                  {activeProfile.logoText}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    selectCompany(profile.id);
-                    setActiveView("Vorlagen");
-                  }}
-                  className="rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-ink transition hover:border-slate-300"
-                >
-                  Öffnen
-                </button>
+                <div>
+                  <p className="font-semibold text-ink">{activeProfile.name}</p>
+                  <p className="mt-2 text-sm leading-6 text-muted">{activeProfile.address}</p>
+                </div>
+              </div>
+              <div className="mt-5 grid gap-2 text-sm text-muted">
+                <p>{activeProfile.email} · {activeProfile.phone}</p>
+                <p>{activeProfile.website}</p>
+                <p>{activeProfile.vatId}</p>
               </div>
             </div>
           </div>
-        );
-      })}
+
+          <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
+            <SectionTitle title="Farben" />
+            <div className="mt-5 grid gap-4">
+              <ColorField label="Primärfarbe" value={activeProfile.colors.primary} onChange={(value) => updateCompanyProfileColors(activeProfile.id, { primary: value })} />
+              <ColorField label="Sekundärfarbe" value={activeProfile.colors.secondary} onChange={(value) => updateCompanyProfileColors(activeProfile.id, { secondary: value })} />
+              <ColorField label="Akzentfarbe" value={activeProfile.colors.accent} onChange={(value) => updateCompanyProfileColors(activeProfile.id, { accent: value })} />
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
+            <SectionTitle title="Profil-LVs" />
+            <p className="mt-3 text-sm text-muted">{profileTemplates.length} gespeicherte LV-Vorlagen für dieses Profil.</p>
+            <button
+              type="button"
+              onClick={() => setActiveView("Vorlagen")}
+              className="mt-5 inline-flex h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-ink transition hover:border-slate-300"
+            >
+              Profil-LVs öffnen
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
+  );
+}
+
+function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+  return (
+    <Field label={label}>
+      <div className="grid grid-cols-[44px_1fr] gap-3">
+        <input type="color" value={value} onChange={(event) => onChange(event.target.value)} className="h-10 w-11 rounded-md border border-line bg-white p-1" />
+        <TextInput value={value} onChange={(event) => onChange(event.target.value)} />
+      </div>
+    </Field>
   );
 }
 
@@ -1307,6 +1411,7 @@ function Templates({
   project,
   groups,
   templates,
+  profiles,
   updateTemplate,
   applyTemplate,
   duplicateTemplate,
@@ -1316,15 +1421,16 @@ function Templates({
   project: Project;
   groups: PositionGroup[];
   templates: LvTemplate[];
+  profiles: CompanyProfile[];
   updateTemplate: (templateId: string, changes: Partial<Pick<LvTemplate, "name" | "description" | "companyId">>) => void;
   applyTemplate: (templateId: string) => void;
   duplicateTemplate: (templateId: string) => void;
   deleteTemplate: (templateId: string) => void;
   saveCurrentTemplate: () => void;
 }) {
-  const activeCompany = companyProfiles.find((profile) => profile.id === project.companyId) ?? companyProfiles[0];
+  const activeCompany = profiles.find((profile) => profile.id === project.companyId) ?? profiles[0];
   const activeTemplates = templates.filter((template) => template.companyId === project.companyId);
-  const otherProfiles = companyProfiles.filter((profile) => profile.id !== project.companyId);
+  const otherProfiles = profiles.filter((profile) => profile.id !== project.companyId);
 
   return (
     <div className="grid gap-6">
@@ -1352,6 +1458,7 @@ function Templates({
               applyTemplate={applyTemplate}
               duplicateTemplate={duplicateTemplate}
               deleteTemplate={deleteTemplate}
+              profiles={profiles}
             />
           ))
         ) : (
@@ -1386,7 +1493,8 @@ function TemplateCard({
   updateTemplate,
   applyTemplate,
   duplicateTemplate,
-  deleteTemplate
+  deleteTemplate,
+  profiles
 }: {
   template: LvTemplate;
   groups: PositionGroup[];
@@ -1394,6 +1502,7 @@ function TemplateCard({
   applyTemplate: (templateId: string) => void;
   duplicateTemplate: (templateId: string) => void;
   deleteTemplate: (templateId: string) => void;
+  profiles: CompanyProfile[];
 }) {
   const templateGroups = activeGroups(template.groups);
   const templatePositions = templateGroups.flatMap((group) => group.positions.filter((position) => position.active));
@@ -1410,7 +1519,7 @@ function TemplateCard({
             </Field>
             <Field label="Firmenprofil">
               <Select value={template.companyId} onChange={(event) => updateTemplate(template.id, { companyId: event.target.value as Project["companyId"] })}>
-                {companyProfiles.map((profile) => (
+                {profiles.map((profile) => (
                   <option key={profile.id} value={profile.id}>
                     {profile.name}
                   </option>

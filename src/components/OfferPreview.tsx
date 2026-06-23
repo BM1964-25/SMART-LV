@@ -1,13 +1,12 @@
 "use client";
 
 import { Printer } from "lucide-react";
-import { companyProfiles } from "@/lib/data";
 import { activeGroups, calculateSummary, formatCurrency, groupNumber, groupTotal, positionNumber, positionTotal } from "@/lib/calculations";
 import { printElement } from "@/lib/print";
-import { PositionGroup, Project } from "@/lib/types";
+import { CompanyProfile, PositionGroup, Project } from "@/lib/types";
 
-export function OfferPreview({ project, groups }: { project: Project; groups: PositionGroup[] }) {
-  const company = companyProfiles.find((profile) => profile.id === project.companyId) ?? companyProfiles[0];
+export function OfferPreview({ project, groups, profiles }: { project: Project; groups: PositionGroup[]; profiles: CompanyProfile[] }) {
+  const company = profiles.find((profile) => profile.id === project.companyId) ?? profiles[0];
   const summary = calculateSummary(groups, project);
   const today = new Intl.DateTimeFormat("de-DE", { dateStyle: "long" }).format(new Date());
   const visibleGroups = activeGroups(groups).filter((group) => group.positions.some((position) => position.active));
