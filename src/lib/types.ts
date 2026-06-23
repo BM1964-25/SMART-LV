@@ -29,6 +29,8 @@ export type CompanyProfile = {
   vatId: string;
   bank: string;
   contact: string;
+  contactRole: string;
+  ownerLine: string;
   footer: string;
   liability: string;
   offerText: string;
@@ -47,13 +49,19 @@ export type Project = {
   companyId: CompanyId;
   client: string;
   contactPerson: string;
+  projectLocation: string;
+  projectVolume: string;
+  servicePeriod: string;
+  plannedProjectStart: string;
   projectName: string;
   shortDescription: string;
   offerIntro: string;
   assignmentReason: string;
   serviceScope: string;
+  contractorRole: string;
   serviceDirectoryIntro: string;
   serviceExclusion: string;
+  ancillaryCosts: string;
   meetingBillingNote: string;
   changeTerms: string;
   contractBasis: string;

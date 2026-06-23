@@ -35,8 +35,14 @@ export const defaultServiceDirectoryIntro =
 export const defaultServiceScope =
   "Die Leistungen werden als unabhängige Beratungs-, Steuerungs-, Analyse- und Unterstützungsleistungen erbracht. Der konkrete Umfang richtet sich nach den Anforderungen des Projekts und den jeweils abgestimmten Leistungsabrufen.";
 
+export const defaultContractorRole =
+  "Der Auftragnehmer erbringt die Leistungen als unabhängiger Berater, Projektsteuerer, Sachverständiger oder technischer Sonderbeauftragter. Eine Übernahme gesetzlicher Pflichten eines Bauleiters, Fachbauleiters, Sicherheits- und Gesundheitsschutzkoordinators oder sonstiger öffentlich-rechtlicher Funktionen erfolgt nur bei ausdrücklicher schriftlicher Vereinbarung.";
+
 export const defaultServiceExclusion =
   "Nicht ausdrücklich aufgeführte Leistungen sind nicht Bestandteil dieses Angebots und bedürfen einer gesonderten Beauftragung.";
+
+export const defaultAncillaryCosts =
+  "Sofern nicht anders vereinbart, werden Reise- und Nebenkosten nach tatsächlichem Aufwand berechnet.";
 
 export const defaultMeetingBillingNote =
   "Projektbesprechungen, Workshops, Baustellenbegehungen, Jour-fixe-Termine sowie sonstige Vor-Ort-Einsätze werden nach tatsächlichem Aufwand gemäß den vereinbarten Vergütungssätzen abgerechnet.";
@@ -51,7 +57,7 @@ export const defaultValidityText =
   "Dieses Angebot ist 30 Kalendertage ab Angebotsdatum gültig. Danach behalten wir uns eine Anpassung aufgrund geänderter Rahmenbedingungen vor.";
 
 export const defaultOfferBasis =
-  "Dieses Angebot basiert auf den zum Zeitpunkt der Angebotserstellung vorliegenden Informationen und Rahmenbedingungen. Änderungen des Leistungsumfangs, der Projektanforderungen oder sonstiger wesentlicher Rahmenbedingungen können eine Anpassung des Angebots erforderlich machen.";
+  "Dieses Angebot basiert auf den zum Zeitpunkt der Angebotserstellung vorliegenden Informationen und Rahmenbedingungen. Grundlage dieses Angebots sind ausschließlich die derzeit bekannten Projektinformationen. Nicht erkennbare oder nachträglich bekannt werdende Sachverhalte sowie Änderungen des Leistungsumfangs, der Projektanforderungen oder sonstiger wesentlicher Rahmenbedingungen können eine Anpassung des Angebots erforderlich machen.";
 
 export const defaultAcceptanceText =
   "Mit Unterzeichnung dieses Angebots beauftragt der Auftraggeber die beschriebenen Leistungen zu den genannten Konditionen.";
@@ -70,6 +76,8 @@ export const companyProfiles: CompanyProfile[] = [
     vatId: "DE000000001",
     bank: "IBAN DE00 0000 0000 0000 0000 01, BIC BUILDEFF",
     contact: "Bernhard Metzger",
+    contactRole: "Inhaber | Senior Consultant",
+    ownerLine: "Dipl.-Ing. (FH) Bernhard Metzger",
     footer: "BuiltSmart Hub verbindet digitale Immobilienprozesse, Beratung und umsetzungsstarke Technologieprojekte.",
     liability: "Alle Leistungsangaben verstehen sich vorbehaltlich finaler technischer Prüfung und abgestimmter Mitwirkungspflichten.",
     offerText: "Wir strukturieren das Vorhaben so, dass fachliche Anforderungen, technische Architektur und wirtschaftliche Zielsetzung sauber ineinandergreifen.",
@@ -89,6 +97,8 @@ export const companyProfiles: CompanyProfile[] = [
     vatId: "DE000000002",
     bank: "IBAN DE00 0000 0000 0000 0000 02, BIC BSAIDEFF",
     contact: "AI Delivery Team",
+    contactRole: "Projektverantwortung",
+    ownerLine: "BuiltSmart AI GmbH",
     footer: "BuiltSmart AI entwickelt produktive KI-Anwendungen mit belastbarer Architektur, klarer Nutzerführung und messbarem Nutzen.",
     liability: "KI-Ausgaben werden durch geeignete Prüf-, Logging- und Freigabemechanismen abgesichert; produktive Nutzung erfolgt nach gemeinsam definierten Qualitätskriterien.",
     offerText: "Die Lösung wird auf robuste KI-Workflows, transparente Wissensquellen und eine anwenderfreundliche Oberfläche ausgerichtet.",
@@ -108,6 +118,8 @@ export const companyProfiles: CompanyProfile[] = [
     vatId: "DE000000003",
     bank: "Kontoinhaber Bernhard Metzger, IBAN DE00 0000 0000 0000 0000 03, BIC MREADDE",
     contact: "Bernhard Metzger",
+    contactRole: "Inhaber | Senior Consultant",
+    ownerLine: "Dipl.-Ing. (FH) Bernhard Metzger",
     footer: "Metzger Real Estate Advisory steht für präzise Analyse, belastbare Entscheidungen und digitale Exzellenz in Immobilienprojekten.",
     liability: "Dieses Angebot basiert auf den zum Angebotszeitpunkt bekannten Rahmenbedingungen und ersetzt keine rechtliche oder steuerliche Prüfung.",
     offerText: "Die Leistungen werden mit besonderem Blick auf belastbare Immobilienprozesse, Entscheidungsqualität und nachhaltige Betriebsfähigkeit strukturiert.",
@@ -127,6 +139,8 @@ export const companyProfiles: CompanyProfile[] = [
     vatId: "DE000000004",
     bank: "IBAN DE00 0000 0000 0000 0000 04, BIC FREEDEFF",
     contact: "Projektteam",
+    contactRole: "Projektverantwortung",
+    ownerLine: "Musterfirma GmbH",
     footer: "Individuell konfigurierbares Firmenprofil für weitere Marken, Geschäftsbereiche oder Angebotslinien.",
     liability: "Standard-Haftungshinweise können je Firmenprofil angepasst und in Exporte übernommen werden.",
     offerText: "Auf Basis der Anforderungen erstellen wir ein transparentes Leistungsbild mit klarer Kalkulation und nachvollziehbarer Umsetzungslogik.",
@@ -140,13 +154,19 @@ export const sampleProject: Project = {
   companyId: "builtsmart-ai",
   client: "Musterbau Immobilien GmbH",
   contactPerson: "Dr. Julia Hartmann",
+  projectLocation: "",
+  projectVolume: "",
+  servicePeriod: "Die Leistungserbringung erfolgt nach Abruf durch den Auftraggeber im vereinbarten Projektzeitraum.",
+  plannedProjectStart: "",
   projectName: "KI-gestützte Angebotsplattform",
   shortDescription: "Konzeption und Entwicklung einer KI-Anwendung zur strukturierten Auswertung, Angebotserstellung und Angebotsvorbereitung.",
   offerIntro: "Die Lösung wird auf robuste KI-Workflows, transparente Wissensquellen und eine anwenderfreundliche Oberfläche ausgerichtet.",
   assignmentReason: defaultAssignmentReason,
   serviceScope: defaultServiceScope,
+  contractorRole: defaultContractorRole,
   serviceDirectoryIntro: defaultServiceDirectoryIntro,
   serviceExclusion: defaultServiceExclusion,
+  ancillaryCosts: defaultAncillaryCosts,
   meetingBillingNote: defaultMeetingBillingNote,
   changeTerms: defaultChangeTerms,
   contractBasis: defaultContractBasis,
@@ -163,7 +183,7 @@ export const sampleProject: Project = {
   offerNumber: "BSAI-2026-001",
   offerDate: "2026-06-23",
   validUntil: "30 Tage ab Angebotsdatum",
-  paymentTerms: "Rechnungen sind innerhalb von 14 Kalendertagen nach Rechnungsstellung ohne Abzug zur Zahlung fällig.",
+  paymentTerms: "Rechnungen sind innerhalb von 14 Kalendertagen nach Rechnungsstellung ohne Abzug zur Zahlung fällig. Die Rechnungsstellung erfolgt monatlich beziehungsweise nach erbrachter Leistung.",
   vatRate: 19,
   discountPercent: 0,
   skontoPercent: 0,

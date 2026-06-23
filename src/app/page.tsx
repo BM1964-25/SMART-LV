@@ -40,9 +40,11 @@ import { activeGroups, calculateSummary, formatCurrency, groupNumber, groupTotal
 import {
   companyProfiles,
   defaultAcceptanceText,
+  defaultAncillaryCosts,
   defaultAssignmentReason,
   defaultChangeTerms,
   defaultContractBasis,
+  defaultContractorRole,
   defaultMeetingBillingNote,
   defaultOfferBasis,
   defaultServiceDirectoryIntro,
@@ -450,7 +452,9 @@ function normalizeProfiles(savedProfiles: CompanyProfile[] | undefined) {
     return {
       ...profile,
       agbUrl: profile.agbUrl ?? defaultProfile?.agbUrl ?? "",
-      bookingUrl
+      bookingUrl,
+      contactRole: profile.contactRole ?? defaultProfile?.contactRole ?? "",
+      ownerLine: profile.ownerLine ?? defaultProfile?.ownerLine ?? ""
     };
   });
 }
@@ -464,20 +468,28 @@ function sanitizeProject(project: Project, profiles: CompanyProfile[] = companyP
   const profileDefaults = companyProfiles.find((profile) => profile.id === project.companyId) ?? companyProfiles[0];
   const activeProfile = profiles.find((profile) => profile.id === project.companyId) ?? profileDefaults;
   const oldSoftwarePaymentTerms = "40 % bei Beauftragung, 40 % nach Bereitstellung der Beta-Version, 20 % nach Abnahme.";
+  const oldSimplePaymentTerms = "Rechnungen sind innerhalb von 14 Kalendertagen nach Rechnungsstellung ohne Abzug zur Zahlung fällig.";
   const oldOfferClarifications = new Set([
     "KI-Ausgaben werden durch geeignete Prüf-, Logging- und Freigabemechanismen abgesichert; produktive Nutzung erfolgt nach gemeinsam definierten Qualitätskriterien.",
-    "Dieses Angebot basiert auf den zum Angebotszeitpunkt bekannten Rahmenbedingungen und ersetzt keine rechtliche oder steuerliche Prüfung."
+    "Dieses Angebot basiert auf den zum Angebotszeitpunkt bekannten Rahmenbedingungen und ersetzt keine rechtliche oder steuerliche Prüfung.",
+    "Dieses Angebot basiert auf den zum Zeitpunkt der Angebotserstellung vorliegenden Informationen und Rahmenbedingungen. Änderungen des Leistungsumfangs, der Projektanforderungen oder sonstiger wesentlicher Rahmenbedingungen können eine Anpassung des Angebots erforderlich machen."
   ]);
   const oldContractBasis = "Die Leistungserbringung erfolgt auf Grundlage dieses Angebots sowie der Allgemeinen Geschäftsbedingungen von Metzger - Real Estate Advisory. Mit Auftragserteilung erkennt der Auftraggeber diese als Vertragsbestandteil an.";
   return {
     ...project,
+    projectLocation: project.projectLocation ?? "",
+    projectVolume: project.projectVolume ?? "",
+    servicePeriod: project.servicePeriod ?? sampleProject.servicePeriod,
+    plannedProjectStart: project.plannedProjectStart ?? "",
     projectName: stripCompanyNameFromProjectName(project.projectName ?? sampleProject.projectName, profiles),
     shortDescription: project.shortDescription ?? sampleProject.shortDescription,
     offerIntro: project.offerIntro ?? profileDefaults.offerText,
     assignmentReason: project.assignmentReason ?? defaultAssignmentReason,
     serviceScope: project.serviceScope ?? defaultServiceScope,
+    contractorRole: project.contractorRole ?? defaultContractorRole,
     serviceDirectoryIntro: project.serviceDirectoryIntro ?? defaultServiceDirectoryIntro,
     serviceExclusion: project.serviceExclusion ?? defaultServiceExclusion,
+    ancillaryCosts: project.ancillaryCosts ?? defaultAncillaryCosts,
     meetingBillingNote: project.meetingBillingNote ?? defaultMeetingBillingNote,
     changeTerms: project.changeTerms ?? defaultChangeTerms,
     contractBasis: !project.contractBasis || project.contractBasis === defaultContractBasis || project.contractBasis === oldContractBasis ? contractBasisForProfile(activeProfile) : project.contractBasis,
@@ -485,7 +497,7 @@ function sanitizeProject(project: Project, profiles: CompanyProfile[] = companyP
     offerClarification: !project.offerClarification || oldOfferClarifications.has(project.offerClarification) ? defaultOfferBasis : project.offerClarification,
     acceptanceText: project.acceptanceText ?? defaultAcceptanceText,
     offerDate: project.offerDate ?? sampleProject.offerDate,
-    paymentTerms: !project.paymentTerms || project.paymentTerms === oldSoftwarePaymentTerms ? sampleProject.paymentTerms : project.paymentTerms,
+    paymentTerms: !project.paymentTerms || project.paymentTerms === oldSoftwarePaymentTerms || project.paymentTerms === oldSimplePaymentTerms ? sampleProject.paymentTerms : project.paymentTerms,
     skontoPercent: project.skontoPercent ?? 0,
     skontoDays: project.skontoDays ?? 10
   };
@@ -1729,14 +1741,33 @@ function ProjectWorkspace({
                 <TextInput value={project.contactPerson} onChange={(event) => updateProject("contactPerson", event.target.value)} />
               </Field>
             </div>
+            <div className="mt-5 border-t border-line pt-4">
+              <h4 className="text-sm font-semibold text-ink">Projektinformationen</h4>
+              <div className="mt-3 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <Field label="Projekt">
+                  <TextInput value={project.projectName} onChange={(event) => updateProject("projectName", event.target.value)} />
+                </Field>
+                <Field label="Projektstandort">
+                  <TextInput value={project.projectLocation} onChange={(event) => updateProject("projectLocation", event.target.value)} />
+                </Field>
+                <Field label="Projektvolumen">
+                  <TextInput value={project.projectVolume} onChange={(event) => updateProject("projectVolume", event.target.value)} />
+                </Field>
+                <Field label="Geplanter Projektbeginn">
+                  <TextInput value={project.plannedProjectStart} onChange={(event) => updateProject("plannedProjectStart", event.target.value)} />
+                </Field>
+                <div className="xl:col-span-4">
+                  <Field label="Leistungszeitraum">
+                    <TextArea value={project.servicePeriod} onChange={(event) => updateProject("servicePeriod", event.target.value)} className="min-h-20" />
+                  </Field>
+                </div>
+              </div>
+            </div>
           </section>
 
           <section className="rounded-md border border-line p-4">
             <h3 className="font-semibold text-ink">2 Angebotskopf</h3>
-            <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              <Field label="Projektname">
-                <TextInput value={project.projectName} onChange={(event) => updateProject("projectName", event.target.value)} />
-              </Field>
+            <div className="mt-4 grid gap-4 md:grid-cols-3">
               <Field label="Angebotsnummer">
                 <TextInput value={project.offerNumber} onChange={(event) => updateProject("offerNumber", event.target.value)} />
               </Field>
@@ -1774,6 +1805,9 @@ function ProjectWorkspace({
               <Field label="Projekt- und Leistungsrahmen">
                 <TextArea value={project.serviceScope} onChange={(event) => updateProject("serviceScope", event.target.value)} className="min-h-28" />
               </Field>
+              <Field label="Funktion des Auftragnehmers">
+                <TextArea value={project.contractorRole} onChange={(event) => updateProject("contractorRole", event.target.value)} className="min-h-28" />
+              </Field>
               <Field label="Zielsetzung">
                 <TextArea value={project.objective} onChange={(event) => updateProject("objective", event.target.value)} className="min-h-28" />
               </Field>
@@ -1786,6 +1820,9 @@ function ProjectWorkspace({
               </Field>
               <Field label="Leistungsabgrenzung">
                 <TextArea value={project.serviceExclusion} onChange={(event) => updateProject("serviceExclusion", event.target.value)} className="min-h-28" />
+              </Field>
+              <Field label="Nebenkosten und Auslagen">
+                <TextArea value={project.ancillaryCosts} onChange={(event) => updateProject("ancillaryCosts", event.target.value)} className="min-h-28" />
               </Field>
               <Field label="Besprechungen und Vor-Ort-Termine">
                 <TextArea value={project.meetingBillingNote} onChange={(event) => updateProject("meetingBillingNote", event.target.value)} className="min-h-28" />
@@ -2365,6 +2402,12 @@ function CompanyProfiles({
             </Field>
             <Field label="Kontaktperson">
               <TextInput value={activeProfile.contact} onChange={(event) => updateCompanyProfile(activeProfile.id, { contact: event.target.value })} />
+            </Field>
+            <Field label="Rolle Kontaktperson">
+              <TextInput value={activeProfile.contactRole} onChange={(event) => updateCompanyProfile(activeProfile.id, { contactRole: event.target.value })} />
+            </Field>
+            <Field label="Inhaber / Verantwortlicher">
+              <TextInput value={activeProfile.ownerLine} onChange={(event) => updateCompanyProfile(activeProfile.id, { ownerLine: event.target.value })} />
             </Field>
             <Field label="E-Mail">
               <TextInput value={activeProfile.email} onChange={(event) => updateCompanyProfile(activeProfile.id, { email: event.target.value })} />

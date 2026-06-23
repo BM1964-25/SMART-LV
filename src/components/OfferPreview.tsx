@@ -75,6 +75,9 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
           <div className="min-w-64 rounded-lg border border-line p-4 text-sm text-muted">
             <p className="font-semibold text-ink">{company.name}</p>
             <p className="mt-2">{company.address}</p>
+            <p className="mt-3 font-semibold text-ink">Projektverantwortlicher</p>
+            <p>{company.contact}</p>
+            {company.contactRole ? <p>{company.contactRole}</p> : null}
             <p className="mt-3">{company.email}</p>
             <p>{company.phone}</p>
             <p>{company.website}</p>
@@ -86,6 +89,17 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
           <PreviewMeta label="Angebotsnummer" value={project.offerNumber} />
           <PreviewMeta label="Datum" value={offerDate} />
         </div>
+        {(project.projectLocation || project.projectVolume || project.servicePeriod || project.plannedProjectStart) ? (
+          <div className="mt-6 rounded-lg border border-line p-4">
+            <h2 className="text-sm font-semibold text-ink">Projektinformationen</h2>
+            <div className="mt-4 grid gap-4 md:grid-cols-4">
+              {project.projectLocation ? <PreviewMeta label="Projektstandort" value={project.projectLocation} /> : null}
+              {project.projectVolume ? <PreviewMeta label="Projektvolumen" value={project.projectVolume} /> : null}
+              {project.plannedProjectStart ? <PreviewMeta label="Projektbeginn" value={project.plannedProjectStart} /> : null}
+              {project.servicePeriod ? <PreviewMeta label="Leistungszeitraum" value={project.servicePeriod} /> : null}
+            </div>
+          </div>
+        ) : null}
       </section>
 
       <section className="print-section py-8">
@@ -107,6 +121,12 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
               <p className="mt-2 leading-7 text-muted">{project.serviceScope}</p>
             </div>
           ) : null}
+          {project.contractorRole ? (
+            <div>
+              <h3 className="text-sm font-semibold text-ink">Funktion des Auftragnehmers</h3>
+              <p className="mt-2 leading-7 text-muted">{project.contractorRole}</p>
+            </div>
+          ) : null}
           <div>
             <h3 className="text-sm font-semibold text-ink">Zielsetzung</h3>
             <p className="mt-2 leading-7 text-muted">{project.objective}</p>
@@ -115,10 +135,22 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
       </section>
 
       <section className="print-section border-t border-line py-8">
+        {project.servicePeriod ? (
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-ink">Leistungszeitraum</h2>
+            <p className="mt-3 leading-7 text-muted">{project.servicePeriod}</p>
+          </div>
+        ) : null}
         {project.serviceExclusion ? (
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-ink">Leistungsabgrenzung</h2>
             <p className="mt-3 leading-7 text-muted">{project.serviceExclusion}</p>
+          </div>
+        ) : null}
+        {project.ancillaryCosts ? (
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-ink">Nebenkosten und Auslagen</h2>
+            <p className="mt-3 leading-7 text-muted">{project.ancillaryCosts}</p>
           </div>
         ) : null}
         <h2 className="text-lg font-semibold text-ink">Leistungsverzeichnis</h2>
@@ -290,6 +322,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
           <p className="break-words">Web: {company.website}</p>
           <p className="break-words">E-Mail: {company.email}</p>
           <p className="break-words">Telefon: {company.phone}</p>
+          {company.ownerLine ? <p className="break-words">Inhaber: {company.ownerLine}</p> : null}
           {company.agbUrl ? (
             <p className="break-words">
               AGB:{" "}
