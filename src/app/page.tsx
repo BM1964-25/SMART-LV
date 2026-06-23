@@ -1759,14 +1759,9 @@ function ProjectWorkspace({
                 <Field label="Projektvolumen">
                   <TextInput value={project.projectVolume} onChange={(event) => updateProject("projectVolume", event.target.value)} />
                 </Field>
-                <Field label="Projektbeginn / Dauer">
+                <Field label="Leistungszeitraum">
                   <TextInput value={project.plannedProjectStart} onChange={(event) => updateProject("plannedProjectStart", event.target.value)} />
                 </Field>
-                <div className="xl:col-span-4">
-                  <Field label="Leistungszeitraum">
-                    <TextArea value={project.servicePeriod} onChange={(event) => updateProject("servicePeriod", event.target.value)} className="min-h-20" />
-                  </Field>
-                </div>
               </div>
             </div>
           </section>

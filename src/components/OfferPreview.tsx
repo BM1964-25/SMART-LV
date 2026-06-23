@@ -93,12 +93,12 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
 
       <section className="print-section py-8">
         <p className="leading-7 text-muted">{introText}</p>
-        {(project.projectName || project.projectLocation || project.projectVolume || project.servicePeriod) ? (
+        {(project.projectName || project.projectLocation || project.projectVolume || project.plannedProjectStart) ? (
           <div className="mt-6 grid gap-4 md:grid-cols-4">
             <PreviewMeta label="Projekt" value={project.projectName || "-"} />
             <PreviewMeta label="Standort" value={project.projectLocation || "-"} />
             <PreviewMeta label="Projektvolumen" value={project.projectVolume || "-"} />
-            <PreviewMeta label="Leistungszeitraum" value={project.servicePeriod || "-"} />
+            <PreviewMeta label="Leistungszeitraum" value={project.plannedProjectStart || "-"} />
           </div>
         ) : null}
         {project.assignmentReason ? (
@@ -134,10 +134,10 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
       </section>
 
       <section className="print-section border-t border-line py-8">
-        {project.servicePeriod ? (
+        {project.plannedProjectStart ? (
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-ink">Leistungszeitraum</h2>
-            <p className="mt-3 leading-7 text-muted">{project.servicePeriod}</p>
+            <p className="mt-3 leading-7 text-muted">{project.plannedProjectStart}</p>
           </div>
         ) : null}
         {project.serviceExclusion ? (
