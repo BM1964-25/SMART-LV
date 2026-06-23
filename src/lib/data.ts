@@ -116,7 +116,7 @@ export const companyProfiles: CompanyProfile[] = [
     agbUrl: "https://www.metzger-rea.de/agb",
     bookingUrl: "https://booking.builtsmart-ai.app/book/profile/metzger-real-estate-advisory?embed=1",
     vatId: "DE000000003",
-    bank: "Kontoinhaber Bernhard Metzger, IBAN DE00 0000 0000 0000 0000 03, BIC MREADDE",
+    bank: "Bernhard Metzger IBAN DE29 7008 0000 0454 4456 00 BIC DRESDEFF700",
     contact: "Bernhard Metzger",
     contactRole: "Inhaber | Senior Consultant",
     ownerLine: "Dipl.-Ing. (FH) Bernhard Metzger",

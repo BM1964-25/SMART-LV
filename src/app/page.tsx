@@ -449,10 +449,16 @@ function normalizeProfiles(savedProfiles: CompanyProfile[] | undefined) {
       profile.id === "metzger-real-estate" && (!profile.bookingUrl || profile.bookingUrl === "https://www.metzger-rea.de/termin")
         ? defaultProfile?.bookingUrl ?? ""
         : profile.bookingUrl ?? defaultProfile?.bookingUrl ?? "";
+    const bank =
+      profile.id === "metzger-real-estate" &&
+      (!profile.bank || profile.bank === "Kontoinhaber Bernhard Metzger, IBAN DE00 0000 0000 0000 0000 03, BIC MREADDE")
+        ? defaultProfile?.bank ?? ""
+        : profile.bank ?? defaultProfile?.bank ?? "";
     return {
       ...profile,
       agbUrl: profile.agbUrl ?? defaultProfile?.agbUrl ?? "",
       bookingUrl,
+      bank,
       contactRole: profile.contactRole ?? defaultProfile?.contactRole ?? "",
       ownerLine: profile.ownerLine ?? defaultProfile?.ownerLine ?? ""
     };
@@ -2610,7 +2616,7 @@ function QualityManagement({
     });
   }
 
-  if (project.companyId === "metzger-real-estate" && !/kontoinhaber\s+bernhard\s+metzger/i.test(company.bank)) {
+  if (project.companyId === "metzger-real-estate" && !/bernhard\s+metzger/i.test(company.bank)) {
     issues.push({
       id: "mrea-bank-owner",
       severity: "Warnung",

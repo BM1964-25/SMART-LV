@@ -346,7 +346,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
             </p>
           ) : null}
           <p className="break-words">USt-ID: {company.vatId}</p>
-          <p className="break-words md:col-span-3">Bankverbindung: {company.bank}</p>
+          <p className="break-words md:col-span-2">Bankverbindung: {company.bank}</p>
         </div>
       </footer>
     </article>
