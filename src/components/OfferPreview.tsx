@@ -107,7 +107,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
             <p>{company.website}</p>
           </div>
         </div>
-        <div className="mt-10 grid gap-4 md:grid-cols-4">
+        <div className="mt-16 grid gap-4 md:grid-cols-4">
           <PreviewMeta label="Empfänger" value={project.client} />
           <PreviewMeta label="Ansprechpartner" value={project.contactPerson} />
           <PreviewMeta label="Angebotsnummer" value={project.offerNumber} />
@@ -117,7 +117,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
 
       <section className="print-section py-8">
         {(project.projectName || project.projectLocation || project.projectVolume || project.plannedProjectStart) ? (
-          <div className="mb-14 grid gap-4 md:grid-cols-4">
+          <div className="mb-20 grid gap-4 md:grid-cols-4">
             <PreviewMeta label="Projekt" value={project.projectName || "-"} />
             <PreviewMeta label="Standort" value={project.projectLocation || "-"} />
             <PreviewMeta label="Projektvolumen" value={project.projectVolume || "-"} />
