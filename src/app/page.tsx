@@ -1579,6 +1579,7 @@ function CompanyProfiles({
 }) {
   const activeProfile = profiles.find((profile) => profile.id === selectedCompanyId) ?? profiles[0];
   const profileTemplates = templates.filter((template) => template.companyId === activeProfile.id);
+  const previewAddressLines = formatProfileAddressLines(activeProfile);
 
   return (
     <div className="grid gap-6">
@@ -1661,11 +1662,16 @@ function CompanyProfiles({
                 </div>
                 <div>
                   <p className="font-semibold text-ink">{activeProfile.name}</p>
-                  <p className="mt-2 text-sm leading-6 text-muted">{activeProfile.address}</p>
+                  <div className="mt-2 grid gap-1 text-sm leading-6 text-muted">
+                    {previewAddressLines.map((line) => (
+                      <p key={line}>{line}</p>
+                    ))}
+                  </div>
                 </div>
               </div>
               <div className="mt-5 grid gap-2 text-sm text-muted">
-                <p>{activeProfile.email} · {activeProfile.phone}</p>
+                <p>{activeProfile.email}</p>
+                <p>{activeProfile.phone}</p>
                 <p>{activeProfile.website}</p>
                 <p>{activeProfile.vatId}</p>
               </div>
@@ -1679,6 +1685,7 @@ function CompanyProfiles({
               <ColorField label="Sekundärfarbe" value={activeProfile.colors.secondary} onChange={(value) => updateCompanyProfileColors(activeProfile.id, { secondary: value })} />
               <ColorField label="Akzentfarbe" value={activeProfile.colors.accent} onChange={(value) => updateCompanyProfileColors(activeProfile.id, { accent: value })} />
             </div>
+            <p className="mt-4 text-sm leading-6 text-muted">Profilangaben und Farbangaben werden automatisch gespeichert.</p>
           </div>
 
           <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
@@ -1696,6 +1703,18 @@ function CompanyProfiles({
       </div>
     </div>
   );
+}
+
+function formatProfileAddressLines(profile: CompanyProfile) {
+  const withoutDuplicateName = profile.address
+    .replace(profile.name, "")
+    .replace(/^,\s*/, "")
+    .replace(/\s*,\s*/g, "\n");
+  return withoutDuplicateName
+    .replace(/\s+(\d{5}\s+\S.*)$/m, "\n$1")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
 }
 
 function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
