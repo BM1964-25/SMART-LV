@@ -331,14 +331,14 @@ function mergeProfileTemplates(savedTemplates: LvTemplate[] | undefined, profile
   return [...defaultTemplates, ...customTemplates];
 }
 
-function normalizeCompanyProfiles(profiles: CompanyProfile[]) {
-  const yellowValues = new Set(["#ffff00", "#fff200", "#ffea00", "#facc15", "#fde047"]);
-  return profiles.map((profile) => {
-    if (profile.id !== "metzger-real-estate") return profile;
-    const primary = profile.colors.primary.toLowerCase();
-    if (!yellowValues.has(primary)) return profile;
-    return { ...profile, colors: { ...profile.colors, primary: "#111827" } };
-  });
+function readableTextColor(background: string) {
+  const hex = background.replace("#", "");
+  if (hex.length !== 6) return "#ffffff";
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.62 ? "#111827" : "#ffffff";
 }
 
 export default function HomePage() {
@@ -377,7 +377,7 @@ export default function HomePage() {
           skontoDays: parsed.project.skontoDays ?? 10
         });
         setGroups(parsed.groups.map((group) => ({ ...group, active: group.active ?? true })));
-        const savedProfiles = normalizeCompanyProfiles(parsed.profiles ?? companyProfiles);
+        const savedProfiles = parsed.profiles ?? companyProfiles;
         setProfiles(savedProfiles);
         setLibraryPositions(parsed.libraryPositions ?? createInitialLibraryPositions());
         setLvTemplates(mergeProfileTemplates(parsed.lvTemplates, savedProfiles));
@@ -1604,7 +1604,10 @@ function CompanyProfiles({
                 profile.id === activeProfile.id ? "bg-slate-100 text-ink" : "text-muted hover:bg-slate-50 hover:text-ink"
               }`}
             >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-xs font-bold text-white" style={{ background: profile.colors.primary }}>
+              <span
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-xs font-bold"
+                style={{ background: profile.colors.primary, color: readableTextColor(profile.colors.primary) }}
+              >
                 {profile.logoText}
               </span>
               <span className="min-w-0">
@@ -1667,7 +1670,10 @@ function CompanyProfiles({
             <SectionTitle title="Vorschau" />
             <div className="mt-5 rounded-md border border-line p-4">
               <div className="flex items-start gap-4">
-                <div className="flex h-14 min-w-14 items-center justify-center rounded-md px-3 text-sm font-bold text-white" style={{ background: activeProfile.colors.primary }}>
+                <div
+                  className="flex h-14 min-w-14 items-center justify-center rounded-md px-3 text-sm font-bold"
+                  style={{ background: activeProfile.colors.primary, color: readableTextColor(activeProfile.colors.primary) }}
+                >
                   {activeProfile.logoText}
                 </div>
                 <div>

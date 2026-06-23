@@ -5,6 +5,16 @@ import { activeGroups, calculateSummary, formatCurrency, groupNumber, groupTotal
 import { printElement } from "@/lib/print";
 import { CompanyProfile, PositionGroup, Project } from "@/lib/types";
 
+function readableTextColor(background: string) {
+  const hex = background.replace("#", "");
+  if (hex.length !== 6) return "#ffffff";
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.62 ? "#111827" : "#ffffff";
+}
+
 export function OfferPreview({ project, groups, profiles }: { project: Project; groups: PositionGroup[]; profiles: CompanyProfile[] }) {
   const company = profiles.find((profile) => profile.id === project.companyId) ?? profiles[0];
   const summary = calculateSummary(groups, project);
@@ -35,8 +45,8 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           <div>
             <div
-              className="mb-8 inline-flex h-14 min-w-14 items-center justify-center rounded-md px-4 text-sm font-bold text-white"
-              style={{ background: company.colors.primary }}
+              className="mb-8 inline-flex h-14 min-w-14 items-center justify-center rounded-md px-4 text-sm font-bold"
+              style={{ background: company.colors.primary, color: readableTextColor(company.colors.primary) }}
             >
               {company.logoText}
             </div>
