@@ -96,10 +96,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
 
       <section className="print-section border-t border-line py-8">
         <h2 className="text-lg font-semibold text-ink">Leistungsverzeichnis</h2>
-        <p className="mt-2 max-w-4xl text-sm leading-6 text-muted">
-          Die nachfolgende Darstellung weist Mengen, Einheiten, Einzelpreise und Positionssummen transparent aus. Alternativ kann dieselbe interne
-          Kalkulation als Abschnittspauschale angeboten werden, wenn einzelne Preisansätze im Angebot nicht offengelegt werden sollen.
-        </p>
+        {project.serviceDirectoryIntro ? <p className="mt-2 max-w-4xl text-sm leading-6 text-muted">{project.serviceDirectoryIntro}</p> : null}
         <div className="print-table mt-5 overflow-hidden rounded-lg border border-line">
           {visibleGroups.map((group) => {
             const activePositions = group.positions.filter((position) => position.active);

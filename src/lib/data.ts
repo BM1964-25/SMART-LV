@@ -29,6 +29,9 @@ export const rateLabels: Record<keyof RateCard, string> = {
 export const defaultAssignmentReason =
   "Die nachfolgend angebotenen Leistungen basieren auf den bislang geführten Gesprächen sowie den derzeit bekannten Projektanforderungen. Ziel ist die professionelle Unterstützung des Auftraggebers bei der Analyse, Steuerung, Bewertung und Umsetzung der vereinbarten Aufgabenstellungen.";
 
+export const defaultServiceDirectoryIntro =
+  "Die nachfolgende Darstellung weist Mengen, Einheiten, Einzelpreise und Positionssummen transparent aus. Alternativ kann dieselbe interne Kalkulation als Abschnittspauschale angeboten werden, wenn einzelne Preisansätze im Angebot nicht offengelegt werden sollen.";
+
 export const companyProfiles: CompanyProfile[] = [
   {
     id: "builtsmart-hub",
@@ -109,6 +112,7 @@ export const sampleProject: Project = {
   shortDescription: "Konzeption und Entwicklung einer KI-Anwendung zur strukturierten Auswertung, Angebotserstellung und Angebotsvorbereitung.",
   offerIntro: "Die Lösung wird auf robuste KI-Workflows, transparente Wissensquellen und eine anwenderfreundliche Oberfläche ausgerichtet.",
   assignmentReason: defaultAssignmentReason,
+  serviceDirectoryIntro: defaultServiceDirectoryIntro,
   offerClarification:
     "KI-Ausgaben werden durch geeignete Prüf-, Logging- und Freigabemechanismen abgesichert; produktive Nutzung erfolgt nach gemeinsam definierten Qualitätskriterien.",
   objective:

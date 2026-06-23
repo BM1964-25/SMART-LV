@@ -49,6 +49,7 @@ export type Project = {
   shortDescription: string;
   offerIntro: string;
   assignmentReason: string;
+  serviceDirectoryIntro: string;
   offerClarification: string;
   objective: string;
   technicalContext: string;
