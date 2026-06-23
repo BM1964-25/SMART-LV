@@ -43,8 +43,17 @@ function formatCompanyAddressLines(profile: CompanyProfile) {
     .filter(Boolean);
 }
 
+function formatBankDetails(bank: string) {
+  const raw = bank.trim();
+  const owner = raw.split(/\s+IBAN\s+/i)[0]?.replace(/^Bankverbindung:\s*/i, "").trim();
+  const iban = raw.match(/\bIBAN\s+(.+?)(?=\s+BIC\b|$)/i)?.[1]?.trim();
+  const bic = raw.match(/\bBIC\s+([A-Z0-9]+)/i)?.[1]?.trim();
+  return { owner, iban, bic, raw };
+}
+
 export function OfferPreview({ project, groups, profiles }: { project: Project; groups: PositionGroup[]; profiles: CompanyProfile[] }) {
   const company = profiles.find((profile) => profile.id === project.companyId) ?? profiles[0];
+  const bankDetails = formatBankDetails(company.bank);
   const companyAddressLines = formatCompanyAddressLines(company);
   const summary = calculateSummary(groups, project);
   const offerDate = new Intl.DateTimeFormat("de-DE", { dateStyle: "long" }).format(new Date(`${project.offerDate}T12:00:00`));
@@ -308,28 +317,50 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
       <footer className="print-keep border-t border-line pt-5 text-base leading-7 text-black">
         <p className="font-medium text-ink">{company.name}</p>
         <p>{company.footer}</p>
-        <div className="mt-4 grid gap-x-8 gap-y-2 md:grid-cols-3">
-          <p className="break-words">Web: {company.website}</p>
-          <p className="break-words">E-Mail: {company.email}</p>
-          <p className="break-words">Telefon: {company.phone}</p>
-          {company.ownerLine ? <p className="break-words">Inhaber: {company.ownerLine}</p> : null}
-          {company.agbUrl ? (
-            <p className="break-words">
-              AGB:{" "}
-              <a className="font-medium text-ink underline underline-offset-2" href={company.agbUrl} target="_blank" rel="noreferrer">
-                {company.agbUrl}
-              </a>
-            </p>
-          ) : null}
-          {company.bookingUrl ? (
-            <p className="break-words">
-              <a className="font-medium text-ink underline underline-offset-2" href={company.bookingUrl} target="_blank" rel="noreferrer">
-                Online-Terminbuchung
-              </a>
-            </p>
-          ) : null}
-          <p className="break-words">USt-ID: {company.vatId}</p>
-          <p className="break-words md:col-span-3">Bankverbindung: {company.bank}</p>
+        <div className="mt-5 grid gap-6 md:grid-cols-3">
+          <div className="break-words">
+            <p className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Kontakt & Direktaktion</p>
+            {company.ownerLine ? <p className="mt-2">Inhaber: {company.ownerLine}</p> : null}
+            <p>Telefon: {company.phone}</p>
+            <p>E-Mail: {company.email}</p>
+            {company.bookingUrl ? (
+              <p className="mt-2">
+                <a
+                  className="inline-flex rounded-md border border-line px-3 py-1 font-semibold text-ink underline-offset-2 transition hover:border-slate-300"
+                  href={company.bookingUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Online-Terminbuchung
+                </a>
+              </p>
+            ) : null}
+          </div>
+          <div className="break-words">
+            <p className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Rechtliches & Links</p>
+            <p className="mt-2">Web: {company.website}</p>
+            {company.agbUrl ? (
+              <p>
+                AGB:{" "}
+                <a className="font-medium text-ink underline underline-offset-2" href={company.agbUrl} target="_blank" rel="noreferrer">
+                  {company.agbUrl}
+                </a>
+              </p>
+            ) : null}
+            <p>USt-ID: {company.vatId}</p>
+          </div>
+          <div className="break-words">
+            <p className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Bankverbindung</p>
+            {bankDetails.iban || bankDetails.bic ? (
+              <div className="mt-2">
+                {bankDetails.owner ? <p>{bankDetails.owner}</p> : null}
+                {bankDetails.iban ? <p>IBAN: {bankDetails.iban}</p> : null}
+                {bankDetails.bic ? <p>BIC: {bankDetails.bic}</p> : null}
+              </div>
+            ) : (
+              <p className="mt-2">{bankDetails.raw}</p>
+            )}
+          </div>
         </div>
       </footer>
     </article>
