@@ -1849,7 +1849,7 @@ function PositionLibrary({
                 </div>
 
                 <div className="grid content-start gap-3 rounded-md border border-line bg-slate-50 p-4">
-                  <Field label="Stundensatzlogik">
+                  <Field label="Preislogik">
                     <Select value={position.rateKey} onChange={(event) => updateLibraryPosition(position.id, { rateKey: event.target.value as Position["rateKey"] })}>
                       {rateEntries.map(([key, label]) => (
                         <option key={key} value={key}>

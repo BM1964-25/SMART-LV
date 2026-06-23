@@ -109,7 +109,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
                     <span>Leistung</span>
                     <span className="text-right">Einheit</span>
                     <span className="text-right">Menge</span>
-                    <span className="text-right">Stundensatz</span>
+                    <span className="text-right">Einzelpreis</span>
                     <span className="text-right">Positionssumme</span>
                   </div>
                 </div>
