@@ -68,6 +68,16 @@ const navItems: { label: View; icon: typeof Home }[] = [
 
 const storageKey = "smart-lv-state-v1";
 
+type LvTemplate = {
+  id: string;
+  companyId: Project["companyId"];
+  name: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+  groups: PositionGroup[];
+};
+
 function createInitialLibraryPositions() {
   return initialGroups.flatMap((group) =>
     group.positions.map((position) => ({
@@ -79,11 +89,34 @@ function createInitialLibraryPositions() {
   );
 }
 
+function cloneGroups(groups: PositionGroup[]) {
+  return renumberGroups(
+    groups.map((group) => ({
+      ...group,
+      positions: group.positions.map((position) => ({ ...position }))
+    }))
+  );
+}
+
+function createInitialProfileTemplates(): LvTemplate[] {
+  const createdAt = "2026-06-20T00:00:00.000Z";
+  return companyProfiles.map((profile) => ({
+    id: `template-${profile.id}-standard`,
+    companyId: profile.id,
+    name: `${profile.name} Standard-LV`,
+    description: `Profilgebundene LV-Grundstruktur für ${profile.name} mit eigener Angebotslogik und wiederverwendbaren Leistungsgruppen.`,
+    createdAt,
+    updatedAt: createdAt,
+    groups: cloneGroups(initialGroups)
+  }));
+}
+
 export default function HomePage() {
   const [activeView, setActiveView] = useState<View>("Dashboard");
   const [project, setProject] = useState<Project>(sampleProject);
   const [groups, setGroups] = useState<PositionGroup[]>(initialGroups);
   const [libraryPositions, setLibraryPositions] = useState<Position[]>(createInitialLibraryPositions);
+  const [lvTemplates, setLvTemplates] = useState<LvTemplate[]>(createInitialProfileTemplates);
   const [orderBilling, setOrderBilling] = useState<OrderBilling>(sampleOrderBilling);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [query, setQuery] = useState("");
@@ -94,7 +127,13 @@ export default function HomePage() {
     const saved = window.localStorage.getItem(storageKey);
     if (!saved) return;
     try {
-      const parsed = JSON.parse(saved) as { project: Project; groups: PositionGroup[]; libraryPositions?: Position[]; orderBilling?: OrderBilling };
+      const parsed = JSON.parse(saved) as {
+        project: Project;
+        groups: PositionGroup[];
+        libraryPositions?: Position[];
+        lvTemplates?: LvTemplate[];
+        orderBilling?: OrderBilling;
+      };
       queueMicrotask(() => {
         setProject({
           ...parsed.project,
@@ -107,6 +146,7 @@ export default function HomePage() {
         });
         setGroups(parsed.groups.map((group) => ({ ...group, active: group.active ?? true })));
         setLibraryPositions(parsed.libraryPositions ?? createInitialLibraryPositions());
+        setLvTemplates(parsed.lvTemplates ?? createInitialProfileTemplates());
         const billing = parsed.orderBilling ?? sampleOrderBilling;
         setOrderBilling({
           ...billing,
@@ -120,8 +160,8 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem(storageKey, JSON.stringify({ project, groups, libraryPositions, orderBilling }));
-  }, [project, groups, libraryPositions, orderBilling]);
+    window.localStorage.setItem(storageKey, JSON.stringify({ project, groups, libraryPositions, lvTemplates, orderBilling }));
+  }, [project, groups, libraryPositions, lvTemplates, orderBilling]);
 
   const company = companyProfiles.find((profile) => profile.id === project.companyId) ?? companyProfiles[0];
   const summary = calculateSummary(groups, project);
@@ -153,6 +193,10 @@ export default function HomePage() {
 
   function updateProject<K extends keyof Project>(key: K, value: Project[K]) {
     setProject((current) => ({ ...current, [key]: value }));
+  }
+
+  function selectCompany(companyId: Project["companyId"]) {
+    updateProject("companyId", companyId);
   }
 
   function updatePosition(groupId: string, positionId: string, changes: Partial<Position>) {
@@ -355,12 +399,57 @@ export default function HomePage() {
   }
 
   function saveAsTemplate() {
-    const template = {
-      name: `${project.projectName} Vorlage`,
-      createdAt: new Date().toISOString(),
-      groups
+    const now = new Date().toISOString();
+    const companyName = companyProfiles.find((profile) => profile.id === project.companyId)?.name ?? "Firmenprofil";
+    const template: LvTemplate = {
+      id: `template-${Date.now()}`,
+      companyId: project.companyId,
+      name: `${project.projectName} LV`,
+      description: `Gespeichertes Leistungsverzeichnis für ${companyName}.`,
+      createdAt: now,
+      updatedAt: now,
+      groups: cloneGroups(groups)
     };
-    window.localStorage.setItem("smart-lv-last-template", JSON.stringify(template));
+    setLvTemplates((current) => [template, ...current]);
+    setActiveView("Vorlagen");
+  }
+
+  function updateLvTemplate(templateId: string, changes: Partial<Pick<LvTemplate, "name" | "description" | "companyId">>) {
+    setLvTemplates((current) =>
+      current.map((template) => (template.id === templateId ? { ...template, ...changes, updatedAt: new Date().toISOString() } : template))
+    );
+  }
+
+  function applyLvTemplate(templateId: string) {
+    const template = lvTemplates.find((item) => item.id === templateId);
+    if (!template) return;
+    setProject((current) => ({ ...current, companyId: template.companyId }));
+    setGroups(cloneGroups(template.groups));
+    setActiveView("LV bearbeiten");
+  }
+
+  function duplicateLvTemplate(templateId: string) {
+    const template = lvTemplates.find((item) => item.id === templateId);
+    if (!template) return;
+    const now = new Date().toISOString();
+    setLvTemplates((current) => [
+      {
+        ...template,
+        id: `template-${Date.now()}`,
+        name: `${template.name} Kopie`,
+        createdAt: now,
+        updatedAt: now,
+        groups: cloneGroups(template.groups)
+      },
+      ...current
+    ]);
+  }
+
+  function deleteLvTemplate(templateId: string) {
+    const template = lvTemplates.find((item) => item.id === templateId);
+    if (!template) return;
+    if (!window.confirm(`LV-Vorlage "${template.name}" löschen?`)) return;
+    setLvTemplates((current) => current.filter((item) => item.id !== templateId));
   }
 
   function exportCsv() {
@@ -471,14 +560,14 @@ export default function HomePage() {
               <h1 className="truncate text-2xl font-semibold tracking-normal text-ink">{project.projectName}</h1>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <Select value={project.companyId} onChange={(event) => updateProject("companyId", event.target.value as Project["companyId"])} className="w-56">
+              <Select value={project.companyId} onChange={(event) => selectCompany(event.target.value as Project["companyId"])} className="w-56">
                 {companyProfiles.map((profile) => (
                   <option key={profile.id} value={profile.id}>
                     {profile.name}
                   </option>
                 ))}
               </Select>
-              <IconButton icon={Save} label="Als Vorlage speichern" onClick={saveAsTemplate} />
+              <IconButton icon={Save} label="Aktuelles LV als Profil-LV speichern" onClick={saveAsTemplate} />
               <IconButton icon={Copy} label="Angebot duplizieren" onClick={duplicateOffer} />
               <IconButton icon={Download} label="CSV exportieren" onClick={exportCsv} />
               <IconButton icon={Braces} label="JSON exportieren" onClick={exportJson} />
@@ -557,7 +646,14 @@ export default function HomePage() {
 
           {activeView === "KI-Assistenz" ? <AiAssistant project={project} groups={groups} updatePosition={updatePosition} replaceGroupsFromAi={replaceGroupsFromAi} setActiveView={setActiveView} /> : null}
 
-          {activeView === "Firmenprofile" ? <CompanyProfiles selectedCompanyId={project.companyId} /> : null}
+          {activeView === "Firmenprofile" ? (
+            <CompanyProfiles
+              selectedCompanyId={project.companyId}
+              templates={lvTemplates}
+              selectCompany={selectCompany}
+              setActiveView={setActiveView}
+            />
+          ) : null}
 
           {activeView === "Mandanten" ? <Tenants /> : null}
 
@@ -571,7 +667,18 @@ export default function HomePage() {
             />
           ) : null}
 
-          {activeView === "Vorlagen" ? <Templates project={project} groups={groups} /> : null}
+          {activeView === "Vorlagen" ? (
+            <Templates
+              project={project}
+              groups={groups}
+              templates={lvTemplates}
+              updateTemplate={updateLvTemplate}
+              applyTemplate={applyLvTemplate}
+              duplicateTemplate={duplicateLvTemplate}
+              deleteTemplate={deleteLvTemplate}
+              saveCurrentTemplate={saveAsTemplate}
+            />
+          ) : null}
 
           {activeView === "Einstellungen" ? <SettingsPanel project={project} updateProject={updateProject} /> : null}
         </div>
@@ -979,34 +1086,65 @@ function LvEditor({
   );
 }
 
-function CompanyProfiles({ selectedCompanyId }: { selectedCompanyId: string }) {
+function CompanyProfiles({
+  selectedCompanyId,
+  templates,
+  selectCompany,
+  setActiveView
+}: {
+  selectedCompanyId: string;
+  templates: LvTemplate[];
+  selectCompany: (companyId: Project["companyId"]) => void;
+  setActiveView: (view: View) => void;
+}) {
   return (
     <div className="grid gap-5 md:grid-cols-2">
-      {companyProfiles.map((profile) => (
-        <div key={profile.id} className={`rounded-lg border bg-white p-6 shadow-sm ${profile.id === selectedCompanyId ? "border-blue-200" : "border-line"}`}>
-          <div className="flex items-start gap-4">
-            <div className="flex h-14 min-w-14 items-center justify-center rounded-md px-3 text-sm font-bold text-white" style={{ background: profile.colors.primary }}>
-              {profile.logoText}
+      {companyProfiles.map((profile) => {
+        const profileTemplates = templates.filter((template) => template.companyId === profile.id);
+        return (
+          <div key={profile.id} className={`rounded-lg border bg-white p-6 shadow-sm ${profile.id === selectedCompanyId ? "border-blue-200" : "border-line"}`}>
+            <div className="flex items-start gap-4">
+              <div className="flex h-14 min-w-14 items-center justify-center rounded-md px-3 text-sm font-bold text-white" style={{ background: profile.colors.primary }}>
+                {profile.logoText}
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-ink">{profile.name}</h2>
+                <p className="mt-2 text-sm leading-6 text-muted">{profile.address}</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-lg font-semibold text-ink">{profile.name}</h2>
-              <p className="mt-2 text-sm leading-6 text-muted">{profile.address}</p>
+            <div className="mt-5 grid gap-3 text-sm text-muted">
+              <p>{profile.email} · {profile.phone}</p>
+              <p>{profile.website}</p>
+              <p>{profile.vatId}</p>
+              <p>{profile.bank}</p>
+            </div>
+            <div className="mt-5 flex gap-2">
+              <span className="h-8 w-8 rounded-md border border-line" style={{ background: profile.colors.primary }} />
+              <span className="h-8 w-8 rounded-md border border-line" style={{ background: profile.colors.secondary }} />
+              <span className="h-8 w-8 rounded-md border border-line" style={{ background: profile.colors.accent }} />
+            </div>
+            <p className="mt-5 text-sm leading-6 text-muted">{profile.footer}</p>
+            <div className="mt-5 rounded-md border border-line bg-slate-50 px-4 py-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-ink">Profil-LVs</p>
+                  <p className="mt-1 text-sm text-muted">{profileTemplates.length} gespeicherte LV-Vorlagen</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    selectCompany(profile.id);
+                    setActiveView("Vorlagen");
+                  }}
+                  className="rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-ink transition hover:border-slate-300"
+                >
+                  Öffnen
+                </button>
+              </div>
             </div>
           </div>
-          <div className="mt-5 grid gap-3 text-sm text-muted">
-            <p>{profile.email} · {profile.phone}</p>
-            <p>{profile.website}</p>
-            <p>{profile.vatId}</p>
-            <p>{profile.bank}</p>
-          </div>
-          <div className="mt-5 flex gap-2">
-            <span className="h-8 w-8 rounded-md border border-line" style={{ background: profile.colors.primary }} />
-            <span className="h-8 w-8 rounded-md border border-line" style={{ background: profile.colors.secondary }} />
-            <span className="h-8 w-8 rounded-md border border-line" style={{ background: profile.colors.accent }} />
-          </div>
-          <p className="mt-5 text-sm leading-6 text-muted">{profile.footer}</p>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -1165,16 +1303,165 @@ function PositionLibrary({
   );
 }
 
-function Templates({ project, groups }: { project: Project; groups: PositionGroup[] }) {
+function Templates({
+  project,
+  groups,
+  templates,
+  updateTemplate,
+  applyTemplate,
+  duplicateTemplate,
+  deleteTemplate,
+  saveCurrentTemplate
+}: {
+  project: Project;
+  groups: PositionGroup[];
+  templates: LvTemplate[];
+  updateTemplate: (templateId: string, changes: Partial<Pick<LvTemplate, "name" | "description" | "companyId">>) => void;
+  applyTemplate: (templateId: string) => void;
+  duplicateTemplate: (templateId: string) => void;
+  deleteTemplate: (templateId: string) => void;
+  saveCurrentTemplate: () => void;
+}) {
+  const activeCompany = companyProfiles.find((profile) => profile.id === project.companyId) ?? companyProfiles[0];
+  const activeTemplates = templates.filter((template) => template.companyId === project.companyId);
+  const otherProfiles = companyProfiles.filter((profile) => profile.id !== project.companyId);
+
   return (
-    <div className="grid gap-5 md:grid-cols-3">
-      {["KI-App MVP", "RAG-Wissenssystem", "Immobilien-Workflow-Automation"].map((template, index) => (
-        <div key={template} className="rounded-lg border border-line bg-white p-6 shadow-sm">
-          <p className="text-sm font-medium text-muted">Vorlage {index + 1}</p>
-          <h2 className="mt-2 text-lg font-semibold text-ink">{template}</h2>
-          <p className="mt-3 text-sm leading-6 text-muted">{groups.length} Hauptgruppen, Firmenprofil {project.companyId}, Statuslogik und Exportlayout vorbereitet.</p>
+    <div className="grid gap-6">
+      <div className="flex flex-col gap-4 rounded-lg border border-line bg-white p-6 shadow-sm lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <SectionTitle title="Profil-LV-Vorlagen" kicker={activeCompany.name} />
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
+            Hier werden Leistungsverzeichnisse je Firmenprofil gespeichert. Beim Übernehmen wird das aktuelle LV ersetzt und das passende Firmenprofil aktiviert.
+          </p>
         </div>
-      ))}
+        <button type="button" onClick={saveCurrentTemplate} className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-ink px-4 text-sm font-semibold text-white transition hover:bg-slate-700">
+          <Save className="h-4 w-4" />
+          Aktuelles LV speichern
+        </button>
+      </div>
+
+      <div className="grid gap-4">
+        {activeTemplates.length ? (
+          activeTemplates.map((template) => (
+            <TemplateCard
+              key={template.id}
+              template={template}
+              groups={groups}
+              updateTemplate={updateTemplate}
+              applyTemplate={applyTemplate}
+              duplicateTemplate={duplicateTemplate}
+              deleteTemplate={deleteTemplate}
+            />
+          ))
+        ) : (
+          <div className="rounded-lg border border-dashed border-line bg-white p-8 text-center">
+            <p className="font-semibold text-ink">Noch keine Profil-LVs für {activeCompany.name}</p>
+            <p className="mt-2 text-sm text-muted">Speichere das aktuelle LV als Vorlage oder wähle ein anderes Firmenprofil.</p>
+          </div>
+        )}
+      </div>
+
+      <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
+        <SectionTitle title="Weitere Firmenprofile" />
+        <div className="mt-5 grid gap-3 md:grid-cols-3">
+          {otherProfiles.map((profile) => {
+            const count = templates.filter((template) => template.companyId === profile.id).length;
+            return (
+              <div key={profile.id} className="rounded-md border border-line p-4">
+                <p className="font-semibold text-ink">{profile.name}</p>
+                <p className="mt-2 text-sm text-muted">{count} Profil-LVs gespeichert</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TemplateCard({
+  template,
+  groups,
+  updateTemplate,
+  applyTemplate,
+  duplicateTemplate,
+  deleteTemplate
+}: {
+  template: LvTemplate;
+  groups: PositionGroup[];
+  updateTemplate: (templateId: string, changes: Partial<Pick<LvTemplate, "name" | "description" | "companyId">>) => void;
+  applyTemplate: (templateId: string) => void;
+  duplicateTemplate: (templateId: string) => void;
+  deleteTemplate: (templateId: string) => void;
+}) {
+  const templateGroups = activeGroups(template.groups);
+  const templatePositions = templateGroups.flatMap((group) => group.positions.filter((position) => position.active));
+  const templateTotal = templateGroups.reduce((sum, group) => sum + groupTotal(group), 0);
+  const currentTotal = activeGroups(groups).reduce((sum, group) => sum + groupTotal(group), 0);
+
+  return (
+    <div className="rounded-lg border border-line bg-white p-5 shadow-sm">
+      <div className="grid gap-4 xl:grid-cols-[1fr_260px]">
+        <div className="grid gap-4">
+          <div className="grid gap-3 md:grid-cols-[1fr_220px]">
+            <Field label="Vorlagenname">
+              <TextInput value={template.name} onChange={(event) => updateTemplate(template.id, { name: event.target.value })} />
+            </Field>
+            <Field label="Firmenprofil">
+              <Select value={template.companyId} onChange={(event) => updateTemplate(template.id, { companyId: event.target.value as Project["companyId"] })}>
+                {companyProfiles.map((profile) => (
+                  <option key={profile.id} value={profile.id}>
+                    {profile.name}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+          </div>
+          <Field label="Beschreibung">
+            <TextArea value={template.description} onChange={(event) => updateTemplate(template.id, { description: event.target.value })} />
+          </Field>
+          <div className="grid gap-3 md:grid-cols-3">
+            <div className="rounded-md border border-line bg-slate-50 px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">Hauptgruppen</p>
+              <p className="mt-2 text-lg font-semibold text-ink">{templateGroups.length}</p>
+            </div>
+            <div className="rounded-md border border-line bg-slate-50 px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">Positionen</p>
+              <p className="mt-2 text-lg font-semibold text-ink">{templatePositions.length}</p>
+            </div>
+            <div className="rounded-md border border-line bg-slate-50 px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">LV-Summe</p>
+              <p className="mt-2 text-lg font-semibold text-ink">{formatCurrency(templateTotal)}</p>
+            </div>
+          </div>
+        </div>
+        <div className="grid content-start gap-3 rounded-md border border-line bg-slate-50 p-4">
+          <button type="button" onClick={() => applyTemplate(template.id)} className="inline-flex h-10 items-center justify-center rounded-md bg-ink px-4 text-sm font-semibold text-white transition hover:bg-slate-700">
+            In aktuelles Angebot übernehmen
+          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <button type="button" onClick={() => duplicateTemplate(template.id)} className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink transition hover:border-slate-300">
+              <Copy className="h-4 w-4" />
+              Duplizieren
+            </button>
+            <button type="button" onClick={() => deleteTemplate(template.id)} className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink transition hover:border-slate-300">
+              <Trash2 className="h-4 w-4" />
+              Löschen
+            </button>
+          </div>
+          <div className="divide-y divide-line border-t border-line pt-2 text-sm">
+            <div className="flex items-center justify-between py-2">
+              <span className="text-muted">Aktuelles LV</span>
+              <span className="font-semibold text-ink">{formatCurrency(currentTotal)}</span>
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <span className="text-muted">Gespeichert</span>
+              <span className="font-semibold text-ink">{new Date(template.updatedAt).toLocaleDateString("de-DE")}</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
