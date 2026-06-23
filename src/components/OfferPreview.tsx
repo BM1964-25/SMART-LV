@@ -1,6 +1,7 @@
 "use client";
 
 import { Printer } from "lucide-react";
+import Image from "next/image";
 import { activeGroups, calculateSummary, formatCurrency, groupNumber, groupTotal, positionNumber, positionTotal } from "@/lib/calculations";
 import { printElement } from "@/lib/print";
 import { CompanyProfile, PositionGroup, Project } from "@/lib/types";
@@ -77,12 +78,20 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
       <section className="print-section border-b border-line pb-8">
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           <div>
-            <div
-              className="mb-8 inline-flex h-14 min-w-14 items-center justify-center rounded-md px-4 text-sm font-bold"
-              style={{ background: company.colors.primary, color: readableTextColor(company.colors.primary) }}
-            >
-              {company.logoText}
-            </div>
+            {company.id === "metzger-real-estate" ? (
+              <div className="mb-8">
+                <Image src="/bernhard-metzger-signature.png" alt="Bernhard Metzger" width={320} height={120} className="h-16 w-64 object-contain object-left" priority />
+                <p className="mt-1 text-xl font-semibold uppercase tracking-[0.08em] text-ink">Real Estate Advisory</p>
+                <p className="mt-1 text-sm text-muted">use experience - secure values</p>
+              </div>
+            ) : (
+              <div
+                className="mb-8 inline-flex h-14 min-w-14 items-center justify-center rounded-md px-4 text-sm font-bold"
+                style={{ background: company.colors.primary, color: readableTextColor(company.colors.primary) }}
+              >
+                {company.logoText}
+              </div>
+            )}
             <p className="text-sm uppercase tracking-[0.16em] text-muted">Angebot</p>
             <h1 className="mt-3 max-w-2xl text-3xl font-semibold tracking-normal text-ink">{project.projectName}</h1>
             <p className="mt-4 max-w-3xl text-base leading-7 text-muted">{project.offerIntro}</p>
