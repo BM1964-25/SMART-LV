@@ -282,7 +282,14 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
           <p className="break-words">Web: {company.website}</p>
           <p className="break-words">E-Mail: {company.email}</p>
           <p className="break-words">Telefon: {company.phone}</p>
-          {company.agbUrl ? <p className="break-words">AGB: {company.agbUrl}</p> : null}
+          {company.agbUrl ? (
+            <p className="break-words">
+              AGB:{" "}
+              <a className="font-medium text-ink underline underline-offset-2" href={company.agbUrl} target="_blank" rel="noreferrer">
+                {company.agbUrl}
+              </a>
+            </p>
+          ) : null}
           {company.bookingUrl ? (
             <p className="break-words">
               <a className="font-medium text-ink underline underline-offset-2" href={company.bookingUrl} target="_blank" rel="noreferrer">
@@ -290,7 +297,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
               </a>
             </p>
           ) : null}
-          <p className="break-words">USt-ID / Steuernummer: {company.vatId}</p>
+          <p className="break-words">USt-ID: {company.vatId}</p>
           <p className="break-words md:col-span-3">Bankverbindung: {company.bank}</p>
         </div>
       </footer>
