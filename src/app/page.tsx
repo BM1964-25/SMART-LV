@@ -1891,7 +1891,7 @@ function ProjectWorkspace({
                 </Field>
               </div>
               <div className="xl:col-span-4">
-                <Field label="Annahme des Angebots">
+                <Field label="Auftragserteilung">
                   <TextArea value={project.acceptanceText} onChange={(event) => updateProject("acceptanceText", event.target.value)} className="min-h-20" />
                 </Field>
               </div>

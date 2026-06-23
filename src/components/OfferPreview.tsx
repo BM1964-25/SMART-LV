@@ -305,7 +305,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
 
       {project.acceptanceText ? (
         <section className="print-section print-keep border-t border-line py-8">
-          <h2 className="text-lg font-semibold text-ink">Annahme des Angebots</h2>
+          <h2 className="text-lg font-semibold text-ink">Auftragserteilung</h2>
           <p className="mt-3 leading-7 text-muted">{project.acceptanceText}</p>
           <div className="mt-10 grid gap-8 md:grid-cols-4">
             {["Ort, Datum", "Name", "Funktion", "Unterschrift"].map((label) => (
