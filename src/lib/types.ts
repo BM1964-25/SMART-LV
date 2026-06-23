@@ -90,7 +90,7 @@ export type Position = {
   number: string;
   title: string;
   description: string;
-  unit: "Std." | "Pauschal" | "Tag" | "Monat";
+  unit: "Std." | "Pauschal" | "Tag" | "Monat" | "Kilometer";
   quantity: number;
   rateKey: RateKey;
   unitPrice: number;

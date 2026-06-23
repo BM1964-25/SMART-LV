@@ -380,7 +380,7 @@ function createMetzgerReaStandardGroups(): PositionGroup[] {
       intro: "Gesonderte Abrechnung projektbezogener Fahrtkosten, Reisekosten und außergewöhnlicher Auslagen, sofern keine abweichende Vereinbarung getroffen wurde.",
       active: true,
       positions: [
-        makeMetzgerPosition("mrea-expenses", 1, "Kilometerpauschale Kraftfahrzeug", "Abrechnung projektbezogener Fahrten mit dem Kraftfahrzeug auf Basis der vereinbarten Kilometerpauschale.", "support", "Pauschal", 1, 0, "Auslagen"),
+        makeMetzgerPosition("mrea-expenses", 1, "Kilometerpauschale Kraftfahrzeug", "Abrechnung projektbezogener Fahrten mit dem Kraftfahrzeug auf Basis der vereinbarten Kilometerpauschale.", "support", "Kilometer", 1, 0, "Auslagen"),
         makeMetzgerPosition("mrea-expenses", 2, "Reisekosten nach tatsächlichem Aufwand", "Abrechnung notwendiger Bahn-, Flug-, Taxi-, Mietwagen-, Park-, Maut- und Übernachtungskosten nach tatsächlichem Aufwand und Nachweis.", "support", "Pauschal", 1, 0, "Auslagen"),
         makeMetzgerPosition("mrea-expenses", 3, "Außergewöhnliche projektbezogene Auslagen", "Gesonderte Berechnung sonstiger außergewöhnlicher projektbezogener Auslagen nach vorheriger Abstimmung mit dem Auftraggeber.", "support", "Pauschal", 1, 0, "Auslagen")
       ]
@@ -2192,6 +2192,7 @@ function LvEditor({
                                       <option>Pauschal</option>
                                       <option>Tag</option>
                                       <option>Monat</option>
+                                      <option>Kilometer</option>
                                     </Select>
                                   </Field>
                                   <Field label="Menge">
@@ -2942,6 +2943,7 @@ function PositionLibrary({
                         <option>Pauschal</option>
                         <option>Tag</option>
                         <option>Monat</option>
+                        <option>Kilometer</option>
                       </Select>
                     </Field>
                     <Field label="Menge">

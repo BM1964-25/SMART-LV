@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { PositionGroup, Project, RateKey } from "@/lib/types";
 
 const allowedRateKeys: RateKey[] = ["strategy", "concept", "project", "ux", "development", "ai", "prompt", "deployment", "training", "support"];
-const allowedUnits = ["Std.", "Pauschal", "Tag", "Monat"] as const;
+const allowedUnits = ["Std.", "Pauschal", "Tag", "Monat", "Kilometer"] as const;
 const allowedStatuses = ["Offen", "Abgestimmt", "Optional", "Zurückgestellt"] as const;
 
 export async function POST(request: NextRequest) {

@@ -225,6 +225,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
                       <p className="text-right text-muted">
                         {formatCurrency(position.unitPrice)}
                         {position.unit === "Std." ? "/Std." : null}
+                        {position.unit === "Kilometer" ? "/km" : null}
                       </p>
                       <p className="text-right font-semibold text-ink">{formatCurrency(positionTotal(position))}</p>
                     </div>
