@@ -104,7 +104,7 @@ export const companyProfiles: CompanyProfile[] = [
     phone: "+49 162 7111 911",
     website: "www.metzger-rea.de",
     agbUrl: "https://www.metzger-rea.de/agb",
-    bookingUrl: "https://www.metzger-rea.de/termin",
+    bookingUrl: "https://booking.builtsmart-ai.app/book/profile/metzger-real-estate-advisory?embed=1",
     vatId: "DE000000003",
     bank: "Kontoinhaber Bernhard Metzger, IBAN DE00 0000 0000 0000 0000 03, BIC MREADDE",
     contact: "Bernhard Metzger",

@@ -443,10 +443,14 @@ function normalizeProfiles(savedProfiles: CompanyProfile[] | undefined) {
   const profiles = savedProfiles ?? companyProfiles;
   return profiles.map((profile) => {
     const defaultProfile = companyProfiles.find((item) => item.id === profile.id);
+    const bookingUrl =
+      profile.id === "metzger-real-estate" && (!profile.bookingUrl || profile.bookingUrl === "https://www.metzger-rea.de/termin")
+        ? defaultProfile?.bookingUrl ?? ""
+        : profile.bookingUrl ?? defaultProfile?.bookingUrl ?? "";
     return {
       ...profile,
       agbUrl: profile.agbUrl ?? defaultProfile?.agbUrl ?? "",
-      bookingUrl: profile.bookingUrl ?? defaultProfile?.bookingUrl ?? ""
+      bookingUrl
     };
   });
 }
