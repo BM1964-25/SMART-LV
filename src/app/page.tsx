@@ -7,6 +7,7 @@ import {
   Braces,
   Building2,
   CheckCircle2,
+  Contact,
   Copy,
   Download,
   Edit3,
@@ -46,6 +47,7 @@ type View =
   | "LV-Vorschau"
   | "Auftrag & Abrechnung"
   | "KI-Assistenz"
+  | "Kunden"
   | "Firmenprofile"
   | "Mandanten"
   | "Positionsbibliothek"
@@ -61,6 +63,7 @@ const navItems: { label: View; icon: typeof Home }[] = [
   { label: "LV-Vorschau", icon: Eye },
   { label: "Auftrag & Abrechnung", icon: ReceiptText },
   { label: "KI-Assistenz", icon: Bot },
+  { label: "Kunden", icon: Contact },
   { label: "Firmenprofile", icon: Building2 },
   { label: "Mandanten", icon: Users },
   { label: "Positionsbibliothek", icon: Library },
@@ -79,6 +82,34 @@ type LvTemplate = {
   updatedAt: string;
   groups: PositionGroup[];
 };
+
+type Customer = {
+  id: string;
+  companyName: string;
+  contactPerson: string;
+  address: string;
+  email: string;
+  phone: string;
+  customerNumber: string;
+  industry: string;
+  notes: string;
+};
+
+function createInitialCustomers(): Customer[] {
+  return [
+    {
+      id: "customer-musterbau",
+      companyName: "Musterbau Immobilien GmbH",
+      contactPerson: "Dr. Julia Hartmann",
+      address: "Musterbau Immobilien GmbH, Beispielstraße 10, 80331 München",
+      email: "julia.hartmann@musterbau.de",
+      phone: "+49 89 123456",
+      customerNumber: "KD-2026-001",
+      industry: "Immobilienwirtschaft",
+      notes: "Beispielkunde für Angebots- und LV-Prozesse."
+    }
+  ];
+}
 
 function createInitialLibraryPositions() {
   return initialGroups.flatMap((group) =>
@@ -346,6 +377,7 @@ export default function HomePage() {
   const [project, setProject] = useState<Project>(sampleProject);
   const [groups, setGroups] = useState<PositionGroup[]>(initialGroups);
   const [profiles, setProfiles] = useState<CompanyProfile[]>(companyProfiles);
+  const [customers, setCustomers] = useState<Customer[]>(createInitialCustomers);
   const [libraryPositions, setLibraryPositions] = useState<Position[]>(createInitialLibraryPositions);
   const [lvTemplates, setLvTemplates] = useState<LvTemplate[]>(createInitialProfileTemplates);
   const [orderBilling, setOrderBilling] = useState<OrderBilling>(sampleOrderBilling);
@@ -362,6 +394,7 @@ export default function HomePage() {
         project: Project;
         groups: PositionGroup[];
         profiles?: CompanyProfile[];
+        customers?: Customer[];
         libraryPositions?: Position[];
         lvTemplates?: LvTemplate[];
         orderBilling?: OrderBilling;
@@ -373,12 +406,14 @@ export default function HomePage() {
             .replace("KI-gestützte Angebots- und Wissensplattform", "KI-gestützte Angebotsplattform")
             .replace("K. I. Gestützte Angebots und Wissensplattform", "KI-gestützte Angebotsplattform"),
           shortDescription: parsed.project.shortDescription.replace(" und Wissensbereitstellung", ""),
+          offerDate: parsed.project.offerDate ?? sampleProject.offerDate,
           skontoPercent: parsed.project.skontoPercent ?? 0,
           skontoDays: parsed.project.skontoDays ?? 10
         });
         setGroups(parsed.groups.map((group) => ({ ...group, active: group.active ?? true })));
         const savedProfiles = parsed.profiles ?? companyProfiles;
         setProfiles(savedProfiles);
+        setCustomers(parsed.customers ?? createInitialCustomers());
         setLibraryPositions(parsed.libraryPositions ?? createInitialLibraryPositions());
         setLvTemplates(mergeProfileTemplates(parsed.lvTemplates, savedProfiles));
         const billing = parsed.orderBilling ?? sampleOrderBilling;
@@ -394,8 +429,8 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem(storageKey, JSON.stringify({ project, groups, profiles, libraryPositions, lvTemplates, orderBilling }));
-  }, [project, groups, profiles, libraryPositions, lvTemplates, orderBilling]);
+    window.localStorage.setItem(storageKey, JSON.stringify({ project, groups, profiles, customers, libraryPositions, lvTemplates, orderBilling }));
+  }, [project, groups, profiles, customers, libraryPositions, lvTemplates, orderBilling]);
 
   const company = profiles.find((profile) => profile.id === project.companyId) ?? profiles[0];
   const summary = calculateSummary(groups, project);
@@ -441,6 +476,45 @@ export default function HomePage() {
     setProfiles((current) =>
       current.map((profile) => (profile.id === profileId ? { ...profile, colors: { ...profile.colors, ...changes } } : profile))
     );
+  }
+
+  function updateCustomer(customerId: string, changes: Partial<Customer>) {
+    setCustomers((current) => current.map((customer) => (customer.id === customerId ? { ...customer, ...changes } : customer)));
+  }
+
+  function addCustomer() {
+    const id = `customer-${Date.now()}`;
+    setCustomers((current) => [
+      ...current,
+      {
+        id,
+        companyName: "Neuer Kunde",
+        contactPerson: "",
+        address: "",
+        email: "",
+        phone: "",
+        customerNumber: `KD-${new Date().getFullYear()}-${String(current.length + 1).padStart(3, "0")}`,
+        industry: "",
+        notes: ""
+      }
+    ]);
+  }
+
+  function deleteCustomer(customerId: string) {
+    const customer = customers.find((item) => item.id === customerId);
+    if (!customer) return;
+    if (!window.confirm(`Kunde "${customer.companyName}" löschen?`)) return;
+    setCustomers((current) => current.filter((item) => item.id !== customerId));
+  }
+
+  function applyCustomerToProject(customerId: string) {
+    const customer = customers.find((item) => item.id === customerId);
+    if (!customer) return;
+    setProject((current) => ({
+      ...current,
+      client: customer.companyName,
+      contactPerson: customer.contactPerson
+    }));
   }
 
   function updatePosition(groupId: string, positionId: string, changes: Partial<Position>) {
@@ -918,7 +992,9 @@ export default function HomePage() {
             />
           ) : null}
 
-          {activeView === "Projekte" || activeView === "Neues Angebot" ? <ProjectWorkspace project={project} updateProject={updateProject} /> : null}
+          {activeView === "Projekte" || activeView === "Neues Angebot" ? (
+            <ProjectWorkspace project={project} customers={customers} updateProject={updateProject} applyCustomerToProject={applyCustomerToProject} setActiveView={setActiveView} />
+          ) : null}
 
           {activeView === "Neues LV" ? (
             <NewLvWorkspace
@@ -975,6 +1051,8 @@ export default function HomePage() {
           ) : null}
 
           {activeView === "KI-Assistenz" ? <AiAssistant project={project} groups={groups} updatePosition={updatePosition} replaceGroupsFromAi={replaceGroupsFromAi} setActiveView={setActiveView} /> : null}
+
+          {activeView === "Kunden" ? <Customers customers={customers} updateCustomer={updateCustomer} addCustomer={addCustomer} deleteCustomer={deleteCustomer} applyCustomerToProject={applyCustomerToProject} /> : null}
 
           {activeView === "Firmenprofile" ? (
             <CompanyProfiles
@@ -1153,12 +1231,42 @@ function Dashboard({
   );
 }
 
-function ProjectWorkspace({ project, updateProject }: { project: Project; updateProject: <K extends keyof Project>(key: K, value: Project[K]) => void }) {
+function ProjectWorkspace({
+  project,
+  customers,
+  updateProject,
+  applyCustomerToProject,
+  setActiveView
+}: {
+  project: Project;
+  customers: Customer[];
+  updateProject: <K extends keyof Project>(key: K, value: Project[K]) => void;
+  applyCustomerToProject: (customerId: string) => void;
+  setActiveView: (view: View) => void;
+}) {
+  const selectedCustomer = customers.find((customer) => customer.companyName === project.client && customer.contactPerson === project.contactPerson);
+
   return (
     <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
       <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
         <SectionTitle title="Angebotsdaten" kicker="Projekt" />
         <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <Field label="Kunde auswählen">
+            <div className="grid gap-2 md:grid-cols-[1fr_auto]">
+              <Select value={selectedCustomer?.id ?? ""} onChange={(event) => event.target.value && applyCustomerToProject(event.target.value)}>
+                <option value="">Manuelle Eingabe</option>
+                {customers.map((customer) => (
+                  <option key={customer.id} value={customer.id}>
+                    {customer.companyName} · {customer.contactPerson || "ohne Ansprechpartner"}
+                  </option>
+                ))}
+              </Select>
+              <button type="button" onClick={() => setActiveView("Kunden")} className="rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-ink transition hover:border-slate-300">
+                Kunden öffnen
+              </button>
+            </div>
+          </Field>
+          <div />
           <Field label="Auftraggeber">
             <TextInput value={project.client} onChange={(event) => updateProject("client", event.target.value)} />
           </Field>
@@ -1170,6 +1278,9 @@ function ProjectWorkspace({ project, updateProject }: { project: Project; update
           </Field>
           <Field label="Angebotsnummer">
             <TextInput value={project.offerNumber} onChange={(event) => updateProject("offerNumber", event.target.value)} />
+          </Field>
+          <Field label="Angebotsdatum">
+            <TextInput type="date" value={project.offerDate} onChange={(event) => updateProject("offerDate", event.target.value)} />
           </Field>
           <Field label="Kalkulationsart">
             <Select value={project.calculationType} onChange={(event) => updateProject("calculationType", event.target.value as Project["calculationType"])}>
@@ -1755,6 +1866,89 @@ function Tenants() {
             <p className="text-sm font-medium text-muted">Mandant {index + 1}</p>
             <p className="mt-2 font-semibold text-ink">{tenant}</p>
             <p className="mt-3 text-sm text-muted">Eigene Angebote, Vorlagen und Firmenprofile vorbereitet.</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Customers({
+  customers,
+  updateCustomer,
+  addCustomer,
+  deleteCustomer,
+  applyCustomerToProject
+}: {
+  customers: Customer[];
+  updateCustomer: (customerId: string, changes: Partial<Customer>) => void;
+  addCustomer: () => void;
+  deleteCustomer: (customerId: string) => void;
+  applyCustomerToProject: (customerId: string) => void;
+}) {
+  return (
+    <div className="grid gap-5">
+      <div className="flex flex-col gap-4 rounded-lg border border-line bg-white p-6 shadow-sm md:flex-row md:items-end md:justify-between">
+        <div>
+          <SectionTitle title="Kundendatenbank" />
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
+            Kundenstammdaten werden lokal gespeichert und können im Angebot als Empfänger und Ansprechpartner übernommen werden.
+          </p>
+        </div>
+        <button type="button" onClick={addCustomer} className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-ink px-4 text-sm font-semibold text-white transition hover:bg-slate-700">
+          <Plus className="h-4 w-4" />
+          Kunde anlegen
+        </button>
+      </div>
+
+      <div className="grid gap-4">
+        {customers.map((customer) => (
+          <div key={customer.id} className="rounded-lg border border-line bg-white p-5 shadow-sm">
+            <div className="grid gap-4 xl:grid-cols-[1fr_220px]">
+              <div className="grid gap-4">
+                <div className="grid gap-3 md:grid-cols-2">
+                  <Field label="Firma / Empfänger">
+                    <TextInput value={customer.companyName} onChange={(event) => updateCustomer(customer.id, { companyName: event.target.value })} />
+                  </Field>
+                  <Field label="Ansprechpartner">
+                    <TextInput value={customer.contactPerson} onChange={(event) => updateCustomer(customer.id, { contactPerson: event.target.value })} />
+                  </Field>
+                  <Field label="Kundennummer">
+                    <TextInput value={customer.customerNumber} onChange={(event) => updateCustomer(customer.id, { customerNumber: event.target.value })} />
+                  </Field>
+                  <Field label="Branche">
+                    <TextInput value={customer.industry} onChange={(event) => updateCustomer(customer.id, { industry: event.target.value })} />
+                  </Field>
+                  <Field label="E-Mail">
+                    <TextInput value={customer.email} onChange={(event) => updateCustomer(customer.id, { email: event.target.value })} />
+                  </Field>
+                  <Field label="Telefon">
+                    <TextInput value={customer.phone} onChange={(event) => updateCustomer(customer.id, { phone: event.target.value })} />
+                  </Field>
+                </div>
+                <Field label="Adresse">
+                  <TextArea value={customer.address} onChange={(event) => updateCustomer(customer.id, { address: event.target.value })} />
+                </Field>
+                <Field label="Notizen">
+                  <TextArea value={customer.notes} onChange={(event) => updateCustomer(customer.id, { notes: event.target.value })} />
+                </Field>
+              </div>
+              <div className="grid content-start gap-3 rounded-md border border-line bg-slate-50 p-4">
+                <button type="button" onClick={() => applyCustomerToProject(customer.id)} className="rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700">
+                  In Angebot übernehmen
+                </button>
+                <button type="button" onClick={() => deleteCustomer(customer.id)} className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-line bg-white px-4 text-sm font-semibold text-ink transition hover:border-slate-300">
+                  <Trash2 className="h-4 w-4" />
+                  Löschen
+                </button>
+                <div className="border-t border-line pt-3 text-sm text-muted">
+                  <p className="font-semibold text-ink">{customer.companyName}</p>
+                  <p className="mt-2">{customer.contactPerson || "Kein Ansprechpartner hinterlegt"}</p>
+                  <p className="mt-2">{customer.email}</p>
+                  <p>{customer.phone}</p>
+                </div>
+              </div>
+            </div>
           </div>
         ))}
       </div>

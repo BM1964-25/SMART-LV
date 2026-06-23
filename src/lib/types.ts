@@ -53,6 +53,7 @@ export type Project = {
   calculationType: "Stundenbasiert" | "Pauschal" | "Hybrid";
   status: OfferStatus;
   offerNumber: string;
+  offerDate: string;
   validUntil: string;
   paymentTerms: string;
   vatRate: number;

@@ -112,6 +112,7 @@ export const sampleProject: Project = {
   calculationType: "Hybrid",
   status: "Entwurf",
   offerNumber: "BSAI-2026-001",
+  offerDate: "2026-06-23",
   validUntil: "30 Tage ab Angebotsdatum",
   paymentTerms: "40 % bei Beauftragung, 40 % nach Bereitstellung der Beta-Version, 20 % nach Abnahme.",
   vatRate: 19,

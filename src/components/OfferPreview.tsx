@@ -18,7 +18,7 @@ function readableTextColor(background: string) {
 export function OfferPreview({ project, groups, profiles }: { project: Project; groups: PositionGroup[]; profiles: CompanyProfile[] }) {
   const company = profiles.find((profile) => profile.id === project.companyId) ?? profiles[0];
   const summary = calculateSummary(groups, project);
-  const today = new Intl.DateTimeFormat("de-DE", { dateStyle: "long" }).format(new Date());
+  const offerDate = new Intl.DateTimeFormat("de-DE", { dateStyle: "long" }).format(new Date(`${project.offerDate}T12:00:00`));
   const visibleGroups = activeGroups(groups).filter((group) => group.positions.some((position) => position.active));
   const subtotal = summary.net + summary.discount;
   const printOffer = () => {
@@ -66,7 +66,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
           <PreviewMeta label="Empfänger" value={project.client} />
           <PreviewMeta label="Ansprechpartner" value={project.contactPerson} />
           <PreviewMeta label="Angebotsnummer" value={project.offerNumber} />
-          <PreviewMeta label="Datum" value={today} />
+          <PreviewMeta label="Datum" value={offerDate} />
         </div>
       </section>
 
