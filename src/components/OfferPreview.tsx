@@ -15,6 +15,20 @@ function readableTextColor(background: string) {
   return luminance > 0.62 ? "#111827" : "#ffffff";
 }
 
+function LinkedAgbText({ text, url }: { text: string; url?: string }) {
+  if (!url || !text.includes(url)) return <>{text}</>;
+  const [before, after] = text.split(url);
+  return (
+    <>
+      {before}
+      <a className="font-medium text-ink underline underline-offset-2" href={url} target="_blank" rel="noreferrer">
+        {url}
+      </a>
+      {after}
+    </>
+  );
+}
+
 export function OfferPreview({ project, groups, profiles }: { project: Project; groups: PositionGroup[]; profiles: CompanyProfile[] }) {
   const company = profiles.find((profile) => profile.id === project.companyId) ?? profiles[0];
   const summary = calculateSummary(groups, project);
@@ -217,15 +231,9 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
           {project.contractBasis ? (
             <>
               <h2 className="mt-6 text-lg font-semibold text-ink">Vertragsgrundlage</h2>
-              <p className="mt-3 leading-7 text-muted">{project.contractBasis}</p>
-              {company.agbUrl ? (
-                <p className="mt-2 leading-7 text-muted">
-                  AGB:{" "}
-                  <a className="font-medium text-ink underline underline-offset-2" href={company.agbUrl} target="_blank" rel="noreferrer">
-                    {company.agbUrl}
-                  </a>
-                </p>
-              ) : null}
+              <p className="mt-3 leading-7 text-muted">
+                <LinkedAgbText text={project.contractBasis} url={company.agbUrl} />
+              </p>
             </>
           ) : null}
           <h2 className="mt-6 text-lg font-semibold text-ink">Gültigkeit</h2>
