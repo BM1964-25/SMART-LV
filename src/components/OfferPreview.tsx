@@ -94,19 +94,11 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
       <section className="print-section py-8">
         <p className="leading-7 text-muted">{introText}</p>
         {(project.projectName || project.projectLocation || project.projectVolume || project.servicePeriod) ? (
-          <div className="mt-6 overflow-hidden rounded-md border border-line">
-            <div className="grid bg-slate-50 text-xs font-semibold uppercase tracking-[0.08em] text-muted md:grid-cols-4">
-              <p className="border-b border-line px-4 py-3 md:border-b-0 md:border-r">Projekt</p>
-              <p className="border-b border-line px-4 py-3 md:border-b-0 md:border-r">Standort</p>
-              <p className="border-b border-line px-4 py-3 md:border-b-0 md:border-r">Projektvolumen</p>
-              <p className="px-4 py-3">Leistungszeitraum</p>
-            </div>
-            <div className="grid text-sm font-medium text-ink md:grid-cols-4">
-              <p className="break-words border-b border-line px-4 py-3 md:border-b-0 md:border-r">{project.projectName || "-"}</p>
-              <p className="break-words border-b border-line px-4 py-3 md:border-b-0 md:border-r">{project.projectLocation || "-"}</p>
-              <p className="break-words border-b border-line px-4 py-3 md:border-b-0 md:border-r">{project.projectVolume || "-"}</p>
-              <p className="break-words px-4 py-3">{project.servicePeriod || "-"}</p>
-            </div>
+          <div className="mt-6 grid gap-4 md:grid-cols-4">
+            <PreviewMeta label="Projekt" value={project.projectName || "-"} />
+            <PreviewMeta label="Standort" value={project.projectLocation || "-"} />
+            <PreviewMeta label="Projektvolumen" value={project.projectVolume || "-"} />
+            <PreviewMeta label="Leistungszeitraum" value={project.servicePeriod || "-"} />
           </div>
         ) : null}
         {project.assignmentReason ? (
