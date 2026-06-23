@@ -331,6 +331,16 @@ function mergeProfileTemplates(savedTemplates: LvTemplate[] | undefined, profile
   return [...defaultTemplates, ...customTemplates];
 }
 
+function normalizeCompanyProfiles(profiles: CompanyProfile[]) {
+  const yellowValues = new Set(["#ffff00", "#fff200", "#ffea00", "#facc15", "#fde047"]);
+  return profiles.map((profile) => {
+    if (profile.id !== "metzger-real-estate") return profile;
+    const primary = profile.colors.primary.toLowerCase();
+    if (!yellowValues.has(primary)) return profile;
+    return { ...profile, colors: { ...profile.colors, primary: "#111827" } };
+  });
+}
+
 export default function HomePage() {
   const [activeView, setActiveView] = useState<View>("Dashboard");
   const [project, setProject] = useState<Project>(sampleProject);
@@ -367,7 +377,7 @@ export default function HomePage() {
           skontoDays: parsed.project.skontoDays ?? 10
         });
         setGroups(parsed.groups.map((group) => ({ ...group, active: group.active ?? true })));
-        const savedProfiles = parsed.profiles ?? companyProfiles;
+        const savedProfiles = normalizeCompanyProfiles(parsed.profiles ?? companyProfiles);
         setProfiles(savedProfiles);
         setLibraryPositions(parsed.libraryPositions ?? createInitialLibraryPositions());
         setLvTemplates(mergeProfileTemplates(parsed.lvTemplates, savedProfiles));

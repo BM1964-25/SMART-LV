@@ -75,7 +75,7 @@ export const companyProfiles: CompanyProfile[] = [
     footer: "Metzger Real Estate Advisory steht für präzise Analyse, belastbare Entscheidungen und digitale Exzellenz in Immobilienprojekten.",
     liability: "Dieses Angebot basiert auf den zum Angebotszeitpunkt bekannten Rahmenbedingungen und ersetzt keine rechtliche oder steuerliche Prüfung.",
     offerText: "Die Leistungen werden mit besonderem Blick auf belastbare Immobilienprozesse, Entscheidungsqualität und nachhaltige Betriebsfähigkeit strukturiert.",
-    colors: { primary: "#2C3137", secondary: "#EEF0F2", accent: "#9C7A42" },
+    colors: { primary: "#111827", secondary: "#EEF0F2", accent: "#9C7A42" },
     exportLayout: "Zurückhaltendes Business-Layout mit hochwertigem Akzent"
   },
   {
