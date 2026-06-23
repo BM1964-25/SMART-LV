@@ -111,26 +111,28 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
           </div>
         ) : null}
         <div className="mt-6 grid gap-5 md:grid-cols-2">
-          <div className="md:col-span-2">
-            <h3 className="text-sm font-semibold text-ink">Projektbeschreibung</h3>
-            <p className="mt-2 leading-7 text-muted">{project.shortDescription}</p>
+          <div className="grid gap-5">
+            <div>
+              <h3 className="text-sm font-semibold text-ink">Projektbeschreibung</h3>
+              <p className="mt-2 leading-7 text-muted">{project.shortDescription}</p>
+            </div>
+            {project.serviceScope ? (
+              <div>
+                <h3 className="text-sm font-semibold text-ink">Projekt- und Leistungsrahmen</h3>
+                <p className="mt-2 leading-7 text-muted">{project.serviceScope}</p>
+              </div>
+            ) : null}
           </div>
-          {project.serviceScope ? (
-            <div>
-              <h3 className="text-sm font-semibold text-ink">Projekt- und Leistungsrahmen</h3>
-              <p className="mt-2 leading-7 text-muted">{project.serviceScope}</p>
-            </div>
-          ) : null}
-          {project.contractorRole ? (
-            <div>
-              <h3 className="text-sm font-semibold text-ink">Funktion des Auftragnehmers</h3>
-              <p className="mt-2 leading-7 text-muted">{project.contractorRole}</p>
-            </div>
-          ) : null}
           <div>
             <h3 className="text-sm font-semibold text-ink">Zielsetzung</h3>
             <p className="mt-2 leading-7 text-muted">{project.objective}</p>
           </div>
+          {project.contractorRole ? (
+            <div className="md:col-span-2">
+              <h3 className="text-sm font-semibold text-ink">Funktion des Auftragnehmers</h3>
+              <p className="mt-2 leading-7 text-muted">{project.contractorRole}</p>
+            </div>
+          ) : null}
         </div>
       </section>
 
