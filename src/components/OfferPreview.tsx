@@ -75,10 +75,10 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
           <div>
             {company.id === "metzger-real-estate" ? (
               <div className="mb-8">
-                <p className="text-3xl font-semibold uppercase leading-tight tracking-[0.12em] text-slate-500 sm:text-4xl">
+                <p className="text-3xl font-semibold uppercase leading-tight tracking-[0.12em] text-slate-700 sm:text-4xl">
                   Metzger - Real Estate Advisory
                 </p>
-                <p className="mt-2 text-base text-muted">use experience - secure values</p>
+                <p className="mt-2 text-base text-slate-600">use experience - secure values</p>
               </div>
             ) : (
               <div
@@ -154,7 +154,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
         </div>
       </section>
 
-      <section className="print-section border-t border-line py-8">
+      <section className="print-section print-page-break-before border-t border-line py-8">
         {project.plannedProjectStart ? (
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-ink">Leistungszeitraum</h2>
@@ -227,13 +227,13 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
       </section>
 
       {project.meetingBillingNote ? (
-        <section className="print-section border-t border-line py-8">
+        <section className="print-section print-compact border-t border-line py-6">
           <h2 className="text-lg font-semibold text-ink">Projektbesprechungen und Ortstermine</h2>
           <p className="mt-3 leading-7 text-muted">{project.meetingBillingNote}</p>
         </section>
       ) : null}
 
-      <section className="print-section print-keep border-t border-line py-8">
+      <section className="print-section print-compact print-keep border-t border-line py-6">
         <h2 className="text-lg font-semibold text-ink">Zusammenfassung der Leistungsbereiche</h2>
         <div className="mt-5 overflow-hidden rounded-lg border border-line">
           <div className="divide-y divide-line">
@@ -259,13 +259,13 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
       </section>
 
       {project.changeTerms ? (
-        <section className="print-section border-t border-line py-8">
+        <section className="print-section print-compact border-t border-line py-6">
           <h2 className="text-lg font-semibold text-ink">Leistungsänderungen</h2>
           <p className="mt-3 leading-7 text-muted">{project.changeTerms}</p>
         </section>
       ) : null}
 
-      <section className="print-section border-t border-line py-8">
+      <section className="print-section print-compact border-t border-line py-6">
         <div>
           <h2 className="text-lg font-semibold text-ink">Zahlungsbedingungen</h2>
           <p className="mt-3 leading-7 text-muted">{project.paymentTerms}</p>
@@ -291,10 +291,10 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
       </section>
 
       {project.acceptanceText ? (
-        <section className="print-section print-keep border-t border-line py-8">
+        <section className="print-section print-compact print-keep border-t border-line py-6">
           <h2 className="text-lg font-semibold text-ink">Auftragserteilung</h2>
           <p className="mt-3 leading-7 text-muted">{project.acceptanceText}</p>
-          <div className="mt-10 grid gap-8 md:grid-cols-4">
+          <div className="mt-8 grid gap-6 md:grid-cols-4">
             {["Ort, Datum", "Name", "Funktion", "Unterschrift"].map((label) => (
               <div key={label} className="border-t border-line pt-3 text-sm font-medium text-muted">
                 {label}
@@ -304,7 +304,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
         </section>
       ) : null}
 
-      <footer className="print-keep border-t border-line pt-6 text-sm leading-6 text-muted">
+      <footer className="print-keep border-t border-line pt-5 text-sm leading-6 text-muted">
         <p className="font-medium text-ink">{company.name}</p>
         <p>{company.footer}</p>
         <div className="mt-4 grid gap-x-8 gap-y-2 md:grid-cols-3">
@@ -328,7 +328,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
             </p>
           ) : null}
           <p className="break-words">USt-ID: {company.vatId}</p>
-          <p className="break-words md:col-span-2">Bankverbindung: {company.bank}</p>
+          <p className="break-words md:col-span-3">Bankverbindung: {company.bank}</p>
         </div>
       </footer>
     </article>
