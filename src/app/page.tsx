@@ -16,6 +16,7 @@ import {
   EyeOff,
   FileText,
   GripVertical,
+  HelpCircle,
   Home,
   LayoutTemplate,
   Library,
@@ -35,6 +36,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { OfferPreview } from "@/components/OfferPreview";
+import { HelpDialog } from "@/components/HelpDialog";
 import { Field, IconButton, SectionTitle, Select, StatCard, TextArea, TextInput } from "@/components/ui";
 import { activeGroups, calculateSummary, formatCurrency, groupNumber, groupTotal, positionNumber, positionTotal, renumberGroups } from "@/lib/calculations";
 import {
@@ -581,6 +583,7 @@ export default function HomePage() {
   const [lvTemplates, setLvTemplates] = useState<LvTemplate[]>(createInitialProfileTemplates);
   const [orderBilling, setOrderBilling] = useState<OrderBilling>(sampleOrderBilling);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("Alle Kategorien");
   const [statusFilter, setStatusFilter] = useState("Alle Status");
@@ -1326,6 +1329,14 @@ export default function HomePage() {
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
+                onClick={() => setHelpOpen(true)}
+                className="inline-flex h-10 items-center gap-2 rounded-md border border-blue-100 bg-blue-50 px-3 text-sm font-semibold text-blue-800 transition hover:border-blue-200 hover:bg-blue-100"
+              >
+                <HelpCircle className="h-4 w-4" />
+                Hilfe
+              </button>
+              <button
+                type="button"
                 onClick={() => setActiveView("Firmenprofile")}
                 className="inline-flex h-10 items-center gap-2 rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink transition hover:border-slate-300"
                 title="Aktives Firmenprofil bearbeiten"
@@ -1492,6 +1503,7 @@ export default function HomePage() {
           {activeView === "Einstellungen" ? <SettingsPanel project={project} updateProject={updateProject} /> : null}
         </div>
       </section>
+      <HelpDialog open={helpOpen} onClose={() => setHelpOpen(false)} />
     </main>
   );
 }
