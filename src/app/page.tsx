@@ -1671,11 +1671,11 @@ function ProjectWorkspace({
           <section className="rounded-md border border-line p-4">
             <h3 className="font-semibold text-ink">3 Inhalt und Angebotsklarstellung</h3>
             <div className="mt-4 grid gap-4 md:grid-cols-2">
-              <Field label="Kurzbeschreibung">
-                <TextArea value={project.shortDescription} onChange={(event) => updateProject("shortDescription", event.target.value)} className="min-h-28" />
-              </Field>
               <Field label="Angebotseinleitung">
                 <TextArea value={project.offerIntro} onChange={(event) => updateProject("offerIntro", event.target.value)} className="min-h-28" />
+              </Field>
+              <Field label="Projektbeschreibung">
+                <TextArea value={project.shortDescription} onChange={(event) => updateProject("shortDescription", event.target.value)} className="min-h-28" />
               </Field>
               <Field label="Zielsetzung">
                 <TextArea value={project.objective} onChange={(event) => updateProject("objective", event.target.value)} className="min-h-28" />
