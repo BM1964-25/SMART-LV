@@ -51,10 +51,6 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
   const offerDate = new Intl.DateTimeFormat("de-DE", { dateStyle: "long" }).format(new Date(`${project.offerDate}T12:00:00`));
   const visibleGroups = activeGroups(groups).filter((group) => group.positions.some((position) => position.active));
   const subtotal = summary.net + summary.discount;
-  const introText =
-    project.companyId === "metzger-real-estate"
-      ? "Wir bedanken uns für Ihr Interesse an unseren Beratungs- und Unterstützungsleistungen. Auf Grundlage der vorliegenden Aufgabenstellung erstellen wir nachfolgend ein strukturiertes Leistungsverzeichnis für die vereinbarten immobilienbezogenen Beratungs-, Steuerungs-, Prüf- und Sachverständigenleistungen."
-      : "Wir bedanken uns für Ihr Interesse an der Entwicklung einer individuellen KI-gestützten Softwarelösung. Auf Grundlage der vorliegenden Anforderungen erstellen wir nachfolgend ein strukturiertes Leistungsverzeichnis für die Konzeption, Entwicklung, Implementierung und Einführung der Anwendung.";
   const printOffer = () => {
     printElement(".print-area", `${project.offerNumber} ${project.projectName}`.trim());
   };
@@ -129,9 +125,8 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
       </section>
 
       <section className="print-section py-8">
-        <p className="leading-7 text-muted">{introText}</p>
         {(project.projectName || project.projectLocation || project.projectVolume || project.plannedProjectStart) ? (
-          <div className="mt-6 grid gap-4 md:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-4">
             <PreviewMeta label="Projekt" value={project.projectName || "-"} />
             <PreviewMeta label="Standort" value={project.projectLocation || "-"} />
             <PreviewMeta label="Projektvolumen" value={project.projectVolume || "-"} />
