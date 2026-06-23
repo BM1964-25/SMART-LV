@@ -98,17 +98,235 @@ function cloneGroups(groups: PositionGroup[]) {
   );
 }
 
+function makeMetzgerPosition(
+  groupId: string,
+  index: number,
+  title: string,
+  description: string,
+  rateKey: Position["rateKey"] = "strategy",
+  unit: Position["unit"] = "Std.",
+  quantity = 1,
+  unitPrice = 250,
+  category = "Beratung"
+): Position {
+  return {
+    id: `mrea-${groupId}-${index}`,
+    groupId,
+    number: "0.0",
+    title,
+    description,
+    unit,
+    quantity,
+    rateKey,
+    unitPrice,
+    category,
+    required: false,
+    note: "Individuell nach Beauftragung und Leistungsumfang abrechenbar.",
+    status: "Offen",
+    active: true
+  };
+}
+
+function createMetzgerReaStandardGroups(): PositionGroup[] {
+  const groups: PositionGroup[] = [
+    {
+      id: "mrea-strategy",
+      title: "Strategische Beratung",
+      intro: "Strategische Beratung zur Entwicklung, Bewertung und Priorisierung immobilienbezogener Projekt-, Organisations- und Entscheidungsfragen.",
+      active: true,
+      positions: [
+        makeMetzgerPosition("mrea-strategy", 1, "Strategische Erstbewertung und Zielbild", "Analyse der Ausgangslage, Klärung der Zielsetzung, Bewertung strategischer Handlungsoptionen und Ableitung eines belastbaren Zielbildes."),
+        makeMetzgerPosition("mrea-strategy", 2, "Entscheidungsvorlage und Handlungsempfehlung", "Erstellung strukturierter Entscheidungsvorlagen mit Chancen, Risiken, Prioritäten, Maßnahmen und wirtschaftlichen Auswirkungen."),
+        makeMetzgerPosition("mrea-strategy", 3, "Management-Sparring und Beratungstermine", "Projektbezogene Beratung, Abstimmung mit Geschäftsführung, Eigentümer, Projektleitung oder weiteren Entscheidungsträgern.")
+      ]
+    },
+    {
+      id: "mrea-project-control",
+      title: "Projektsteuerung und Projektmanagement",
+      intro: "Operative Steuerung von Projekten mit Blick auf Kosten, Termine, Qualitäten, Risiken, Kommunikation und Entscheidungsfähigkeit.",
+      active: true,
+      positions: [
+        makeMetzgerPosition("mrea-project-control", 1, "Projektstruktur und Steuerungssystem", "Aufbau oder Prüfung von Projektstruktur, Rollen, Termin- und Kostensteuerung, Berichtswesen und Entscheidungswegen.", "project", "Std.", 1, 220, "Projektsteuerung"),
+        makeMetzgerPosition("mrea-project-control", 2, "Laufende Projektsteuerungsleistungen", "Koordination, Terminverfolgung, Kosten- und Maßnahmencontrolling, Protokollierung und Nachhalten offener Punkte.", "project", "Std.", 1, 220, "Projektsteuerung"),
+        makeMetzgerPosition("mrea-project-control", 3, "Jour fixe und Gremienvorbereitung", "Vorbereitung, Moderation und Nachbereitung von Projektbesprechungen, Lenkungskreisen und Entscheidungsrunden.", "project", "Std.", 1, 220, "Projektsteuerung")
+      ]
+    },
+    {
+      id: "mrea-interim",
+      title: "Interimsmanagement",
+      intro: "Zeitlich befristete Übernahme von Management-, Steuerungs- oder Koordinationsaufgaben in Projekten oder Organisationseinheiten.",
+      active: true,
+      positions: [
+        makeMetzgerPosition("mrea-interim", 1, "Interimsmandat Projektleitung", "Temporäre Übernahme projektleitender Aufgaben einschließlich Organisation, Steuerung, Kommunikation und Entscheidungsunterstützung.", "project", "Tag", 1, 1760, "Interimsmanagement"),
+        makeMetzgerPosition("mrea-interim", 2, "Interimsmandat Fachkoordination", "Zeitlich begrenzte fachliche Koordination von Technik, Bau, Betrieb, Bestandsaufnahme oder externen Dienstleistern.", "project", "Tag", 1, 1760, "Interimsmanagement")
+      ]
+    },
+    {
+      id: "mrea-risk",
+      title: "Risikomanagement und Chancenmanagement",
+      intro: "Systematische Identifikation, Bewertung, Steuerung und Dokumentation von Risiken und Chancen im Projekt- oder Bestandskontext.",
+      active: true,
+      positions: [
+        makeMetzgerPosition("mrea-risk", 1, "Risiko- und Chancenworkshop", "Durchführung strukturierter Workshops zur Aufnahme und Bewertung von Risiken, Chancen, Gegenmaßnahmen und Verantwortlichkeiten.", "strategy", "Std.", 1, 250, "Risikomanagement"),
+        makeMetzgerPosition("mrea-risk", 2, "Risikoregister und Maßnahmenplan", "Erstellung oder Fortschreibung eines Risikoregisters mit Eintrittswahrscheinlichkeit, Auswirkungen, Priorisierung und Maßnahmenverfolgung.", "concept", "Std.", 1, 250, "Risikomanagement"),
+        makeMetzgerPosition("mrea-risk", 3, "Review kritischer Projektparameter", "Bewertung kritischer Kosten-, Termin-, Qualitäts-, Vertrags- oder Organisationsrisiken und Ableitung von Handlungsoptionen.", "strategy", "Std.", 1, 250, "Risikomanagement")
+      ]
+    },
+    {
+      id: "mrea-crisis",
+      title: "Troubleshooting und Krisenmanagement",
+      intro: "Kurzfristige Stabilisierung und strukturierte Bearbeitung kritischer Projekt-, Bau-, Qualitäts- oder Organisationssituationen.",
+      active: true,
+      positions: [
+        makeMetzgerPosition("mrea-crisis", 1, "Krisenanalyse und Sofortmaßnahmenplan", "Schnelle Lagebewertung, Identifikation der Hauptursachen und Ableitung priorisierter Sofortmaßnahmen.", "strategy", "Std.", 1, 250, "Troubleshooting"),
+        makeMetzgerPosition("mrea-crisis", 2, "Taskforce-Steuerung", "Koordination beteiligter Parteien, Nachverfolgung kritischer Maßnahmen und Berichterstattung an Auftraggeber oder Entscheidungsgremium.", "project", "Std.", 1, 220, "Troubleshooting")
+      ]
+    },
+    {
+      id: "mrea-tdd",
+      title: "Technische Due Diligence",
+      intro: "Technische Prüfung von Immobilien, Projekten oder Portfolios zur Bewertung von Zustand, Risiken, Investitionsbedarf und Entscheidungsgrundlagen.",
+      active: true,
+      positions: [
+        makeMetzgerPosition("mrea-tdd", 1, "Objekt- und Dokumentenprüfung", "Prüfung vorhandener Unterlagen, Bestandsdokumentation, Wartungsnachweise, Genehmigungen, Gutachten und technischer Angaben.", "concept", "Std.", 1, 250, "Due Diligence"),
+        makeMetzgerPosition("mrea-tdd", 2, "Objektbegehung und Zustandsaufnahme", "Technische Begehung von Gebäude, Außenanlagen, technischen Anlagen und wesentlichen Bauteilen mit Fotodokumentation.", "strategy", "Std.", 1, 250, "Due Diligence"),
+        makeMetzgerPosition("mrea-tdd", 3, "TDD-Bericht und Maßnahmenbudget", "Erstellung eines technischen Due-Diligence-Berichts mit Befunden, Risiken, CapEx-Einschätzung und Handlungsempfehlungen.", "concept", "Std.", 1, 250, "Due Diligence")
+      ]
+    },
+    {
+      id: "mrea-construction-audit",
+      title: "Baurevision",
+      intro: "Unabhängige Prüfung von Bauprojekten, Bauabläufen, Abrechnungen, Dokumentationen und Qualitäts- oder Kostenrisiken.",
+      active: true,
+      positions: [
+        makeMetzgerPosition("mrea-construction-audit", 1, "Prüfung Baufortschritt und Leistungsstand", "Abgleich von vertraglich geschuldeten Leistungen, Baufortschritt, Dokumentation und erkennbarem Abweichungsbedarf.", "project", "Std.", 1, 220, "Baurevision"),
+        makeMetzgerPosition("mrea-construction-audit", 2, "Prüfung Nachträge und Abrechnungsgrundlagen", "Plausibilisierung von Nachträgen, Leistungsänderungen, Aufmaßen, Rechnungsgrundlagen und Dokumentationsständen.", "concept", "Std.", 1, 250, "Baurevision"),
+        makeMetzgerPosition("mrea-construction-audit", 3, "Revisionsbericht", "Dokumentation der Feststellungen mit Bewertung, Empfehlungen, Prioritäten und gegebenenfalls weiterem Prüfbedarf.", "concept", "Std.", 1, 250, "Baurevision")
+      ]
+    },
+    {
+      id: "mrea-quality",
+      title: "Qualitätsmanagement",
+      intro: "Aufbau, Prüfung und Begleitung von Qualitätsprozessen für Planung, Bauausführung, Bestand, Betrieb und Dokumentation.",
+      active: true,
+      positions: [
+        makeMetzgerPosition("mrea-quality", 1, "Qualitätskonzept und Prüfplan", "Definition von Qualitätszielen, Prüfprozessen, Abnahmekriterien, Verantwortlichkeiten und Dokumentationsanforderungen.", "concept", "Std.", 1, 250, "Qualitätsmanagement"),
+        makeMetzgerPosition("mrea-quality", 2, "Qualitätsbegehung und Mängeltracking", "Durchführung von Begehungen, strukturierte Erfassung von Abweichungen und Nachverfolgung von Maßnahmen.", "project", "Std.", 1, 220, "Qualitätsmanagement")
+      ]
+    },
+    {
+      id: "mrea-damage",
+      title: "Bauschadenanalyse",
+      intro: "Analyse von Bauschäden, Mängeln oder Auffälligkeiten mit Ursachenbewertung, Dokumentation und Handlungsempfehlung.",
+      active: true,
+      positions: [
+        makeMetzgerPosition("mrea-damage", 1, "Schadensaufnahme vor Ort", "Objektbezogene Aufnahme von Schadensbildern, Randbedingungen, Nutzungseinflüssen und erkennbaren Ursachenindikatoren.", "strategy", "Std.", 1, 250, "Bauschadenanalyse"),
+        makeMetzgerPosition("mrea-damage", 2, "Ursachenanalyse und Sanierungsempfehlung", "Bewertung möglicher Ursachen, Abgrenzung weiterer Untersuchungen und Ableitung technischer Maßnahmenempfehlungen.", "concept", "Std.", 1, 250, "Bauschadenanalyse"),
+        makeMetzgerPosition("mrea-damage", 3, "Dokumentation und Stellungnahme", "Erstellung einer schriftlichen Dokumentation oder Stellungnahme mit Fotodokumentation, Bewertung und Empfehlungen.", "concept", "Std.", 1, 250, "Bauschadenanalyse")
+      ]
+    },
+    {
+      id: "mrea-expert",
+      title: "Sachverständigenleistungen",
+      intro: "Fachliche Stellungnahmen, Plausibilisierungen und gutachterliche Einschätzungen zu technischen, baulichen oder organisatorischen Fragestellungen.",
+      active: true,
+      positions: [
+        makeMetzgerPosition("mrea-expert", 1, "Fachliche Stellungnahme", "Erstellung einer fachlichen Stellungnahme zu einer konkret abgegrenzten technischen oder baubezogenen Fragestellung.", "concept", "Std.", 1, 250, "Sachverständigenleistung"),
+        makeMetzgerPosition("mrea-expert", 2, "Teilnahme an Ortsterminen oder Abstimmungen", "Teilnahme an technischen Abstimmungen, Ortsterminen, Begehungen oder Besprechungen mit fachlicher Bewertung.", "strategy", "Std.", 1, 250, "Sachverständigenleistung")
+      ]
+    },
+    {
+      id: "mrea-building-analysis",
+      title: "Technische Bestandsanalysen",
+      intro: "Strukturierte Analyse technischer Gebäude-, Anlagen- oder Portfoliobestände als Grundlage für Entscheidungen, Budgets und Maßnahmen.",
+      active: true,
+      positions: [
+        makeMetzgerPosition("mrea-building-analysis", 1, "Bestandsaufnahme und Datenstruktur", "Aufnahme technischer Bestandsdaten, Sichtung vorhandener Unterlagen und Strukturierung der relevanten Informationen.", "concept", "Std.", 1, 250, "Bestandsanalyse"),
+        makeMetzgerPosition("mrea-building-analysis", 2, "Maßnahmen- und Prioritätenmatrix", "Ableitung von Instandhaltungs-, Modernisierungs- oder Prüfmaßnahmen mit Priorisierung und Budgetindikationen.", "strategy", "Std.", 1, 250, "Bestandsanalyse")
+      ]
+    },
+    {
+      id: "mrea-organization",
+      title: "Organisations- und Prozessoptimierung",
+      intro: "Analyse und Verbesserung von Organisationsstrukturen, Schnittstellen, Projektprozessen, Verantwortlichkeiten und Berichtswegen.",
+      active: true,
+      positions: [
+        makeMetzgerPosition("mrea-organization", 1, "Prozessanalyse und Schnittstellenbewertung", "Analyse bestehender Abläufe, Rollen, Übergabepunkte, Medienbrüche, Entscheidungswege und Optimierungspotenziale.", "strategy", "Std.", 1, 250, "Prozessoptimierung"),
+        makeMetzgerPosition("mrea-organization", 2, "Sollprozess und Umsetzungsfahrplan", "Entwicklung eines Sollprozesses mit Verantwortlichkeiten, Dokumentationslogik, Meilensteinen und Umsetzungsmaßnahmen.", "concept", "Std.", 1, 250, "Prozessoptimierung")
+      ]
+    },
+    {
+      id: "mrea-training",
+      title: "Schulungen, Workshops und Vorträge",
+      intro: "Konzeption und Durchführung von Schulungen, Workshops und Vorträgen zu technischen, organisatorischen oder projektbezogenen Themen.",
+      active: true,
+      positions: [
+        makeMetzgerPosition("mrea-training", 1, "Workshop-Konzeption und Vorbereitung", "Abstimmung von Zielgruppe, Lernzielen, Agenda, Unterlagen, Übungen und Ergebnissicherung.", "training", "Std.", 1, 220, "Schulung"),
+        makeMetzgerPosition("mrea-training", 2, "Durchführung Workshop, Schulung oder Vortrag", "Durchführung einer Schulung, eines Workshops oder Vortrags einschließlich Moderation und fachlicher Einordnung.", "training", "Tag", 1, 1760, "Schulung"),
+        makeMetzgerPosition("mrea-training", 3, "Dokumentation und Ergebniszusammenfassung", "Nachbereitung, Zusammenfassung der Ergebnisse, Fotoprotokoll oder Übergabe einer strukturierten Ergebnisdokumentation.", "training", "Std.", 1, 220, "Schulung")
+      ]
+    },
+    {
+      id: "mrea-individual",
+      title: "Sonstige individuell vereinbarte Beratungs- und Unterstützungsleistungen",
+      intro: "Weitere projektbezogene Leistungen nach individueller Vereinbarung, soweit sie dem Beratungs- und Unterstützungszweck dienen.",
+      active: true,
+      positions: [
+        makeMetzgerPosition("mrea-individual", 1, "Individuelle Beratungsleistung", "Sonstige abgestimmte Beratungs-, Analyse-, Koordinations- oder Unterstützungsleistung nach konkretem Projektbedarf.", "strategy", "Std.", 1, 250, "Individuell"),
+        makeMetzgerPosition("mrea-individual", 2, "Sonderauswertung oder Ad-hoc-Unterstützung", "Kurzfristige fachliche Zuarbeit, Auswertung, Stellungnahme oder Projektunterstützung nach vorheriger Abstimmung.", "concept", "Std.", 1, 250, "Individuell")
+      ]
+    },
+    {
+      id: "mrea-compensation",
+      title: "Vergütung und abrechenbare Leistungszeiten",
+      intro: "Abrechnungspositionen zur Abbildung von Stunden-, Tages-, Pauschal- oder Projektvergütung sowie vergütungspflichtigen Leistungszeiten.",
+      active: true,
+      positions: [
+        makeMetzgerPosition("mrea-compensation", 1, "Stundenbasierte Beratungsleistung", "Abrechnung projektbezogener Tätigkeiten nach vereinbartem Stundensatz, insbesondere Beratung, Besprechung, Analyse, Auswertung, Dokumentation, Bericht, Stellungnahme, Präsentation und Workshop.", "strategy", "Std.", 1, 250, "Vergütung"),
+        makeMetzgerPosition("mrea-compensation", 2, "Tagesbasierte Beratungsleistung", "Abrechnung projektbezogener Leistungen auf Basis eines vereinbarten Tagessatzes für Einsatztage, Workshops, Ortstermine oder Interimsleistungen.", "project", "Tag", 1, 1760, "Vergütung"),
+        makeMetzgerPosition("mrea-compensation", 3, "Pauschal- oder Projektvergütung", "Individuell vereinbarte Pauschal- oder Projektvergütung für abgegrenzte Leistungspakete, Arbeitsergebnisse oder Projektphasen.", "strategy", "Pauschal", 1, 0, "Vergütung"),
+        makeMetzgerPosition("mrea-compensation", 4, "Reisezeiten als Leistungszeit", "Vergütungspflichtige Reise- und Fahrtzeiten im Zusammenhang mit projektbezogenen Einsatzorten, Kunden, Baustellen oder Objekten, soweit vereinbart oder zur Leistungserbringung erforderlich.", "support", "Std.", 1, 180, "Vergütung"),
+        makeMetzgerPosition("mrea-compensation", 5, "Abschlagszahlung oder Vorschuss", "Abschlagszahlung oder Vorschuss für laufende oder bevorstehende Beratungs-, Projekt- oder Unterstützungsleistungen nach angemessener Vereinbarung.", "strategy", "Pauschal", 1, 0, "Vergütung")
+      ]
+    },
+    {
+      id: "mrea-expenses",
+      title: "Fahrtkosten und Auslagen",
+      intro: "Gesonderte Abrechnung projektbezogener Fahrtkosten, Reisekosten und außergewöhnlicher Auslagen, sofern keine abweichende Vereinbarung getroffen wurde.",
+      active: true,
+      positions: [
+        makeMetzgerPosition("mrea-expenses", 1, "Kilometerpauschale Kraftfahrzeug", "Abrechnung projektbezogener Fahrten mit dem Kraftfahrzeug auf Basis der vereinbarten Kilometerpauschale.", "support", "Pauschal", 1, 0, "Auslagen"),
+        makeMetzgerPosition("mrea-expenses", 2, "Reisekosten nach tatsächlichem Aufwand", "Abrechnung notwendiger Bahn-, Flug-, Taxi-, Mietwagen-, Park-, Maut- und Übernachtungskosten nach tatsächlichem Aufwand und Nachweis.", "support", "Pauschal", 1, 0, "Auslagen"),
+        makeMetzgerPosition("mrea-expenses", 3, "Außergewöhnliche projektbezogene Auslagen", "Gesonderte Berechnung sonstiger außergewöhnlicher projektbezogener Auslagen nach vorheriger Abstimmung mit dem Auftraggeber.", "support", "Pauschal", 1, 0, "Auslagen")
+      ]
+    }
+  ];
+
+  return renumberGroups(groups);
+}
+
 function createInitialProfileTemplates(profiles: CompanyProfile[] = companyProfiles): LvTemplate[] {
   const createdAt = "2026-06-20T00:00:00.000Z";
   return profiles.map((profile) => ({
     id: `template-${profile.id}-standard`,
     companyId: profile.id,
     name: `${profile.name} Standard-LV`,
-    description: `Profilgebundene LV-Grundstruktur für ${profile.name} mit eigener Angebotslogik und wiederverwendbaren Leistungsgruppen.`,
+    description:
+      profile.id === "metzger-real-estate"
+        ? "Standard-LV für strategische Beratung, Projektsteuerung, Due Diligence, Baurevision, Sachverständigenleistungen, Vergütung, Fahrtkosten und Auslagen."
+        : `Profilgebundene LV-Grundstruktur für ${profile.name} mit eigener Angebotslogik und wiederverwendbaren Leistungsgruppen.`,
     createdAt,
     updatedAt: createdAt,
-    groups: cloneGroups(initialGroups)
+    groups: profile.id === "metzger-real-estate" ? createMetzgerReaStandardGroups() : cloneGroups(initialGroups)
   }));
+}
+
+function mergeProfileTemplates(savedTemplates: LvTemplate[] | undefined, profiles: CompanyProfile[]) {
+  const defaultTemplates = createInitialProfileTemplates(profiles);
+  if (!savedTemplates) return defaultTemplates;
+  const defaultIds = new Set(defaultTemplates.map((template) => template.id));
+  const customTemplates = savedTemplates.filter((template) => !defaultIds.has(template.id));
+  return [...defaultTemplates, ...customTemplates];
 }
 
 export default function HomePage() {
@@ -150,7 +368,7 @@ export default function HomePage() {
         const savedProfiles = parsed.profiles ?? companyProfiles;
         setProfiles(savedProfiles);
         setLibraryPositions(parsed.libraryPositions ?? createInitialLibraryPositions());
-        setLvTemplates(parsed.lvTemplates ?? createInitialProfileTemplates(savedProfiles));
+        setLvTemplates(mergeProfileTemplates(parsed.lvTemplates, savedProfiles));
         const billing = parsed.orderBilling ?? sampleOrderBilling;
         setOrderBilling({
           ...billing,
