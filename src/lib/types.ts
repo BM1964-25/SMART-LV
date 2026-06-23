@@ -49,8 +49,15 @@ export type Project = {
   shortDescription: string;
   offerIntro: string;
   assignmentReason: string;
+  serviceScope: string;
   serviceDirectoryIntro: string;
+  serviceExclusion: string;
+  meetingBillingNote: string;
+  changeTerms: string;
+  contractBasis: string;
+  validityText: string;
   offerClarification: string;
+  acceptanceText: string;
   objective: string;
   technicalContext: string;
   modules: string[];

@@ -32,6 +32,30 @@ export const defaultAssignmentReason =
 export const defaultServiceDirectoryIntro =
   "Die nachfolgende Darstellung weist Mengen, Einheiten, Einzelpreise und Positionssummen transparent aus. Alternativ kann dieselbe interne Kalkulation als Abschnittspauschale angeboten werden, wenn einzelne Preisansätze im Angebot nicht offengelegt werden sollen.";
 
+export const defaultServiceScope =
+  "Die Leistungen werden als unabhängige Beratungs-, Steuerungs-, Analyse- und Unterstützungsleistungen erbracht. Der konkrete Umfang richtet sich nach den Anforderungen des Projekts und den jeweils abgestimmten Leistungsabrufen.";
+
+export const defaultServiceExclusion =
+  "Nicht ausdrücklich aufgeführte Leistungen sind nicht Bestandteil dieses Angebots und bedürfen einer gesonderten Beauftragung.";
+
+export const defaultMeetingBillingNote =
+  "Projektbesprechungen, Workshops, Baustellenbegehungen, Jour-fixe-Termine sowie sonstige Vor-Ort-Einsätze werden nach tatsächlichem Aufwand gemäß den vereinbarten Vergütungssätzen abgerechnet.";
+
+export const defaultChangeTerms =
+  "Änderungen, Ergänzungen oder Erweiterungen des vereinbarten Leistungsumfangs werden nach vorheriger Abstimmung gesondert vergütet.";
+
+export const defaultContractBasis =
+  "Die Leistungserbringung erfolgt auf Grundlage dieses Angebots sowie der Allgemeinen Geschäftsbedingungen von Metzger - Real Estate Advisory. Mit Auftragserteilung erkennt der Auftraggeber diese als Vertragsbestandteil an.";
+
+export const defaultValidityText =
+  "Dieses Angebot ist 30 Kalendertage ab Angebotsdatum gültig. Danach behalten wir uns eine Anpassung aufgrund geänderter Rahmenbedingungen vor.";
+
+export const defaultOfferBasis =
+  "Dieses Angebot basiert auf den zum Zeitpunkt der Angebotserstellung vorliegenden Informationen und Rahmenbedingungen. Änderungen des Leistungsumfangs, der Projektanforderungen oder sonstiger wesentlicher Rahmenbedingungen können eine Anpassung des Angebots erforderlich machen.";
+
+export const defaultAcceptanceText =
+  "Mit Unterzeichnung dieses Angebots beauftragt der Auftraggeber die beschriebenen Leistungen zu den genannten Konditionen.";
+
 export const companyProfiles: CompanyProfile[] = [
   {
     id: "builtsmart-hub",
@@ -112,9 +136,15 @@ export const sampleProject: Project = {
   shortDescription: "Konzeption und Entwicklung einer KI-Anwendung zur strukturierten Auswertung, Angebotserstellung und Angebotsvorbereitung.",
   offerIntro: "Die Lösung wird auf robuste KI-Workflows, transparente Wissensquellen und eine anwenderfreundliche Oberfläche ausgerichtet.",
   assignmentReason: defaultAssignmentReason,
+  serviceScope: defaultServiceScope,
   serviceDirectoryIntro: defaultServiceDirectoryIntro,
-  offerClarification:
-    "KI-Ausgaben werden durch geeignete Prüf-, Logging- und Freigabemechanismen abgesichert; produktive Nutzung erfolgt nach gemeinsam definierten Qualitätskriterien.",
+  serviceExclusion: defaultServiceExclusion,
+  meetingBillingNote: defaultMeetingBillingNote,
+  changeTerms: defaultChangeTerms,
+  contractBasis: defaultContractBasis,
+  validityText: defaultValidityText,
+  offerClarification: defaultOfferBasis,
+  acceptanceText: defaultAcceptanceText,
   objective:
     "Ziel ist eine leistungsfähige, anwenderfreundliche und zukunftsfähige Lösung, die wiederkehrende Arbeitsabläufe beschleunigt, Informationen konsolidiert und fundierte Entscheidungen unterstützt.",
   technicalContext:
@@ -125,7 +155,7 @@ export const sampleProject: Project = {
   offerNumber: "BSAI-2026-001",
   offerDate: "2026-06-23",
   validUntil: "30 Tage ab Angebotsdatum",
-  paymentTerms: "40 % bei Beauftragung, 40 % nach Bereitstellung der Beta-Version, 20 % nach Abnahme.",
+  paymentTerms: "Rechnungen sind innerhalb von 14 Kalendertagen nach Rechnungsstellung ohne Abzug zur Zahlung fällig.",
   vatRate: 19,
   discountPercent: 0,
   skontoPercent: 0,

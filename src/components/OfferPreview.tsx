@@ -83,10 +83,16 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
           </div>
         ) : null}
         <div className="mt-6 grid gap-5 md:grid-cols-2">
-          <div>
+          <div className="md:col-span-2">
             <h3 className="text-sm font-semibold text-ink">Projektbeschreibung</h3>
             <p className="mt-2 leading-7 text-muted">{project.shortDescription}</p>
           </div>
+          {project.serviceScope ? (
+            <div>
+              <h3 className="text-sm font-semibold text-ink">Projekt- und Leistungsrahmen</h3>
+              <p className="mt-2 leading-7 text-muted">{project.serviceScope}</p>
+            </div>
+          ) : null}
           <div>
             <h3 className="text-sm font-semibold text-ink">Zielsetzung</h3>
             <p className="mt-2 leading-7 text-muted">{project.objective}</p>
@@ -95,6 +101,12 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
       </section>
 
       <section className="print-section border-t border-line py-8">
+        {project.serviceExclusion ? (
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-ink">Leistungsabgrenzung</h2>
+            <p className="mt-3 leading-7 text-muted">{project.serviceExclusion}</p>
+          </div>
+        ) : null}
         <h2 className="text-lg font-semibold text-ink">Leistungsverzeichnis</h2>
         {project.serviceDirectoryIntro ? <p className="mt-2 max-w-4xl text-sm leading-6 text-muted">{project.serviceDirectoryIntro}</p> : null}
         <div className="print-table mt-5 overflow-hidden rounded-lg border border-line">
@@ -153,6 +165,13 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
         </div>
       </section>
 
+      {project.meetingBillingNote ? (
+        <section className="print-section border-t border-line py-8">
+          <h2 className="text-lg font-semibold text-ink">Besprechungen und Vor-Ort-Termine</h2>
+          <p className="mt-3 leading-7 text-muted">{project.meetingBillingNote}</p>
+        </section>
+      ) : null}
+
       <section className="print-section print-keep border-t border-line py-8">
         <h2 className="text-lg font-semibold text-ink">Zusammenfassung der Leistungsbereiche</h2>
         <div className="mt-5 overflow-hidden rounded-lg border border-line">
@@ -178,6 +197,13 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
         </div>
       </section>
 
+      {project.changeTerms ? (
+        <section className="print-section border-t border-line py-8">
+          <h2 className="text-lg font-semibold text-ink">Leistungsänderungen</h2>
+          <p className="mt-3 leading-7 text-muted">{project.changeTerms}</p>
+        </section>
+      ) : null}
+
       <section className="print-section grid gap-6 border-t border-line py-8 lg:grid-cols-[1fr_360px]">
         <div>
           <h2 className="text-lg font-semibold text-ink">Zahlungsbedingungen</h2>
@@ -188,9 +214,15 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
               netto zahlbaren Rechnungsbetrag gewährt.
             </p>
           ) : null}
+          {project.contractBasis ? (
+            <>
+              <h2 className="mt-6 text-lg font-semibold text-ink">Vertragsgrundlage</h2>
+              <p className="mt-3 leading-7 text-muted">{project.contractBasis}</p>
+            </>
+          ) : null}
           <h2 className="mt-6 text-lg font-semibold text-ink">Gültigkeit</h2>
-          <p className="mt-3 leading-7 text-muted">Dieses Angebot ist {project.validUntil} gültig.</p>
-          <h2 className="mt-6 text-lg font-semibold text-ink">Haftungshinweise</h2>
+          <p className="mt-3 leading-7 text-muted">{project.validityText || `Dieses Angebot ist ${project.validUntil} gültig.`}</p>
+          <h2 className="mt-6 text-lg font-semibold text-ink">Angebotsgrundlagen</h2>
           <p className="mt-3 leading-7 text-muted">{project.offerClarification}</p>
         </div>
         <div className="rounded-lg border border-line bg-slate-50 p-5">
@@ -220,6 +252,20 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
           </div>
         </div>
       </section>
+
+      {project.acceptanceText ? (
+        <section className="print-section print-keep border-t border-line py-8">
+          <h2 className="text-lg font-semibold text-ink">Annahme des Angebots</h2>
+          <p className="mt-3 leading-7 text-muted">{project.acceptanceText}</p>
+          <div className="mt-10 grid gap-8 md:grid-cols-4">
+            {["Ort, Datum", "Name", "Funktion", "Unterschrift"].map((label) => (
+              <div key={label} className="border-t border-line pt-3 text-sm font-medium text-muted">
+                {label}
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <footer className="print-keep border-t border-line pt-6 text-sm leading-6 text-muted">
         <p className="font-medium text-ink">{company.name}</p>

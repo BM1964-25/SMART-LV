@@ -39,8 +39,16 @@ import { Field, IconButton, SectionTitle, Select, StatCard, TextArea, TextInput 
 import { activeGroups, calculateSummary, formatCurrency, groupNumber, groupTotal, positionNumber, positionTotal, renumberGroups } from "@/lib/calculations";
 import {
   companyProfiles,
+  defaultAcceptanceText,
   defaultAssignmentReason,
+  defaultChangeTerms,
+  defaultContractBasis,
+  defaultMeetingBillingNote,
+  defaultOfferBasis,
   defaultServiceDirectoryIntro,
+  defaultServiceExclusion,
+  defaultServiceScope,
+  defaultValidityText,
   initialGroups,
   rateLabels,
   sampleOrderBilling,
@@ -433,15 +441,28 @@ function stripCompanyNameFromProjectName(projectName: string, profiles: CompanyP
 
 function sanitizeProject(project: Project, profiles: CompanyProfile[] = companyProfiles): Project {
   const profileDefaults = companyProfiles.find((profile) => profile.id === project.companyId) ?? companyProfiles[0];
+  const oldSoftwarePaymentTerms = "40 % bei Beauftragung, 40 % nach Bereitstellung der Beta-Version, 20 % nach Abnahme.";
+  const oldOfferClarifications = new Set([
+    "KI-Ausgaben werden durch geeignete Prüf-, Logging- und Freigabemechanismen abgesichert; produktive Nutzung erfolgt nach gemeinsam definierten Qualitätskriterien.",
+    "Dieses Angebot basiert auf den zum Angebotszeitpunkt bekannten Rahmenbedingungen und ersetzt keine rechtliche oder steuerliche Prüfung."
+  ]);
   return {
     ...project,
     projectName: stripCompanyNameFromProjectName(project.projectName ?? sampleProject.projectName, profiles),
     shortDescription: project.shortDescription ?? sampleProject.shortDescription,
     offerIntro: project.offerIntro ?? profileDefaults.offerText,
     assignmentReason: project.assignmentReason ?? defaultAssignmentReason,
+    serviceScope: project.serviceScope ?? defaultServiceScope,
     serviceDirectoryIntro: project.serviceDirectoryIntro ?? defaultServiceDirectoryIntro,
-    offerClarification: project.offerClarification ?? profileDefaults.liability,
+    serviceExclusion: project.serviceExclusion ?? defaultServiceExclusion,
+    meetingBillingNote: project.meetingBillingNote ?? defaultMeetingBillingNote,
+    changeTerms: project.changeTerms ?? defaultChangeTerms,
+    contractBasis: project.contractBasis ?? defaultContractBasis,
+    validityText: project.validityText ?? defaultValidityText,
+    offerClarification: !project.offerClarification || oldOfferClarifications.has(project.offerClarification) ? defaultOfferBasis : project.offerClarification,
+    acceptanceText: project.acceptanceText ?? defaultAcceptanceText,
     offerDate: project.offerDate ?? sampleProject.offerDate,
+    paymentTerms: !project.paymentTerms || project.paymentTerms === oldSoftwarePaymentTerms ? sampleProject.paymentTerms : project.paymentTerms,
     skontoPercent: project.skontoPercent ?? 0,
     skontoDays: project.skontoDays ?? 10
   };
@@ -1727,6 +1748,9 @@ function ProjectWorkspace({
               <Field label="Projektbeschreibung">
                 <TextArea value={project.shortDescription} onChange={(event) => updateProject("shortDescription", event.target.value)} className="min-h-28" />
               </Field>
+              <Field label="Projekt- und Leistungsrahmen">
+                <TextArea value={project.serviceScope} onChange={(event) => updateProject("serviceScope", event.target.value)} className="min-h-28" />
+              </Field>
               <Field label="Zielsetzung">
                 <TextArea value={project.objective} onChange={(event) => updateProject("objective", event.target.value)} className="min-h-28" />
               </Field>
@@ -1737,7 +1761,16 @@ function ProjectWorkspace({
                   className="min-h-28"
                 />
               </Field>
-              <Field label="Haftungs- und Angebotsklarstellung">
+              <Field label="Leistungsabgrenzung">
+                <TextArea value={project.serviceExclusion} onChange={(event) => updateProject("serviceExclusion", event.target.value)} className="min-h-28" />
+              </Field>
+              <Field label="Besprechungen und Vor-Ort-Termine">
+                <TextArea value={project.meetingBillingNote} onChange={(event) => updateProject("meetingBillingNote", event.target.value)} className="min-h-28" />
+              </Field>
+              <Field label="Leistungsänderungen">
+                <TextArea value={project.changeTerms} onChange={(event) => updateProject("changeTerms", event.target.value)} className="min-h-28" />
+              </Field>
+              <Field label="Angebotsgrundlagen">
                 <TextArea value={project.offerClarification} onChange={(event) => updateProject("offerClarification", event.target.value)} className="min-h-28" />
               </Field>
               <Field label="Technische oder fachliche Rahmenbedingungen">
@@ -1759,7 +1792,7 @@ function ProjectWorkspace({
                   <option>Hybrid</option>
                 </Select>
               </Field>
-              <Field label="Gültigkeitsdauer">
+              <Field label="Gültigkeitsdauer Kurzform">
                 <TextInput value={project.validUntil} onChange={(event) => updateProject("validUntil", event.target.value)} />
               </Field>
               <Field label="Umsatzsteuer in %">
@@ -1785,6 +1818,21 @@ function ProjectWorkspace({
               <div className="xl:col-span-4">
                 <Field label="Zahlungsbedingungen">
                   <TextArea value={project.paymentTerms} onChange={(event) => updateProject("paymentTerms", event.target.value)} className="min-h-20" />
+                </Field>
+              </div>
+              <div className="xl:col-span-4">
+                <Field label="Gültigkeit">
+                  <TextArea value={project.validityText} onChange={(event) => updateProject("validityText", event.target.value)} className="min-h-20" />
+                </Field>
+              </div>
+              <div className="xl:col-span-4">
+                <Field label="Vertragsgrundlage">
+                  <TextArea value={project.contractBasis} onChange={(event) => updateProject("contractBasis", event.target.value)} className="min-h-20" />
+                </Field>
+              </div>
+              <div className="xl:col-span-4">
+                <Field label="Annahme des Angebots">
+                  <TextArea value={project.acceptanceText} onChange={(event) => updateProject("acceptanceText", event.target.value)} className="min-h-20" />
                 </Field>
               </div>
             </div>
