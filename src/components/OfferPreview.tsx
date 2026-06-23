@@ -74,7 +74,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           <div>
             {company.id === "metzger-real-estate" ? (
-              <div className="mb-8">
+              <div className="mb-14">
                 <p className="text-3xl font-semibold uppercase leading-tight tracking-[0.12em] text-slate-700 sm:text-4xl">
                   Metzger - Real Estate Advisory
                 </p>
@@ -82,7 +82,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
               </div>
             ) : (
               <div
-                className="mb-8 inline-flex h-14 min-w-14 items-center justify-center rounded-md px-4 text-sm font-bold"
+                className="mb-14 inline-flex h-14 min-w-14 items-center justify-center rounded-md px-4 text-sm font-bold"
                 style={{ background: company.colors.primary, color: readableTextColor(company.colors.primary) }}
               >
                 {company.logoText}
@@ -107,7 +107,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
             <p>{company.website}</p>
           </div>
         </div>
-        <div className="mt-10 grid gap-4 md:grid-cols-4">
+        <div className="mb-12 mt-10 grid gap-4 md:grid-cols-4">
           <PreviewMeta label="Empfänger" value={project.client} />
           <PreviewMeta label="Ansprechpartner" value={project.contactPerson} />
           <PreviewMeta label="Angebotsnummer" value={project.offerNumber} />
