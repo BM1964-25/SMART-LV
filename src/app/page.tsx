@@ -400,6 +400,7 @@ function mergeProfileTemplates(savedTemplates: LvTemplate[] | undefined, profile
 }
 
 function sanitizeProject(project: Project): Project {
+  const profileDefaults = companyProfiles.find((profile) => profile.id === project.companyId) ?? companyProfiles[0];
   return {
     ...project,
     projectName: project.projectName
@@ -407,6 +408,8 @@ function sanitizeProject(project: Project): Project {
       .replace("K. I. Gestützte Angebots und Wissensplattform", "KI-gestützte Angebotsplattform")
       .replace("KI gestützte Arbeitsblatt Form", "KI-gestützte Angebotsplattform"),
     shortDescription: project.shortDescription.replace(" und Wissensbereitstellung", ""),
+    offerIntro: project.offerIntro ?? profileDefaults.offerText,
+    offerClarification: project.offerClarification ?? profileDefaults.liability,
     offerDate: project.offerDate ?? sampleProject.offerDate,
     skontoPercent: project.skontoPercent ?? 0,
     skontoDays: project.skontoDays ?? 10
@@ -429,6 +432,10 @@ function metzgerAlignedProject(project: Project): Project {
     projectName: "Beratungs- und Unterstützungsleistungen Real Estate Advisory",
     shortDescription:
       "Leistungsangebot für strategische Beratung, Projektsteuerung, technische Prüfungen, Qualitätsmanagement, Baurevision, Sachverständigenleistungen sowie abrechenbare Reise- und Auslagenpositionen.",
+    offerIntro:
+      "Die Leistungen werden mit besonderem Blick auf belastbare Immobilienprozesse, Entscheidungsqualität und nachhaltige Betriebsfähigkeit strukturiert.",
+    offerClarification:
+      "Dieses Angebot basiert auf den zum Angebotszeitpunkt bekannten Rahmenbedingungen und ersetzt keine rechtliche oder steuerliche Prüfung.",
     objective:
       "Ziel ist ein belastbares, fachlich klares und prüffähiges Leistungsbild für immobilienbezogene Beratungs-, Steuerungs- und Unterstützungsleistungen.",
     technicalContext:
@@ -1663,6 +1670,12 @@ function ProjectWorkspace({
           <Field label="Kurzbeschreibung">
             <TextArea value={project.shortDescription} onChange={(event) => updateProject("shortDescription", event.target.value)} />
           </Field>
+          <Field label="Angebotseinleitung">
+            <TextArea value={project.offerIntro} onChange={(event) => updateProject("offerIntro", event.target.value)} />
+          </Field>
+          <Field label="Haftungs- und Angebotsklarstellung">
+            <TextArea value={project.offerClarification} onChange={(event) => updateProject("offerClarification", event.target.value)} />
+          </Field>
           <Field label="Zielsetzung">
             <TextArea value={project.objective} onChange={(event) => updateProject("objective", event.target.value)} />
           </Field>
@@ -2228,14 +2241,8 @@ function CompanyProfiles({
             <Field label="Exportlayout">
               <TextArea value={activeProfile.exportLayout} onChange={(event) => updateCompanyProfile(activeProfile.id, { exportLayout: event.target.value })} />
             </Field>
-            <Field label="Angebotseinleitung">
-              <TextArea value={activeProfile.offerText} onChange={(event) => updateCompanyProfile(activeProfile.id, { offerText: event.target.value })} />
-            </Field>
             <Field label="Footer">
               <TextArea value={activeProfile.footer} onChange={(event) => updateCompanyProfile(activeProfile.id, { footer: event.target.value })} />
-            </Field>
-            <Field label="Haftungs- und Angebotsklarstellung">
-              <TextArea value={activeProfile.liability} onChange={(event) => updateCompanyProfile(activeProfile.id, { liability: event.target.value })} />
             </Field>
           </div>
         </div>

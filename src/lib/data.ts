@@ -104,6 +104,9 @@ export const sampleProject: Project = {
   contactPerson: "Dr. Julia Hartmann",
   projectName: "KI-gestützte Angebotsplattform",
   shortDescription: "Konzeption und Entwicklung einer KI-Anwendung zur strukturierten Auswertung, Angebotserstellung und Angebotsvorbereitung.",
+  offerIntro: "Die Lösung wird auf robuste KI-Workflows, transparente Wissensquellen und eine anwenderfreundliche Oberfläche ausgerichtet.",
+  offerClarification:
+    "KI-Ausgaben werden durch geeignete Prüf-, Logging- und Freigabemechanismen abgesichert; produktive Nutzung erfolgt nach gemeinsam definierten Qualitätskriterien.",
   objective:
     "Ziel ist eine leistungsfähige, anwenderfreundliche und zukunftsfähige Lösung, die wiederkehrende Arbeitsabläufe beschleunigt, Informationen konsolidiert und fundierte Entscheidungen unterstützt.",
   technicalContext:

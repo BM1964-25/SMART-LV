@@ -56,7 +56,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
             </div>
             <p className="text-sm uppercase tracking-[0.16em] text-muted">Angebot</p>
             <h1 className="mt-3 max-w-2xl text-3xl font-semibold tracking-normal text-ink">{project.projectName}</h1>
-            <p className="mt-4 max-w-3xl text-base leading-7 text-muted">{company.offerText}</p>
+            <p className="mt-4 max-w-3xl text-base leading-7 text-muted">{project.offerIntro}</p>
           </div>
           <div className="min-w-64 rounded-lg border border-line p-4 text-sm text-muted">
             <p className="font-semibold text-ink">{company.name}</p>
@@ -189,7 +189,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
           <h2 className="mt-6 text-lg font-semibold text-ink">Gültigkeit</h2>
           <p className="mt-3 leading-7 text-muted">Dieses Angebot ist {project.validUntil} gültig.</p>
           <h2 className="mt-6 text-lg font-semibold text-ink">Haftungshinweise</h2>
-          <p className="mt-3 leading-7 text-muted">{company.liability}</p>
+          <p className="mt-3 leading-7 text-muted">{project.offerClarification}</p>
         </div>
         <div className="rounded-lg border border-line bg-slate-50 p-5">
           <div className="flex justify-between py-2 text-sm">

@@ -47,6 +47,8 @@ export type Project = {
   contactPerson: string;
   projectName: string;
   shortDescription: string;
+  offerIntro: string;
+  offerClarification: string;
   objective: string;
   technicalContext: string;
   modules: string[];
