@@ -1824,7 +1824,7 @@ function ProjectWorkspace({
               <Field label="Nebenkosten und Auslagen">
                 <TextArea value={project.ancillaryCosts} onChange={(event) => updateProject("ancillaryCosts", event.target.value)} className="min-h-28" />
               </Field>
-              <Field label="Besprechungen und Vor-Ort-Termine">
+              <Field label="Projektbesprechungen und Ortstermine">
                 <TextArea value={project.meetingBillingNote} onChange={(event) => updateProject("meetingBillingNote", event.target.value)} className="min-h-28" />
               </Field>
               <Field label="Leistungsänderungen">

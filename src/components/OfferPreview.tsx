@@ -215,7 +215,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
 
       {project.meetingBillingNote ? (
         <section className="print-section border-t border-line py-8">
-          <h2 className="text-lg font-semibold text-ink">Besprechungen und Vor-Ort-Termine</h2>
+          <h2 className="text-lg font-semibold text-ink">Projektbesprechungen und Ortstermine</h2>
           <p className="mt-3 leading-7 text-muted">{project.meetingBillingNote}</p>
         </section>
       ) : null}
