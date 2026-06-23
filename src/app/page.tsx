@@ -1759,7 +1759,7 @@ function ProjectWorkspace({
                 <Field label="Projektvolumen">
                   <TextInput value={project.projectVolume} onChange={(event) => updateProject("projectVolume", event.target.value)} />
                 </Field>
-                <Field label="Geplanter Projektbeginn">
+                <Field label="Projektbeginn / Dauer">
                   <TextInput value={project.plannedProjectStart} onChange={(event) => updateProject("plannedProjectStart", event.target.value)} />
                 </Field>
                 <div className="xl:col-span-4">
