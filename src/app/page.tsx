@@ -41,6 +41,7 @@ type View =
   | "Dashboard"
   | "Projekte"
   | "Neues Angebot"
+  | "Neues LV"
   | "LV bearbeiten"
   | "LV-Vorschau"
   | "Auftrag & Abrechnung"
@@ -55,6 +56,7 @@ const navItems: { label: View; icon: typeof Home }[] = [
   { label: "Dashboard", icon: Home },
   { label: "Projekte", icon: Archive },
   { label: "Neues Angebot", icon: Plus },
+  { label: "Neues LV", icon: LayoutTemplate },
   { label: "LV bearbeiten", icon: FileText },
   { label: "LV-Vorschau", icon: Eye },
   { label: "Auftrag & Abrechnung", icon: ReceiptText },
@@ -310,10 +312,10 @@ function createInitialProfileTemplates(profiles: CompanyProfile[] = companyProfi
   return profiles.map((profile) => ({
     id: `template-${profile.id}-standard`,
     companyId: profile.id,
-    name: `${profile.name} Standard-LV`,
+    name: `${profile.name} Master-LV`,
     description:
       profile.id === "metzger-real-estate"
-        ? "Standard-LV für strategische Beratung, Projektsteuerung, Due Diligence, Baurevision, Sachverständigenleistungen, Vergütung, Fahrtkosten und Auslagen."
+        ? "Master-LV für strategische Beratung, Projektsteuerung, Due Diligence, Baurevision, Sachverständigenleistungen, Vergütung, Fahrtkosten und Auslagen."
         : `Profilgebundene LV-Grundstruktur für ${profile.name} mit eigener Angebotslogik und wiederverwendbaren Leistungsgruppen.`,
     createdAt,
     updatedAt: createdAt,
@@ -660,6 +662,77 @@ export default function HomePage() {
     setActiveView("LV bearbeiten");
   }
 
+  function findMasterTemplate(companyId = project.companyId) {
+    return (
+      lvTemplates.find((template) => template.companyId === companyId && template.id === `template-${companyId}-standard`) ??
+      lvTemplates.find((template) => template.companyId === companyId)
+    );
+  }
+
+  function startEmptyLv() {
+    setGroups([]);
+    setActiveView("LV bearbeiten");
+  }
+
+  function applyMasterLv() {
+    const masterTemplate = findMasterTemplate();
+    if (!masterTemplate) return;
+    setGroups(cloneGroups(masterTemplate.groups));
+    setActiveView("LV bearbeiten");
+  }
+
+  function copyMasterGroupToOffer(masterGroup: PositionGroup) {
+    const timestamp = Date.now();
+    const groupId = `group-${timestamp}-${masterGroup.id}`;
+    const groupCopy: PositionGroup = {
+      ...masterGroup,
+      id: groupId,
+      active: true,
+      positions: masterGroup.positions.map((position, index) => ({
+        ...position,
+        id: `p-${timestamp}-${index + 1}`,
+        groupId,
+        number: "0.0",
+        active: true
+      }))
+    };
+    setGroups((current) => renumberGroups([...current, groupCopy]));
+  }
+
+  function copyMasterPositionToOffer(masterGroup: PositionGroup, masterPosition: Position) {
+    const targetGroup = groups.find((group) => group.title === masterGroup.title);
+    const timestamp = Date.now();
+
+    if (targetGroup) {
+      const positionCopy: Position = {
+        ...masterPosition,
+        id: `p-${timestamp}`,
+        groupId: targetGroup.id,
+        number: "0.0",
+        active: true
+      };
+      setGroups((current) => renumberGroups(current.map((group) => (group.id === targetGroup.id ? { ...group, positions: [...group.positions, positionCopy] } : group))));
+      return;
+    }
+
+    const groupId = `group-${timestamp}-${masterGroup.id}`;
+    const groupCopy: PositionGroup = {
+      ...masterGroup,
+      id: groupId,
+      active: true,
+      positions: [
+        {
+          ...masterPosition,
+          id: `p-${timestamp}`,
+          groupId,
+          number: "0.0",
+          active: true
+        }
+      ]
+    };
+    setGroups((current) => renumberGroups([...current, groupCopy]));
+  }
+
   function duplicateLvTemplate(templateId: string) {
     const template = lvTemplates.find((item) => item.id === templateId);
     if (!template) return;
@@ -836,6 +909,21 @@ export default function HomePage() {
           ) : null}
 
           {activeView === "Projekte" || activeView === "Neues Angebot" ? <ProjectWorkspace project={project} updateProject={updateProject} /> : null}
+
+          {activeView === "Neues LV" ? (
+            <NewLvWorkspace
+              project={project}
+              groups={groups}
+              profiles={profiles}
+              templates={lvTemplates}
+              selectCompany={selectCompany}
+              startEmptyLv={startEmptyLv}
+              applyMasterLv={applyMasterLv}
+              copyMasterGroupToOffer={copyMasterGroupToOffer}
+              copyMasterPositionToOffer={copyMasterPositionToOffer}
+              setActiveView={setActiveView}
+            />
+          ) : null}
 
           {activeView === "LV bearbeiten" ? (
             <LvEditor
@@ -1134,6 +1222,156 @@ function ProjectWorkspace({ project, updateProject }: { project: Project; update
               onChange={(event) => updateProject("flatFee", event.target.value ? Number(event.target.value) : null)}
             />
           </Field>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function NewLvWorkspace({
+  project,
+  groups,
+  profiles,
+  templates,
+  selectCompany,
+  startEmptyLv,
+  applyMasterLv,
+  copyMasterGroupToOffer,
+  copyMasterPositionToOffer,
+  setActiveView
+}: {
+  project: Project;
+  groups: PositionGroup[];
+  profiles: CompanyProfile[];
+  templates: LvTemplate[];
+  selectCompany: (companyId: Project["companyId"]) => void;
+  startEmptyLv: () => void;
+  applyMasterLv: () => void;
+  copyMasterGroupToOffer: (group: PositionGroup) => void;
+  copyMasterPositionToOffer: (group: PositionGroup, position: Position) => void;
+  setActiveView: (view: View) => void;
+}) {
+  const company = profiles.find((profile) => profile.id === project.companyId) ?? profiles[0];
+  const masterTemplate =
+    templates.find((template) => template.companyId === project.companyId && template.id === `template-${project.companyId}-standard`) ??
+    templates.find((template) => template.companyId === project.companyId);
+  const offerGroups = activeGroups(groups);
+  const masterGroups = masterTemplate ? activeGroups(masterTemplate.groups) : [];
+  const offerPositionCount = offerGroups.reduce((sum, group) => sum + group.positions.filter((position) => position.active).length, 0);
+  const masterPositionCount = masterGroups.reduce((sum, group) => sum + group.positions.filter((position) => position.active).length, 0);
+
+  return (
+    <div className="grid gap-6">
+      <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
+        <div className="grid gap-4 xl:grid-cols-[1fr_260px_auto_auto] xl:items-end">
+          <div>
+            <SectionTitle title="Neues LV aus Master-LV" kicker={company.name} />
+            <p className="mt-3 max-w-4xl text-sm leading-6 text-muted">
+              Wähle ein Firmenprofil, starte ein leeres Angebots-LV oder übernimm das zugehörige Master-LV komplett. Einzelne Titel und Positionen können rechts aus dem Master-LV in das aktuelle Angebots-LV übernommen werden.
+            </p>
+          </div>
+          <Field label="Firmenprofil">
+            <Select value={project.companyId} onChange={(event) => selectCompany(event.target.value as Project["companyId"])}>
+              {profiles.map((profile) => (
+                <option key={profile.id} value={profile.id}>
+                  {profile.name}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <button type="button" onClick={startEmptyLv} className="inline-flex h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-ink transition hover:border-slate-300">
+            Leeres LV starten
+          </button>
+          <button type="button" onClick={applyMasterLv} disabled={!masterTemplate} className="inline-flex h-10 items-center justify-center rounded-md bg-ink px-4 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40">
+            Master-LV komplett übernehmen
+          </button>
+        </div>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-2">
+        <div className="rounded-lg border border-line bg-white shadow-sm">
+          <div className="border-b border-line p-5">
+            <SectionTitle title="Aktuelles Angebots-LV" kicker={`${offerGroups.length} Titel · ${offerPositionCount} Positionen`} />
+            <button type="button" onClick={() => setActiveView("LV bearbeiten")} className="mt-4 rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold text-ink transition hover:border-slate-300">
+              Im LV-Editor bearbeiten
+            </button>
+          </div>
+          <div className="max-h-[760px] overflow-auto p-5">
+            {offerGroups.length ? (
+              <div className="grid gap-4">
+                {offerGroups.map((group) => (
+                  <div key={group.id} className="rounded-md border border-line p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-muted">{groupNumber(groups, group.id)}</p>
+                        <h3 className="mt-1 font-semibold text-ink">{group.title}</h3>
+                      </div>
+                      <span className="shrink-0 text-sm font-semibold text-ink">{formatCurrency(groupTotal(group))}</span>
+                    </div>
+                    <div className="mt-3 grid gap-2">
+                      {group.positions.filter((position) => position.active).map((position) => (
+                        <div key={position.id} className="flex items-start justify-between gap-3 rounded-md bg-slate-50 px-3 py-2 text-sm">
+                          <span className="text-muted">{positionNumber(groups, group.id, position.id)} {position.title}</span>
+                          <span className="shrink-0 font-semibold text-ink">{formatCurrency(positionTotal(position))}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-md border border-dashed border-line p-8 text-center">
+                <p className="font-semibold text-ink">Noch kein Angebots-LV angelegt</p>
+                <p className="mt-2 text-sm text-muted">Übernimm rechts einen Titel, eine Position oder das komplette Master-LV.</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-line bg-white shadow-sm">
+          <div className="border-b border-line p-5">
+            <SectionTitle title="Master-LV" kicker={masterTemplate ? `${masterGroups.length} Titel · ${masterPositionCount} Positionen` : "Keine Vorlage"} />
+            {masterTemplate ? <p className="mt-3 text-sm leading-6 text-muted">{masterTemplate.description}</p> : null}
+          </div>
+          <div className="max-h-[760px] overflow-auto p-5">
+            {masterTemplate ? (
+              <div className="grid gap-4">
+                {masterGroups.map((group) => (
+                  <div key={group.id} className="rounded-md border border-line p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-muted">{groupNumber(masterTemplate.groups, group.id)}</p>
+                        <h3 className="mt-1 font-semibold text-ink">{group.title}</h3>
+                        <p className="mt-2 text-sm leading-6 text-muted">{group.intro}</p>
+                      </div>
+                      <button type="button" onClick={() => copyMasterGroupToOffer(group)} className="shrink-0 rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-ink transition hover:border-slate-300">
+                        Titel übernehmen
+                      </button>
+                    </div>
+                    <div className="mt-4 grid gap-2">
+                      {group.positions.filter((position) => position.active).map((position) => (
+                        <div key={position.id} className="grid gap-3 rounded-md bg-slate-50 px-3 py-3 md:grid-cols-[1fr_auto] md:items-center">
+                          <div>
+                            <p className="text-sm font-semibold text-ink">{positionNumber(masterTemplate.groups, group.id, position.id)} {position.title}</p>
+                            <p className="mt-1 text-sm leading-6 text-muted">{position.description}</p>
+                            <p className="mt-1 text-sm text-muted">{position.unit} · {position.quantity} · {formatCurrency(position.unitPrice)}</p>
+                          </div>
+                          <button type="button" onClick={() => copyMasterPositionToOffer(group, position)} className="rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-ink transition hover:border-slate-300">
+                            Position übernehmen
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-md border border-dashed border-line p-8 text-center">
+                <p className="font-semibold text-ink">Kein Master-LV vorhanden</p>
+                <p className="mt-2 text-sm text-muted">Speichere unter Vorlagen ein LV für dieses Firmenprofil.</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
