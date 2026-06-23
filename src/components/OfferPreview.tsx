@@ -1,7 +1,6 @@
 "use client";
 
 import { Printer } from "lucide-react";
-import Image from "next/image";
 import { activeGroups, calculateSummary, formatCurrency, groupNumber, groupTotal, positionNumber, positionTotal } from "@/lib/calculations";
 import { printElement } from "@/lib/print";
 import { CompanyProfile, PositionGroup, Project } from "@/lib/types";
@@ -75,19 +74,11 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           <div>
             {company.id === "metzger-real-estate" ? (
-              <div className="mb-8 flex max-w-3xl flex-col gap-3 sm:flex-row sm:items-end">
-                <Image
-                  src="/bernhard-metzger-signature.png"
-                  alt="Bernhard Metzger"
-                  width={520}
-                  height={180}
-                  className="h-24 w-80 object-contain object-left sm:h-28 sm:w-[360px]"
-                  priority
-                />
-                <div className="pb-2">
-                  <p className="text-2xl font-semibold uppercase leading-none tracking-[0.08em] text-ink sm:text-3xl">Real Estate Advisory</p>
-                  <p className="mt-2 text-base text-muted">use experience - secure values</p>
-                </div>
+              <div className="mb-8">
+                <p className="text-3xl font-semibold uppercase leading-tight tracking-[0.12em] text-slate-500 sm:text-4xl">
+                  Metzger - Real Estate Advisory
+                </p>
+                <p className="mt-2 text-base text-muted">use experience - secure values</p>
               </div>
             ) : (
               <div
