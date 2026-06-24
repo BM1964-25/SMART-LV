@@ -252,6 +252,133 @@ function cloneGroups(groups: PositionGroup[]) {
   );
 }
 
+function makeBuiltSmartAiPosition(
+  groupId: string,
+  index: number,
+  title: string,
+  description: string,
+  rateKey: Position["rateKey"] = "ai",
+  unit: Position["unit"] = "Std.",
+  quantity = 1,
+  unitPrice = 220,
+  category = "KI-Lösung",
+  required = true,
+  note = ""
+): Position {
+  return {
+    id: `bsai-${groupId}-${index}`,
+    groupId,
+    number: "0.0",
+    title,
+    description,
+    unit,
+    quantity,
+    rateKey,
+    unitPrice,
+    category,
+    required,
+    note,
+    status: required ? "Offen" : "Optional",
+    active: required
+  };
+}
+
+function createBuiltSmartAiStandardGroups(): PositionGroup[] {
+  const groups: PositionGroup[] = [
+    {
+      id: "bsai-strategy",
+      title: "Strategie, Anforderungen und Zielbild",
+      intro: "Klärung von Ausgangslage, Nutzenversprechen, priorisierten Anwendungsfällen, Datenlage und Erfolgskriterien.",
+      active: true,
+      positions: [
+        makeBuiltSmartAiPosition("bsai-strategy", 1, "Strategie- und Zielbildworkshop", "Moderierter Auftakt zur Klärung von Zielen, Nutzergruppen, Prozesskontext, Entscheidungswegen und wirtschaftlichem Nutzen.", "strategy", "Std.", 8, 250, "Strategie"),
+        makeBuiltSmartAiPosition("bsai-strategy", 2, "Anforderungsaufnahme und Prozessanalyse", "Strukturierte Aufnahme fachlicher Anforderungen, bestehender Arbeitsabläufe, Medienbrüche, Rollen, Datenquellen und Prioritäten.", "strategy", "Std.", 16, 250, "Analyse"),
+        makeBuiltSmartAiPosition("bsai-strategy", 3, "Umsetzungsfahrplan und Projektstruktur", "Ableitung von Phasen, Arbeitspaketen, Abhängigkeiten, Mitwirkungspflichten, Entscheidungsmeilensteinen und Aufwandstreibern.", "project", "Std.", 10, 220, "Projektsteuerung")
+      ]
+    },
+    {
+      id: "bsai-concept",
+      title: "Fachkonzept und Lösungsarchitektur",
+      intro: "Übersetzung der Anforderungen in ein belastbares Fach- und Architekturkonzept mit klaren Daten-, Rollen- und Integrationsregeln.",
+      active: true,
+      positions: [
+        makeBuiltSmartAiPosition("bsai-concept", 1, "Fachkonzept und Leistungsbeschreibung", "Beschreibung der fachlichen Funktionen, Datenflüsse, Rollen, Zustände, Freigaben, Exportlogik und Akzeptanzkriterien.", "concept", "Std.", 20, 250, "Konzeption"),
+        makeBuiltSmartAiPosition("bsai-concept", 2, "Technische Lösungsarchitektur", "Definition von Komponenten, Datenhaltung, Authentifizierung, Schnittstellen, Umgebungskonzept, Sicherheitsanforderungen und Betriebsmodell.", "concept", "Std.", 18, 250, "Architektur"),
+        makeBuiltSmartAiPosition("bsai-concept", 3, "Daten- und Integrationskonzept", "Prüfung relevanter Datenquellen, Import- und Exportwege, API-Anforderungen, Datenqualität und Zuständigkeiten.", "development", "Std.", 12, 180, "Integration", false, "Abhängig von vorhandenen Systemen und Zugängen.")
+      ]
+    },
+    {
+      id: "bsai-ux",
+      title: "UX, Oberfläche und Arbeitsabläufe",
+      intro: "Gestaltung klarer Nutzerführung, effizienter Eingaben, aussagekräftiger Vorschauen und robuster Bedienlogik.",
+      active: true,
+      positions: [
+        makeBuiltSmartAiPosition("bsai-ux", 1, "UX-Konzept und Informationsarchitektur", "Entwicklung von Nutzerflüssen, Navigation, Formularlogik, Statusanzeigen, Fehlerzuständen und wiederkehrenden Arbeitsabläufen.", "ux", "Std.", 16, 180, "UX/UI"),
+        makeBuiltSmartAiPosition("bsai-ux", 2, "UI-Design und Komponentenlayout", "Gestaltung von Screens, Tabellen, Karten, Vorschauen, Aktionsleisten und responsive Darstellung im abgestimmten Erscheinungsbild.", "ux", "Std.", 22, 180, "UX/UI"),
+        makeBuiltSmartAiPosition("bsai-ux", 3, "Prototyp und Review-Schleifen", "Aufbereitung eines klickbaren oder funktionsnahen Prototyps mit Review, Priorisierung und Anpassung der Bedienlogik.", "ux", "Std.", 10, 180, "UX/UI", false)
+      ]
+    },
+    {
+      id: "bsai-development",
+      title: "Anwendungsentwicklung",
+      intro: "Technische Umsetzung der Anwendung mit stabiler Datenstruktur, nachvollziehbarer Geschäftslogik und wiederverwendbaren Komponenten.",
+      active: true,
+      positions: [
+        makeBuiltSmartAiPosition("bsai-development", 1, "Frontend-Entwicklung", "Entwicklung der webbasierten Oberfläche mit Dashboard, Formularen, Tabellen, Bearbeitungsansichten, Vorschau und Exportfunktionen.", "development", "Std.", 48, 180, "Entwicklung"),
+        makeBuiltSmartAiPosition("bsai-development", 2, "Backend- und Speicherlogik", "Implementierung von Datenmodellen, Speicherprozessen, API-Routen, Validierungen, Statuslogik und vorbereiteter Mehrplatzfähigkeit.", "development", "Std.", 46, 180, "Entwicklung"),
+        makeBuiltSmartAiPosition("bsai-development", 3, "Rollen, Rechte und Arbeitsstände", "Vorbereitung von Nutzerrollen, Berechtigungen, Arbeitsständen, Versionen und nachvollziehbarer Bearbeitungshistorie.", "development", "Std.", 18, 180, "Entwicklung", false)
+      ]
+    },
+    {
+      id: "bsai-ai",
+      title: "KI-Funktionen und Wissenslogik",
+      intro: "Konzeption und Umsetzung produktiver KI-Funktionen mit prüfbaren Ergebnissen, Quellenbezug und fachlichen Leitplanken.",
+      active: true,
+      positions: [
+        makeBuiltSmartAiPosition("bsai-ai", 1, "KI-Anwendungsfälle und Prompt-Konzept", "Definition priorisierter KI-Anwendungsfälle, Eingabeformate, Antwortstrukturen, Systemregeln, Prüfhinweise und Eskalationspunkte.", "prompt", "Std.", 18, 220, "KI-Konzept"),
+        makeBuiltSmartAiPosition("bsai-ai", 2, "Wissensbasis und Quellenlogik", "Aufbereitung von Dokumenten, Textbausteinen, Vorlagen und Projektdaten für nachvollziehbare, quellenbezogene KI-Unterstützung.", "ai", "Std.", 30, 220, "KI-Implementierung"),
+        makeBuiltSmartAiPosition("bsai-ai", 3, "KI-Workflow und Ergebnisprüfung", "Umsetzung von KI-gestützten Vorschlägen, Qualitätssicherung, Logging, Freigabelogik und fachlicher Nachbearbeitung.", "ai", "Std.", 28, 220, "KI-Implementierung"),
+        makeBuiltSmartAiPosition("bsai-ai", 4, "Erweiterte Automatisierungen", "Zusätzliche Automatisierungen für Recherche, Textgenerierung, Strukturprüfung oder Datenübernahme nach gesonderter Abstimmung.", "ai", "Std.", 20, 220, "KI-Implementierung", false, "Optional je Automatisierungstiefe.")
+      ]
+    },
+    {
+      id: "bsai-quality",
+      title: "Qualitätssicherung, Datenschutz und Abnahme",
+      intro: "Systematische Prüfung von Funktion, Datenqualität, KI-Ausgaben, Sicherheit, Datenschutzanforderungen und Betriebsfähigkeit.",
+      active: true,
+      positions: [
+        makeBuiltSmartAiPosition("bsai-quality", 1, "Testkonzept und Funktionstests", "Planung und Durchführung von Tests für Kernprozesse, Berechnungen, Formulare, Schnittstellen, Speicherlogik und Exportausgaben.", "development", "Std.", 22, 180, "Qualität"),
+        makeBuiltSmartAiPosition("bsai-quality", 2, "KI-Qualitätsprüfung und Red-Team-Tests", "Prüfung von Antwortqualität, Halluzinationsrisiken, Quellenbezug, Grenzfällen, Missbrauchsszenarien und fachlicher Nachvollziehbarkeit.", "ai", "Std.", 18, 220, "Qualität"),
+        makeBuiltSmartAiPosition("bsai-quality", 3, "Datenschutz- und Sicherheitsreview", "Review von Datenflüssen, Zugriffsrechten, Protokollierung, Aufbewahrung, externen Diensten und organisatorischen Schutzmaßnahmen.", "concept", "Std.", 10, 250, "Qualität", false)
+      ]
+    },
+    {
+      id: "bsai-deployment",
+      title: "Deployment, Betrieb und Übergabe",
+      intro: "Bereitstellung der Lösung in der Zielumgebung einschließlich Konfiguration, Monitoring, Übergabe und Startbegleitung.",
+      active: true,
+      positions: [
+        makeBuiltSmartAiPosition("bsai-deployment", 1, "Deployment und Umgebungssetup", "Einrichtung von Hosting, Build-Prozess, Umgebungsvariablen, Domain, SSL, Laufzeitkonfiguration und technischer Abnahme.", "deployment", "Std.", 14, 180, "Deployment"),
+        makeBuiltSmartAiPosition("bsai-deployment", 2, "Monitoring und Betriebsdokumentation", "Dokumentation von Betrieb, Konfiguration, Fehleranalyse, Backups, Wartungspunkten und Verantwortlichkeiten.", "deployment", "Std.", 10, 180, "Betrieb"),
+        makeBuiltSmartAiPosition("bsai-deployment", 3, "Produktivstart und Hypercare", "Begleitung des Produktivstarts mit kurzfristiger Fehlerbehebung, Nutzerfeedback, Priorisierung und Stabilisierung.", "support", "Std.", 12, 180, "Support", false)
+      ]
+    },
+    {
+      id: "bsai-training-support",
+      title: "Einführung, Schulung und Weiterentwicklung",
+      intro: "Befähigung der Nutzer und planbare Weiterentwicklung nach Produktivstart.",
+      active: true,
+      positions: [
+        makeBuiltSmartAiPosition("bsai-training-support", 1, "Anwenderschulung", "Praxisnahe Einführung in Rollen, Abläufe, KI-Unterstützung, Qualitätsprüfung, typische Fehlerfälle und empfohlene Arbeitsweisen.", "training", "Std.", 8, 220, "Schulung"),
+        makeBuiltSmartAiPosition("bsai-training-support", 2, "Administratorenschulung", "Schulung technischer oder fachlicher Verantwortlicher zu Konfiguration, Pflege, Datenquellen, Qualitätskontrolle und Betrieb.", "training", "Std.", 6, 220, "Schulung", false),
+        makeBuiltSmartAiPosition("bsai-training-support", 3, "Support- und Weiterentwicklungskontingent", "Reserviertes Kontingent für Anwenderfragen, kleinere Anpassungen, Optimierungen und priorisierte Erweiterungen.", "support", "Monat", 3, 1800, "Support", false, "Monatliches Kontingent nach Vereinbarung.")
+      ]
+    }
+  ];
+
+  return renumberGroups(groups);
+}
+
 function makeMetzgerPosition(
   groupId: string,
   index: number,
@@ -468,11 +595,29 @@ function createInitialProfileTemplates(profiles: CompanyProfile[] = companyProfi
     description:
       profile.id === "metzger-real-estate"
         ? "LV-Vorlage für strategische Beratung, Projektsteuerung, Due Diligence, Baurevision, Sachverständigenleistungen, Vergütung, Fahrtkosten und Auslagen."
+        : profile.id === "builtsmart-ai"
+          ? "Optimierte LV-Vorlage für KI-Anwendungen: Strategie, Fachkonzept, UX, Entwicklung, KI-Funktionen, Qualitätssicherung, Deployment und Einführung."
         : `Profilgebundene LV-Grundstruktur für ${profile.name} mit eigener Angebotslogik und wiederverwendbaren Leistungsgruppen.`,
     createdAt,
     updatedAt: createdAt,
-    groups: profile.id === "metzger-real-estate" ? createMetzgerReaStandardGroups() : cloneGroups(initialGroups)
+    groups:
+      profile.id === "metzger-real-estate"
+        ? createMetzgerReaStandardGroups()
+        : profile.id === "builtsmart-ai"
+          ? createBuiltSmartAiStandardGroups()
+          : cloneGroups(initialGroups)
   }));
+}
+
+function isLegacyBuiltSmartAiTemplate(template: LvTemplate) {
+  if (template.companyId !== "builtsmart-ai" || template.id !== "template-builtsmart-ai-standard") return false;
+  const titles = template.groups.map((group) => group.title);
+  return (
+    titles.includes("Analyse und Konzeption") ||
+    titles.includes("KI-Implementierung") ||
+    titles.includes("Wartung, Support und Weiterentwicklung") ||
+    template.description.startsWith("Profilgebundene LV-Grundstruktur")
+  );
 }
 
 function mergeProfileTemplates(savedTemplates: LvTemplate[] | undefined, profiles: CompanyProfile[]) {
@@ -482,6 +627,7 @@ function mergeProfileTemplates(savedTemplates: LvTemplate[] | undefined, profile
   const mergedDefaults = defaultTemplates.map((template) => {
     const saved = savedById.get(template.id);
     if (!saved) return template;
+    if (isLegacyBuiltSmartAiTemplate(saved)) return template;
     return {
       ...saved,
       name: saved.name.endsWith(" Master-LV") ? saved.name.replace(/ Master-LV$/, " LV-Vorlage") : saved.name,
