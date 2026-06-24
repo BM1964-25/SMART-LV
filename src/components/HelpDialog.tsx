@@ -18,7 +18,7 @@ const helpSections: HelpSection[] = [
       <>
         <p>
           SMART OfferFlow unterstützt die Erstellung von Angeboten, Leistungsverzeichnissen, Auftragsständen und Abrechnungsgrundlagen in einem
-          durchgängigen Prozess. Die App verbindet Firmenprofile, Kunden, Projektangaben, Profil-LVs, LV-Positionen, Nachträge und Leistungsnachweise.
+          durchgängigen Prozess. Die App verbindet Firmenprofile, Kunden, Projektangaben, LV-Vorlagen, LV-Positionen, Nachträge und Leistungsnachweise.
         </p>
         <p>
           Die Kernfunktionen sind ohne KI nutzbar. KI-Funktionen ergänzen den Prozess optional, zum Beispiel beim Formulieren, Strukturieren oder
@@ -95,7 +95,7 @@ const helpSections: HelpSection[] = [
           <li>Optional den Anthropic API-Key unter „KI-Assistenz“ eintragen und prüfen.</li>
           <li>Firmenprofil auswählen oder anpassen.</li>
           <li>Kunden- und Projektdaten unter „Neues Angebot“ erfassen.</li>
-          <li>Passendes Profil-LV übernehmen oder das LV individuell bearbeiten.</li>
+          <li>Passende LV-Vorlage übernehmen oder das LV individuell bearbeiten.</li>
           <li>Angebotsvorschau prüfen und als PDF über den Druckdialog ausgeben.</li>
           <li>Auftrag, Nachträge, Leistungsnachweise und Abrechnungsstand weiterführen.</li>
         </ol>
@@ -130,7 +130,7 @@ const helpSections: HelpSection[] = [
           <li>Firmenprofile mit Kontaktdaten, Farben, Footer, AGB-Link und Terminbuchung pflegen.</li>
           <li>Kunden speichern und in Angebote übernehmen.</li>
           <li>Angebotskopf, Projektinformationen, Textbausteine und Konditionen erfassen.</li>
-          <li>Leistungsverzeichnisse aus Profil-LVs übernehmen, bearbeiten und wieder als Profil-LV speichern.</li>
+          <li>Leistungsverzeichnisse aus LV-Vorlagen übernehmen, bearbeiten und wieder als LV-Vorlage speichern.</li>
           <li>Positionen und Titel löschen, duplizieren, bearbeiten und neu nummerieren.</li>
           <li>Angebotsvorschau, Summen, Netto, Umsatzsteuer und Brutto prüfen.</li>
           <li>Angebot als teilbaren Link vorbereiten, kopieren und per E-Mail an Kunden versenden.</li>
@@ -156,9 +156,9 @@ const helpSections: HelpSection[] = [
           <li>Firmenprofil prüfen oder auswählen.</li>
           <li>Kunde anlegen oder bestehenden Kunden übernehmen.</li>
           <li>Neues Angebot mit Projektangaben, Einleitung, Anlass, Zielsetzung und Konditionen erstellen.</li>
-          <li>Passendes Profil-LV übernehmen oder ein leeres LV starten.</li>
+          <li>Passende LV-Vorlage übernehmen oder ein leeres LV starten.</li>
           <li>Titel und Positionen anpassen, löschen oder ergänzen.</li>
-          <li>Fertiges LV als Profil-LV speichern, damit es für spätere Projekte desselben Firmenprofils wiederverwendet werden kann.</li>
+          <li>Fertiges LV als LV-Vorlage speichern, damit es für spätere Projekte desselben Firmenprofils wiederverwendet werden kann.</li>
           <li>Vorschau prüfen, Summen kontrollieren und PDF erstellen oder Angebot als Link versenden.</li>
           <li>Nach Beauftragung Auftrag, Abrechnung, Nachträge und Leistungsnachweise fortführen.</li>
         </ol>
@@ -172,7 +172,7 @@ const helpSections: HelpSection[] = [
       <>
         <p>
           SMART OfferFlow speichert den Arbeitsstand lokal im Browser und kann zusätzlich JSON-Dateien exportieren und wieder laden. Dadurch lassen
-          sich Firmenprofile, Projekte, Kunden, Profil-LVs, LV-Positionen und Abrechnungsdaten sichern.
+          sich Firmenprofile, Projekte, Kunden, LV-Vorlagen, LV-Positionen und Abrechnungsdaten sichern.
         </p>
         <h3>Angebotsdatenbank</h3>
         <p>
@@ -183,13 +183,13 @@ const helpSections: HelpSection[] = [
           Die Angebotsnummer kann je Firmenprofil über einen Nummernkreis aus Präfix, Jahr und Zähler automatisch erzeugt werden. Im Angebotskopf
           bleibt sie trotzdem manuell überschreibbar.
         </p>
-        <h3>Profil-LVs</h3>
+        <h3>LV-Vorlagen</h3>
         <p>
-          Vollständige Leistungsverzeichnisse werden unter „Profil-LVs“ gespeichert und jeweils einem Firmenprofil zugeordnet. Beim neuen Angebot
-          werden nur die Profil-LVs des aktiven Firmenprofils angeboten, damit keine fremden Demo- oder Projektinhalte in ein anderes Profil rutschen.
+          Vollständige Leistungsverzeichnisse werden unter „LV-Vorlagen“ gespeichert und jeweils einem Firmenprofil zugeordnet. Beim neuen Angebot
+          werden nur die LV-Vorlagen des aktiven Firmenprofils angeboten, damit keine fremden Demo- oder Projektinhalte in ein anderes Profil rutschen.
         </p>
         <p>
-          Ein Profil-LV kann geladen, bearbeitet, dupliziert, gelöscht oder mit dem aktuell bearbeiteten Angebots-LV aktualisiert werden. Profil-LVs
+          Eine LV-Vorlage kann geladen, bearbeitet, dupliziert, gelöscht oder mit dem aktuell bearbeiteten Angebots-LV aktualisiert werden. LV-Vorlagen
           sind Teil des lokalen Arbeitsstands und werden beim JSON-Export vollständig mitgesichert.
         </p>
         <p>
@@ -221,7 +221,8 @@ const helpSections: HelpSection[] = [
         <h3>Angebot als Link versenden</h3>
         <p>
           In der Angebotsvorschau speichert der Button „Angebot an Kunden versenden“ den aktuellen Angebotsstand in Supabase und kopiert einen kurzen
-          Kundenlink in die Zwischenablage. Fügen Sie den kopierten Link anschließend in Ihre E-Mail an den Kunden ein.
+          Kundenlink in die Zwischenablage. Danach wird das Angebot in der Angebotsdatenbank als „Versendet“ markiert und der Kundenlink am Angebot
+          hinterlegt.
         </p>
         <p>
           Für kurze Kundenlinks muss SMART OfferFlow auf einem Server wie Vercel laufen und mit Supabase verbunden sein. GitHub Pages ist statisch und

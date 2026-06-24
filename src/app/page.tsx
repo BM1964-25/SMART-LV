@@ -74,7 +74,7 @@ type View =
   | "Firmenprofile"
   | "Qualitätsmanagement"
   | "Positionsbibliothek"
-  | "Profil-LVs"
+  | "LV-Vorlagen"
   | "Einstellungen";
 
 const navItems: { label: View; icon: typeof Home }[] = [
@@ -90,7 +90,7 @@ const navItems: { label: View; icon: typeof Home }[] = [
   { label: "Firmenprofile", icon: Building2 },
   { label: "Qualitätsmanagement", icon: ShieldCheck },
   { label: "Positionsbibliothek", icon: Library },
-  { label: "Profil-LVs", icon: LayoutTemplate },
+  { label: "LV-Vorlagen", icon: LayoutTemplate },
   { label: "Einstellungen", icon: Settings }
 ];
 
@@ -464,10 +464,10 @@ function createInitialProfileTemplates(profiles: CompanyProfile[] = companyProfi
   return profiles.map((profile) => ({
     id: `template-${profile.id}-standard`,
     companyId: profile.id,
-    name: `${profile.name} Profil-LV`,
+    name: `${profile.name} LV-Vorlage`,
     description:
       profile.id === "metzger-real-estate"
-        ? "Profil-LV für strategische Beratung, Projektsteuerung, Due Diligence, Baurevision, Sachverständigenleistungen, Vergütung, Fahrtkosten und Auslagen."
+        ? "LV-Vorlage für strategische Beratung, Projektsteuerung, Due Diligence, Baurevision, Sachverständigenleistungen, Vergütung, Fahrtkosten und Auslagen."
         : `Profilgebundene LV-Grundstruktur für ${profile.name} mit eigener Angebotslogik und wiederverwendbaren Leistungsgruppen.`,
     createdAt,
     updatedAt: createdAt,
@@ -484,8 +484,8 @@ function mergeProfileTemplates(savedTemplates: LvTemplate[] | undefined, profile
     if (!saved) return template;
     return {
       ...saved,
-      name: saved.name.endsWith(" Master-LV") ? saved.name.replace(/ Master-LV$/, " Profil-LV") : saved.name,
-      description: saved.description.replace(/^Master-LV/, "Profil-LV")
+      name: saved.name.endsWith(" Master-LV") ? saved.name.replace(/ Master-LV$/, " LV-Vorlage") : saved.name,
+      description: saved.description.replace(/^Master-LV/, "LV-Vorlage")
     };
   });
   const defaultIds = new Set(defaultTemplates.map((template) => template.id));
@@ -913,6 +913,32 @@ export default function HomePage() {
     });
     setLastSavedAt(savedAt);
     setStorageMessage("Angebot in Angebotsliste gespeichert");
+  }
+
+  function markOfferAsSent(link: string) {
+    const sentAt = new Date().toISOString();
+    const sentProject: Project = {
+      ...project,
+      status: "Versendet",
+      customerLink: link,
+      sentAt
+    };
+    setProject(sentProject);
+    setSavedOffers((current) => {
+      const existing = current.find((offer) => offer.id === sentProject.id);
+      const savedOffer: SavedOffer = {
+        id: sentProject.id,
+        project: sentProject,
+        groups: cloneGroups(groups),
+        orderBilling,
+        createdAt: existing?.createdAt ?? sentAt,
+        updatedAt: sentAt,
+        version: (existing?.version ?? 0) + 1
+      };
+      return existing ? current.map((offer) => (offer.id === sentProject.id ? savedOffer : offer)) : [savedOffer, ...current];
+    });
+    setLastSavedAt(sentAt);
+    setStorageMessage("Angebot als versendet gespeichert");
   }
 
   function openSavedOffer(offerId: string) {
@@ -1368,12 +1394,12 @@ export default function HomePage() {
     });
   }
 
-  function saveAsTemplate() {
+  function saveAsTemplate(targetCompanyId: Project["companyId"] = project.companyId) {
     const now = new Date().toISOString();
-    const companyName = profiles.find((profile) => profile.id === project.companyId)?.name ?? "Firmenprofil";
+    const companyName = profiles.find((profile) => profile.id === targetCompanyId)?.name ?? "Firmenprofil";
     const template: LvTemplate = {
       id: `template-${Date.now()}`,
-      companyId: project.companyId,
+      companyId: targetCompanyId,
       name: `${project.projectName} LV`,
       description: `Gespeichertes Leistungsverzeichnis für ${companyName}.`,
       createdAt: now,
@@ -1382,14 +1408,14 @@ export default function HomePage() {
     };
     setLvTemplates((current) => [template, ...current]);
     setLastSavedAt(now);
-    setStorageMessage(`Profil-LV gespeichert: ${template.name}`);
-    setActiveView("Profil-LVs");
+    setStorageMessage(`LV-Vorlage gespeichert: ${template.name}`);
+    setActiveView("LV-Vorlagen");
   }
 
   function overwriteLvTemplate(templateId: string) {
     const template = lvTemplates.find((item) => item.id === templateId);
     if (!template) return;
-    if (!window.confirm(`Profil-LV "${template.name}" mit dem aktuellen Angebots-LV überschreiben?`)) return;
+    if (!window.confirm(`LV-Vorlage "${template.name}" mit dem aktuellen Angebots-LV überschreiben?`)) return;
     const now = new Date().toISOString();
     setLvTemplates((current) =>
       current.map((item) =>
@@ -1404,7 +1430,7 @@ export default function HomePage() {
       )
     );
     setLastSavedAt(now);
-    setStorageMessage(`Profil-LV aktualisiert: ${template.name}`);
+    setStorageMessage(`LV-Vorlage aktualisiert: ${template.name}`);
   }
 
   function updateLvTemplate(templateId: string, changes: Partial<Pick<LvTemplate, "name" | "description" | "companyId">>) {
@@ -1436,7 +1462,7 @@ export default function HomePage() {
   function applyMasterLv() {
     const masterTemplate = findMasterTemplate();
     if (!masterTemplate) return;
-    if (!window.confirm("Aktuelles Angebots-LV durch das Profil-LV ersetzen? Bestehende Titel und Positionen im Angebot werden ersetzt.")) return;
+    if (!window.confirm("Aktuelles Angebots-LV durch die LV-Vorlage ersetzen? Bestehende Titel und Positionen im Angebot werden ersetzt.")) return;
     setGroups(cloneGroups(masterTemplate.groups));
     setActiveView("LV bearbeiten");
   }
@@ -1669,7 +1695,7 @@ export default function HomePage() {
                 <Building2 className="h-4 w-4 text-muted" />
                 {company.name}
               </button>
-              <IconButton icon={Save} label="Aktuelles LV als Profil-LV speichern" onClick={saveAsTemplate} />
+              <IconButton icon={Save} label="Aktuelles LV als LV-Vorlage speichern" onClick={saveAsTemplate} />
               <IconButton icon={Copy} label="Angebot duplizieren" onClick={duplicateOffer} />
               <IconButton icon={Download} label="CSV exportieren" onClick={exportCsv} />
               <IconButton icon={Braces} label="JSON exportieren" onClick={exportJson} />
@@ -1780,7 +1806,7 @@ export default function HomePage() {
           ) : null}
 
           {activeView === "Angebotsvorschau" ? (
-            <OfferPreview project={project} groups={groups} profiles={profiles} onSaveOffer={saveCurrentOffer} onExportJson={exportJson} />
+            <OfferPreview project={project} groups={groups} profiles={profiles} onSaveOffer={saveCurrentOffer} onExportJson={exportJson} onOfferSent={markOfferAsSent} />
           ) : null}
 
           {activeView === "Auftrag & Abrechnung" ? (
@@ -1842,7 +1868,7 @@ export default function HomePage() {
             />
           ) : null}
 
-          {activeView === "Profil-LVs" ? (
+          {activeView === "LV-Vorlagen" ? (
             <Templates
               project={project}
               groups={groups}
@@ -1966,7 +1992,13 @@ function OfferDatabase({
                       <span className="rounded-md bg-slate-100 px-2 py-1">Version {offer.version}</span>
                       <span className="rounded-md bg-slate-100 px-2 py-1">Netto {formatCurrency(total)}</span>
                       <span className="rounded-md bg-slate-100 px-2 py-1">Geändert {new Date(offer.updatedAt).toLocaleString("de-DE")}</span>
+                      {offer.project.sentAt ? <span className="rounded-md bg-emerald-50 px-2 py-1 text-emerald-700">Versendet {new Date(offer.project.sentAt).toLocaleString("de-DE")}</span> : null}
                     </div>
+                    {offer.project.customerLink ? (
+                      <a className="mt-3 inline-flex text-sm font-semibold text-slate-600 underline underline-offset-2" href={offer.project.customerLink} target="_blank" rel="noreferrer">
+                        Kundenlink öffnen
+                      </a>
+                    ) : null}
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <button type="button" onClick={() => openSavedOffer(offer.id)} className="h-10 rounded-md bg-ink px-4 text-sm font-semibold text-white transition hover:bg-slate-700">
@@ -2029,7 +2061,7 @@ function Dashboard({
             <div>
               <p className="font-semibold text-rose-900">Firmenprofil und Projektdaten passen nicht zusammen</p>
               <p className="mt-2 text-sm leading-6 text-rose-800">
-                Das Angebot nutzt {company.name}, enthält aber noch KI-Demo-Projektdaten. Bitte das passende Profil-LV und die Projektdaten bereinigen.
+                Das Angebot nutzt {company.name}, enthält aber noch KI-Demo-Projektdaten. Bitte die passende LV-Vorlage und die Projektdaten bereinigen.
               </p>
               <p className="mt-2 text-sm leading-6 text-rose-800">
                 Gefunden in: {aiDemoFindings.map((finding) => `${finding.label} (${finding.terms.join(", ")})`).join("; ")}
@@ -2459,9 +2491,9 @@ function NewLvWorkspace({
       <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
         <div className="grid gap-4 xl:grid-cols-[1fr_240px_260px_auto_auto] xl:items-end">
           <div>
-            <SectionTitle title="Neues LV aus Profil-LV" kicker={company.name} />
+            <SectionTitle title="Neues LV aus LV-Vorlage" kicker={company.name} />
             <p className="mt-3 max-w-4xl text-sm leading-6 text-muted">
-              Wähle ein Firmenprofil und danach ein gespeichertes Profil-LV. Dieses kann komplett übernommen werden; einzelne Titel und Positionen können rechts gezielt in das aktuelle Angebots-LV kopiert werden.
+              Wähle ein Firmenprofil und danach eine gespeicherte LV-Vorlage. Diese kann komplett übernommen werden; einzelne Titel und Positionen können rechts gezielt in das aktuelle Angebots-LV kopiert werden.
             </p>
           </div>
           <Field label="Firmenprofil">
@@ -2473,7 +2505,7 @@ function NewLvWorkspace({
               ))}
             </Select>
           </Field>
-          <Field label="Profil-LV">
+          <Field label="LV-Vorlage">
             <Select value={selectedTemplate?.id ?? ""} onChange={(event) => setSelectedTemplateId(event.target.value)} disabled={!profileTemplates.length}>
               {profileTemplates.map((template) => (
                 <option key={template.id} value={template.id}>
@@ -2491,7 +2523,7 @@ function NewLvWorkspace({
             disabled={!selectedTemplate}
             className="inline-flex h-10 items-center justify-center rounded-md bg-ink px-4 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Profil-LV komplett übernehmen
+            LV-Vorlage komplett übernehmen
           </button>
         </div>
       </div>
@@ -2530,7 +2562,7 @@ function NewLvWorkspace({
             ) : (
               <div className="rounded-md border border-dashed border-line p-8 text-center">
                 <p className="font-semibold text-ink">Noch kein Angebots-LV angelegt</p>
-                <p className="mt-2 text-sm text-muted">Übernimm rechts einen Titel, eine Position oder das komplette Profil-LV.</p>
+                <p className="mt-2 text-sm text-muted">Übernimm rechts einen Titel, eine Position oder die komplette LV-Vorlage.</p>
               </div>
             )}
           </div>
@@ -2538,7 +2570,7 @@ function NewLvWorkspace({
 
         <div className="rounded-lg border border-line bg-white shadow-sm">
           <div className="border-b border-line p-5">
-            <SectionTitle title="Profil-LV" kicker={selectedTemplate ? `${masterGroups.length} Titel · ${masterPositionCount} Positionen` : "Keine Vorlage"} />
+            <SectionTitle title="LV-Vorlage" kicker={selectedTemplate ? `${masterGroups.length} Titel · ${masterPositionCount} Positionen` : "Keine Vorlage"} />
             {selectedTemplate ? (
               <div className="mt-3 grid gap-2 text-sm leading-6 text-muted">
                 <p>{selectedTemplate.description}</p>
@@ -2580,8 +2612,8 @@ function NewLvWorkspace({
               </div>
             ) : (
               <div className="rounded-md border border-dashed border-line p-8 text-center">
-                <p className="font-semibold text-ink">Kein Profil-LV vorhanden</p>
-                <p className="mt-2 text-sm text-muted">Speichere im LV-Editor oder unter Profil-LVs ein Leistungsverzeichnis für dieses Firmenprofil.</p>
+                <p className="font-semibold text-ink">Keine LV-Vorlage vorhanden</p>
+                <p className="mt-2 text-sm text-muted">Speichere im LV-Editor oder unter LV-Vorlagen ein Leistungsverzeichnis für dieses Firmenprofil.</p>
               </div>
             )}
           </div>
@@ -2693,7 +2725,7 @@ function LvEditor({
                   </button>
                   <p className="rounded-md bg-slate-100 px-3 py-2 text-sm font-semibold text-ink">{formatCurrency(groupTotal(group))}</p>
                   <IconButton icon={Plus} label="Position hinzufügen" onClick={() => addPosition(group.id)} disabled={hasFilters} />
-                  <IconButton icon={Save} label="Titel ins Profil-LV übernehmen" onClick={() => copyOfferGroupToMaster(group.id)} disabled={hasFilters} />
+                  <IconButton icon={Save} label="Titel in die LV-Vorlage übernehmen" onClick={() => copyOfferGroupToMaster(group.id)} disabled={hasFilters} />
                   <IconButton icon={Trash2} label="Titel löschen" onClick={() => deleteGroup(group.id)} disabled={hasFilters} />
                 </div>
               </div>
@@ -2772,7 +2804,7 @@ function LvEditor({
                               </div>
                               <div className="flex gap-2">
                                 <IconButton icon={CheckCircle2} label="Position aktivieren/deaktivieren" active={position.active} onClick={() => updatePosition(position.groupId, position.id, { active: !position.active })} />
-                                <IconButton icon={Save} label="Position ins Profil-LV übernehmen" onClick={() => copyOfferPositionToMaster(position.groupId, position.id)} />
+                                <IconButton icon={Save} label="Position in die LV-Vorlage übernehmen" onClick={() => copyOfferPositionToMaster(position.groupId, position.id)} />
                                 <IconButton icon={Copy} label="Position duplizieren" onClick={() => duplicatePosition(position.groupId, position.id)} />
                                 <IconButton icon={Trash2} label="Position löschen" onClick={() => deletePosition(position.groupId, position.id)} />
                               </div>
@@ -2897,7 +2929,7 @@ function CompanyProfiles({
               <span className="min-w-0">
                 <span className="block truncate text-sm font-semibold">{profile.name}</span>
                 <span className="block text-xs">
-                  {templates.filter((template) => template.companyId === profile.id).length} Profil-LVs
+                  {templates.filter((template) => template.companyId === profile.id).length} LV-Vorlagen
                   {profile.id === activeProjectCompanyId ? " · im Angebot aktiv" : ""}
                 </span>
               </span>
@@ -3031,14 +3063,14 @@ function CompanyProfiles({
           </div>
 
           <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
-            <SectionTitle title="Profil-LVs" />
-            <p className="mt-3 text-sm text-muted">{profileTemplates.length} gespeicherte Profil-LVs für dieses Firmenprofil.</p>
+            <SectionTitle title="LV-Vorlagen" />
+            <p className="mt-3 text-sm text-muted">{profileTemplates.length} gespeicherte LV-Vorlagen für dieses Firmenprofil.</p>
             <button
               type="button"
-              onClick={() => setActiveView("Profil-LVs")}
+              onClick={() => setActiveView("LV-Vorlagen")}
               className="mt-5 inline-flex h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-ink transition hover:border-slate-300"
             >
-              Profil-LVs öffnen
+              LV-Vorlagen öffnen
             </button>
           </div>
         </div>
@@ -3120,7 +3152,7 @@ function QualityManagement({
       severity: "Fehler",
       area: "Profil und Inhalt",
       title: "Metzger-REA enthält noch KI-Demo-Texte",
-      detail: `Im Angebot wurden noch Demo-Begriffe gefunden: ${aiDemoFindings.map((finding) => `${finding.label} (${finding.terms.join(", ")})`).join("; ")}. Für Metzger - Real Estate Advisory sollte das Profil-LV mit Beratungs- und Immobilienleistungen verwendet werden.`,
+      detail: `Im Angebot wurden noch Demo-Begriffe gefunden: ${aiDemoFindings.map((finding) => `${finding.label} (${finding.terms.join(", ")})`).join("; ")}. Für Metzger - Real Estate Advisory sollte die LV-Vorlage mit Beratungs- und Immobilienleistungen verwendet werden.`,
       action: "Profil/LV bereinigen"
     });
   }
@@ -3129,10 +3161,10 @@ function QualityManagement({
     issues.push({
       id: "mrea-master-missing",
       severity: "Fehler",
-      area: "Profil-LV",
+      area: "LV-Vorlage",
       title: "Aktuelles LV passt nicht zum Firmenprofil",
       detail: "Das aktive LV nutzt keine Metzger-REA-Titel. Dadurch entstehen falsche Angebotsinhalte und falsche Leistungszuordnungen.",
-      action: "Profil-LV übernehmen"
+      action: "LV-Vorlage übernehmen"
     });
   }
 
@@ -3219,10 +3251,10 @@ function QualityManagement({
     issues.push({
       id: "no-master",
       severity: "Hinweis",
-      area: "Profil-LVs",
-      title: "Kein Profil-LV für dieses Firmenprofil gefunden",
+      area: "LV-Vorlagen",
+      title: "Keine LV-Vorlage für dieses Firmenprofil gefunden",
       detail: "Ein profilgebundenes LV macht neue Angebote schneller und verhindert falsche Titelzuordnungen.",
-      action: "Profil-LVs öffnen"
+      action: "LV-Vorlagen öffnen"
     });
   }
 
@@ -3249,7 +3281,7 @@ function QualityManagement({
     else if (issue.action === "Kunden öffnen") setActiveView("Kunden");
     else if (issue.action === "Firmenprofil öffnen") setActiveView("Firmenprofile");
     else if (issue.action === "LV bearbeiten") setActiveView("LV bearbeiten");
-    else if (issue.action === "Profil-LVs öffnen") setActiveView("Profil-LVs");
+    else if (issue.action === "LV-Vorlagen öffnen") setActiveView("LV-Vorlagen");
   }
 
   return (
@@ -3259,7 +3291,7 @@ function QualityManagement({
           <div>
             <SectionTitle title="Qualitätsmanagement" kicker={company.name} />
             <p className="mt-3 max-w-4xl text-sm leading-6 text-muted">
-              Die Prüfung kontrolliert, ob Firmenprofil, Angebotsdaten, Profil-LV, Positionen, Kalkulation, Speicherung und nächster Workflow-Schritt zusammenpassen.
+              Die Prüfung kontrolliert, ob Firmenprofil, Angebotsdaten, LV-Vorlage, Positionen, Kalkulation, Speicherung und nächster Workflow-Schritt zusammenpassen.
             </p>
           </div>
           <div className="rounded-md border border-line bg-slate-50 px-5 py-4 text-center">
@@ -3326,7 +3358,7 @@ function QualityManagement({
           {[
             ["1", "Firmenprofil", "Profil wählen, Farben und Angebotslogik prüfen."],
             ["2", "Kunde", "Empfänger und Ansprechpartner aus der Kundendatenbank übernehmen."],
-            ["3", "Profil-LV", "Passendes Profil-LV übernehmen oder gezielt Positionen kopieren."],
+            ["3", "LV-Vorlage", "Passende LV-Vorlage übernehmen oder gezielt Positionen kopieren."],
             ["4", "QM-Prüfung", "Fehler, Warnungen und Summen vor Versand kontrollieren."],
             ["5", "Vorschau", "HTML/PDF prüfen, anschließend Angebot versenden oder abrechnen."]
           ].map(([step, title, detail]) => (
@@ -3609,30 +3641,52 @@ function Templates({
   applyTemplate: (templateId: string) => void;
   duplicateTemplate: (templateId: string, targetCompanyId?: Project["companyId"]) => void;
   deleteTemplate: (templateId: string) => void;
-  saveCurrentTemplate: () => void;
+  saveCurrentTemplate: (companyId?: Project["companyId"]) => void;
 }) {
-  const activeCompany = profiles.find((profile) => profile.id === project.companyId) ?? profiles[0];
-  const activeTemplates = templates.filter((template) => template.companyId === project.companyId);
-  const otherProfiles = profiles.filter((profile) => profile.id !== project.companyId);
+  const [activeTemplateCompanyId, setActiveTemplateCompanyId] = useState<Project["companyId"]>(project.companyId);
+  const activeCompany = profiles.find((profile) => profile.id === activeTemplateCompanyId) ?? profiles[0];
+  const activeTemplates = templates.filter((template) => template.companyId === activeCompany.id);
 
   return (
     <div className="grid gap-6">
       <div className="flex flex-col gap-4 rounded-lg border border-line bg-white p-6 shadow-sm lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <SectionTitle title="Profil-LVs" kicker={activeCompany.name} />
+          <SectionTitle title="LV-Vorlagen" kicker="Wiederverwendbare Leistungsgerüste je Firmenprofil" />
           <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
             Hier werden vollständige Leistungsverzeichnisse je Firmenprofil gespeichert. Sie können als Grundlage für neue Angebote geladen, bearbeitet,
             dupliziert oder mit dem aktuellen LV aktualisiert werden.
           </p>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
-            Speicherort: Profil-LVs liegen im lokalen Arbeitsstand der App und werden beim JSON-Export mitgesichert. Für die Nutzung auf Vercel muss
+            Speicherort: LV-Vorlagen liegen im lokalen Arbeitsstand der App und werden beim JSON-Export mitgesichert. Für die Nutzung auf Vercel muss
             der Arbeitsstand dort einmal als JSON geladen oder später in eine Cloud-Speicherung übernommen werden.
           </p>
         </div>
-        <button type="button" onClick={saveCurrentTemplate} className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-ink px-4 text-sm font-semibold text-white transition hover:bg-slate-700">
+        <button type="button" onClick={() => saveCurrentTemplate(activeCompany.id)} className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-ink px-4 text-sm font-semibold text-white transition hover:bg-slate-700">
           <Save className="h-4 w-4" />
-          Aktuelles LV speichern
+          Aktuelles LV als Vorlage speichern
         </button>
+      </div>
+
+      <div className="rounded-lg border border-line bg-white p-3 shadow-sm">
+        <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
+          {profiles.map((profile) => {
+            const count = templates.filter((template) => template.companyId === profile.id).length;
+            const active = profile.id === activeCompany.id;
+            return (
+              <button
+                key={profile.id}
+                type="button"
+                onClick={() => setActiveTemplateCompanyId(profile.id)}
+                className={`rounded-md border px-4 py-3 text-left transition ${
+                  active ? "border-blue-200 bg-blue-50 text-blue-800" : "border-line bg-white text-ink hover:border-slate-300"
+                }`}
+              >
+                <p className="font-semibold">{profile.name}</p>
+                <p className={`mt-1 text-sm ${active ? "text-blue-700" : "text-muted"}`}>{count} LV-Vorlagen</p>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div className="grid gap-4">
@@ -3652,25 +3706,10 @@ function Templates({
           ))
         ) : (
           <div className="rounded-lg border border-dashed border-line bg-white p-8 text-center">
-            <p className="font-semibold text-ink">Noch keine Profil-LVs für {activeCompany.name}</p>
-            <p className="mt-2 text-sm text-muted">Speichere das aktuelle LV als Vorlage oder wähle ein anderes Firmenprofil.</p>
+            <p className="font-semibold text-ink">Noch keine LV-Vorlagen für {activeCompany.name}</p>
+            <p className="mt-2 text-sm text-muted">Speichere das aktuelle LV als Vorlage oder kopiere eine bestehende LV-Vorlage in diesen Tab.</p>
           </div>
         )}
-      </div>
-
-      <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
-        <SectionTitle title="Weitere Firmenprofile" />
-        <div className="mt-5 grid gap-3 md:grid-cols-3">
-          {otherProfiles.map((profile) => {
-            const count = templates.filter((template) => template.companyId === profile.id).length;
-            return (
-              <div key={profile.id} className="rounded-md border border-line p-4">
-                <p className="font-semibold text-ink">{profile.name}</p>
-                <p className="mt-2 text-sm text-muted">{count} Profil-LVs gespeichert</p>
-              </div>
-            );
-          })}
-        </div>
       </div>
     </div>
   );
@@ -3706,7 +3745,7 @@ function TemplateCard({
   function moveTemplate() {
     const targetProfile = profiles.find((profile) => profile.id === targetProfileId);
     if (!targetProfile) return;
-    if (!window.confirm(`Profil-LV "${template.name}" zu "${targetProfile.name}" verschieben?`)) return;
+    if (!window.confirm(`LV-Vorlage "${template.name}" zu "${targetProfile.name}" verschieben?`)) return;
     updateTemplate(template.id, { companyId: targetProfile.id });
     setTargetProfileId("");
   }

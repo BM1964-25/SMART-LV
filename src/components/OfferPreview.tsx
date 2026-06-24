@@ -134,7 +134,8 @@ export function OfferPreview({
   profiles,
   publicView = false,
   onSaveOffer,
-  onExportJson
+  onExportJson,
+  onOfferSent
 }: {
   project: Project;
   groups: PositionGroup[];
@@ -142,6 +143,7 @@ export function OfferPreview({
   publicView?: boolean;
   onSaveOffer?: () => void;
   onExportJson?: () => void;
+  onOfferSent?: (link: string) => void;
 }) {
   const [shareStatus, setShareStatus] = useState<"idle" | "saving" | "copied" | "error">("idle");
   const [shareMessage, setShareMessage] = useState("");
@@ -215,8 +217,9 @@ export function OfferPreview({
 
       const link = result.link;
       await navigator.clipboard.writeText(link);
+      onOfferSent?.(link);
       setShareStatus("copied");
-      setShareMessage("Kurzer Kundenlink wurde kopiert. Jetzt in eine E-Mail einfügen.");
+      setShareMessage("Kurzer Kundenlink wurde kopiert. Angebot wurde als versendet markiert.");
       window.setTimeout(() => setShareStatus("idle"), 6500);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Kundenlink konnte nicht erstellt werden.";
