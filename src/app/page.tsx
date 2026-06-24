@@ -1878,9 +1878,6 @@ function ProjectWorkspace({
               <Field label="Leistungsabgrenzung">
                 <TextArea value={project.serviceExclusion} onChange={(event) => updateProject("serviceExclusion", event.target.value)} className="min-h-28" />
               </Field>
-              <Field label="Projektbesprechungen und Ortstermine">
-                <TextArea value={project.meetingBillingNote} onChange={(event) => updateProject("meetingBillingNote", event.target.value)} className="min-h-28" />
-              </Field>
               <Field label="Leistungsänderungen">
                 <TextArea value={project.changeTerms} onChange={(event) => updateProject("changeTerms", event.target.value)} className="min-h-28" />
               </Field>
