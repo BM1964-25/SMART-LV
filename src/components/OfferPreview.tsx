@@ -275,7 +275,7 @@ export function OfferPreview({
       </div>
       ) : null}
       <article className="print-area rounded-lg border border-line bg-white p-8 text-base text-black shadow-soft">
-      <section className="print-section pb-8">
+      <section className="print-section pb-0">
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           <div>
             {company.id === "metzger-real-estate" ? (
@@ -321,7 +321,7 @@ export function OfferPreview({
       </section>
 
       {projectMetaItems.length > 0 || hasText(project.assignmentReason) || projectTextCards.length > 0 ? (
-        <section className="print-section pb-8 pt-2">
+        <section className="print-section pb-8 pt-4">
           {projectMetaItems.length > 0 ? (
           <div className="mb-16 grid gap-4 md:grid-cols-4">
             {projectMetaItems.map((item) => (
