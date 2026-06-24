@@ -1347,15 +1347,17 @@ export default function HomePage() {
     setGroups((current) => renumberGroups([...current, groupCopy]));
   }
 
-  function duplicateLvTemplate(templateId: string) {
+  function duplicateLvTemplate(templateId: string, targetCompanyId?: Project["companyId"]) {
     const template = lvTemplates.find((item) => item.id === templateId);
     if (!template) return;
     const now = new Date().toISOString();
+    const targetCompany = targetCompanyId ? profiles.find((profile) => profile.id === targetCompanyId) : null;
     setLvTemplates((current) => [
       {
         ...template,
         id: `template-${Date.now()}`,
-        name: `${template.name} Kopie`,
+        companyId: targetCompanyId ?? template.companyId,
+        name: targetCompany ? `${template.name} Kopie für ${targetCompany.name}` : `${template.name} Kopie`,
         createdAt: now,
         updatedAt: now,
         groups: cloneGroups(template.groups)
@@ -3268,7 +3270,7 @@ function Templates({
   updateTemplate: (templateId: string, changes: Partial<Pick<LvTemplate, "name" | "description" | "companyId">>) => void;
   overwriteTemplate: (templateId: string) => void;
   applyTemplate: (templateId: string) => void;
-  duplicateTemplate: (templateId: string) => void;
+  duplicateTemplate: (templateId: string, targetCompanyId?: Project["companyId"]) => void;
   deleteTemplate: (templateId: string) => void;
   saveCurrentTemplate: () => void;
 }) {
@@ -3352,7 +3354,7 @@ function TemplateCard({
   updateTemplate: (templateId: string, changes: Partial<Pick<LvTemplate, "name" | "description" | "companyId">>) => void;
   overwriteTemplate: (templateId: string) => void;
   applyTemplate: (templateId: string) => void;
-  duplicateTemplate: (templateId: string) => void;
+  duplicateTemplate: (templateId: string, targetCompanyId?: Project["companyId"]) => void;
   deleteTemplate: (templateId: string) => void;
   profiles: CompanyProfile[];
 }) {
@@ -3360,6 +3362,24 @@ function TemplateCard({
   const templatePositions = templateGroups.flatMap((group) => group.positions.filter((position) => position.active));
   const templateTotal = templateGroups.reduce((sum, group) => sum + groupTotal(group), 0);
   const currentTotal = activeGroups(groups).reduce((sum, group) => sum + groupTotal(group), 0);
+  const assignedProfile = profiles.find((profile) => profile.id === template.companyId);
+  const otherProfiles = profiles.filter((profile) => profile.id !== template.companyId);
+  const [targetProfileId, setTargetProfileId] = useState("");
+
+  function moveTemplate() {
+    const targetProfile = profiles.find((profile) => profile.id === targetProfileId);
+    if (!targetProfile) return;
+    if (!window.confirm(`Profil-LV "${template.name}" zu "${targetProfile.name}" verschieben?`)) return;
+    updateTemplate(template.id, { companyId: targetProfile.id });
+    setTargetProfileId("");
+  }
+
+  function copyTemplateToProfile() {
+    const targetProfile = profiles.find((profile) => profile.id === targetProfileId);
+    if (!targetProfile) return;
+    duplicateTemplate(template.id, targetProfile.id);
+    setTargetProfileId("");
+  }
 
   return (
     <div className="rounded-lg border border-line bg-white p-5 shadow-sm">
@@ -3369,14 +3389,10 @@ function TemplateCard({
             <Field label="LV-Name">
               <TextInput value={template.name} onChange={(event) => updateTemplate(template.id, { name: event.target.value })} />
             </Field>
-            <Field label="Firmenprofil">
-              <Select value={template.companyId} onChange={(event) => updateTemplate(template.id, { companyId: event.target.value as Project["companyId"] })}>
-                {profiles.map((profile) => (
-                  <option key={profile.id} value={profile.id}>
-                    {profile.name}
-                  </option>
-                ))}
-              </Select>
+            <Field label="Zugeordnet zu">
+              <div className="flex min-h-10 items-center rounded-md border border-line bg-slate-50 px-3 text-sm font-semibold text-ink">
+                {assignedProfile?.name ?? "Kein Firmenprofil"}
+              </div>
             </Field>
           </div>
           <Field label="Beschreibung">
@@ -3414,6 +3430,35 @@ function TemplateCard({
               Löschen
             </button>
           </div>
+          {otherProfiles.length ? (
+            <div className="grid gap-2 border-t border-line pt-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">Zuordnung ändern</p>
+              <Select value={targetProfileId} onChange={(event) => setTargetProfileId(event.target.value)}>
+                <option value="">Firmenprofil wählen</option>
+                {otherProfiles.map((profile) => (
+                  <option key={profile.id} value={profile.id}>
+                    {profile.name}
+                  </option>
+                ))}
+              </Select>
+              <button
+                type="button"
+                onClick={copyTemplateToProfile}
+                disabled={!targetProfileId}
+                className="inline-flex h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-ink transition hover:border-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                In anderes Profil kopieren
+              </button>
+              <button
+                type="button"
+                onClick={moveTemplate}
+                disabled={!targetProfileId}
+                className="inline-flex h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-ink transition hover:border-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Zu anderem Profil verschieben
+              </button>
+            </div>
+          ) : null}
           <div className="divide-y divide-line border-t border-line pt-2 text-sm">
             <div className="flex items-center justify-between py-2">
               <span className="text-muted">Aktuelles LV</span>
