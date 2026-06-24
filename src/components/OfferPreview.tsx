@@ -180,8 +180,8 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
           <p className="text-sm font-semibold text-ink">LV-Vorschau</p>
           <p className="text-xs text-muted">
             {shareStatus === "copied"
-              ? "Angebotslink wurde kopiert. Jetzt in eine E-Mail einfügen; localhost-Links funktionieren nur auf diesem Rechner."
-              : "Für Kundenversand öffentliche App-Adresse verwenden, nicht localhost."}
+              ? "Öffentlicher Angebotslink wurde kopiert. Jetzt in eine E-Mail einfügen."
+              : "Beim lokalen Arbeiten wird automatisch die öffentliche OfferFlow-Adresse für den Link verwendet."}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">

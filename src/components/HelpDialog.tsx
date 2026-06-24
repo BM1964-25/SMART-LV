@@ -197,7 +197,12 @@ const helpSections: HelpSection[] = [
         </p>
         <p>
           Für den Kundenversand muss die App über eine öffentliche Adresse geöffnet sein. Links von localhost funktionieren nur auf dem eigenen
-          Rechner und sind nicht für Kunden erreichbar.
+          Rechner und sind nicht für Kunden erreichbar. Beim lokalen Arbeiten erzeugt SMART OfferFlow deshalb automatisch einen Link mit der
+          öffentlichen GitHub-Pages-Adresse.
+        </p>
+        <p>
+          Der Link kann lang sein, weil er ohne Datenbank die Angebotsdaten direkt enthält. Für kurze, professionelle Kundenlinks ist später eine
+          Server-/Datenbankablage mit kurzer Angebots-ID sinnvoll.
         </p>
       </>
     )

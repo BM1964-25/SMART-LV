@@ -9,6 +9,7 @@ export type OfferSharePayload = {
 };
 
 const offerShareKey = "offer";
+const publicOfferFlowUrl = "https://bm1964-25.github.io/SMART-OfferFlow/";
 
 function encodeBase64Url(value: string) {
   const bytes = new TextEncoder().encode(value);
@@ -41,7 +42,8 @@ export function createOfferSharePayload(project: Project, groups: PositionGroup[
 export function createOfferShareLink(project: Project, groups: PositionGroup[], profiles: CompanyProfile[]) {
   const payload = createOfferSharePayload(project, groups, profiles);
   const encoded = encodeBase64Url(JSON.stringify(payload));
-  const baseUrl = `${window.location.origin}${window.location.pathname}`;
+  const isLocalhost = ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
+  const baseUrl = isLocalhost ? publicOfferFlowUrl : `${window.location.origin}${window.location.pathname}`;
   return `${baseUrl}#${offerShareKey}=${encoded}`;
 }
 
