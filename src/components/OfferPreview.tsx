@@ -58,6 +58,7 @@ function formatBankDetails(bank: string) {
 export function OfferPreview({ project, groups, profiles }: { project: Project; groups: PositionGroup[]; profiles: CompanyProfile[] }) {
   const company = profiles.find((profile) => profile.id === project.companyId) ?? profiles[0];
   const bankDetails = formatBankDetails(company.bank);
+  const accountOwner = company.id === "metzger-real-estate" ? "Bernhard Metzger" : bankDetails.owner;
   const companyAddressLines = formatCompanyAddressLines(company);
   const summary = calculateSummary(groups, project);
   const offerDate = new Intl.DateTimeFormat("de-DE", { dateStyle: "long" }).format(new Date(`${project.offerDate}T12:00:00`));
@@ -343,6 +344,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
           <div className="break-words">
             <p className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Rechtliches & Links</p>
             <p className="mt-2">Web: {company.website}</p>
+            <p>USt-ID: {company.vatId}</p>
             {company.agbUrl ? (
               <p>
                 AGB:{" "}
@@ -351,13 +353,12 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
                 </a>
               </p>
             ) : null}
-            <p>USt-ID: {company.vatId}</p>
           </div>
           <div className="break-words">
-            <p className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Bankverbindung</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Zahlungsinformationen</p>
             {bankDetails.iban || bankDetails.bic ? (
               <div className="mt-2">
-                {bankDetails.owner ? <p>{bankDetails.owner}</p> : null}
+                {accountOwner ? <p>Kontoinhaber: {accountOwner}</p> : null}
                 {bankDetails.iban ? <p>IBAN: {bankDetails.iban}</p> : null}
                 {bankDetails.bic ? <p>BIC: {bankDetails.bic}</p> : null}
               </div>
