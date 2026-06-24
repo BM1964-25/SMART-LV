@@ -82,19 +82,25 @@ function renderLinkedFooterLine(line: string, bookingUrl: string) {
 }
 
 function FooterTextBlock({ text, bookingUrl, className = "" }: { text: string; bookingUrl: string; className?: string }) {
+  const lines = text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+  if (lines.length === 0) return null;
+
   return (
     <>
-      {text
-        .split("\n")
-        .map((line) => line.trim())
-        .filter(Boolean)
-        .map((line, index) => (
-          <p key={`${line}-${index}`} className={index === 0 ? className : ""}>
-            {renderLinkedFooterLine(line, bookingUrl)}
-          </p>
-        ))}
+      {lines.map((line, index) => (
+        <p key={`${line}-${index}`} className={index === 0 ? className : ""}>
+          {renderLinkedFooterLine(line, bookingUrl)}
+        </p>
+      ))}
     </>
   );
+}
+
+function hasText(value?: string | null) {
+  return Boolean(value?.trim());
 }
 
 export function OfferPreview({ project, groups, profiles }: { project: Project; groups: PositionGroup[]; profiles: CompanyProfile[] }) {
@@ -114,11 +120,33 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
     [accountOwner ? `Kontoinhaber: ${accountOwner}` : "", bankDetails.iban ? `IBAN: ${bankDetails.iban}` : "", bankDetails.bic ? `BIC: ${bankDetails.bic}` : bankDetails.raw]
       .filter(Boolean)
       .join("\n");
+  const hasFooterIntro = hasText(footerIntro);
+  const hasFooterContact = hasText(footerContact);
+  const hasFooterLegal = hasText(footerLegal);
+  const hasFooterBank = hasText(footerBank);
   const companyAddressLines = formatCompanyAddressLines(company);
   const summary = calculateSummary(groups, project);
   const offerDate = new Intl.DateTimeFormat("de-DE", { dateStyle: "long" }).format(new Date(`${project.offerDate}T12:00:00`));
   const visibleGroups = activeGroups(groups).filter((group) => group.positions.some((position) => position.active));
   const subtotal = summary.net + summary.discount;
+  const projectMetaItems = [
+    { label: "Mandat", value: project.projectName },
+    { label: "Standort", value: project.projectLocation },
+    { label: "Projektvolumen", value: project.projectVolume },
+    { label: "Leistungszeitraum", value: project.plannedProjectStart }
+  ].filter((item) => hasText(item.value));
+  const projectTextCards = [
+    { title: "Aufgabenstellung", body: project.shortDescription },
+    { title: "Zielsetzung", body: project.objective },
+    { title: "Leistungsrahmen", body: project.serviceScope },
+    { title: "Auftragnehmerrolle", body: project.contractorRole }
+  ].filter((item) => hasText(item.body));
+  const hasLegalContent =
+    hasText(project.paymentTerms) ||
+    project.skontoPercent > 0 ||
+    hasText(project.contractBasis) ||
+    hasText(project.validityText) ||
+    hasText(project.offerClarification);
   const printOffer = () => {
     printElement(".print-area", `${project.offerNumber} ${project.projectName}`.trim());
   };
@@ -159,7 +187,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
             )}
             <p className="text-lg font-bold uppercase tracking-[0.16em] text-black">Angebot</p>
             <h1 className="mt-3 max-w-2xl text-4xl font-semibold tracking-normal text-black">{project.projectName}</h1>
-            <p className="mt-5 max-w-3xl text-lg leading-8 text-black">{project.offerIntro}</p>
+            {hasText(project.offerIntro) ? <p className="mt-5 max-w-3xl text-lg leading-8 text-black">{project.offerIntro}</p> : null}
           </div>
           <div className="min-w-64 rounded-lg border border-line p-4 text-base text-black">
             <p className="text-lg font-semibold leading-6 text-black">{company.name}</p>
@@ -184,44 +212,33 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
         </div>
       </section>
 
-      <section className="print-section py-8">
-        {(project.projectName || project.projectLocation || project.projectVolume || project.plannedProjectStart) ? (
+      {projectMetaItems.length > 0 || hasText(project.assignmentReason) || projectTextCards.length > 0 ? (
+        <section className="print-section py-8">
+          {projectMetaItems.length > 0 ? (
           <div className="mb-20 grid gap-4 md:grid-cols-4">
-            <PreviewMeta label="Mandat" value={project.projectName || "-"} />
-            <PreviewMeta label="Standort" value={project.projectLocation || "-"} />
-            <PreviewMeta label="Projektvolumen" value={project.projectVolume || "-"} />
-            <PreviewMeta label="Leistungszeitraum" value={project.plannedProjectStart || "-"} />
+            {projectMetaItems.map((item) => (
+              <PreviewMeta key={item.label} label={item.label} value={item.value} />
+            ))}
           </div>
         ) : null}
-        {project.assignmentReason ? (
+        {hasText(project.assignmentReason) ? (
           <div className="mt-6">
             <h3 className="text-base font-semibold text-black">Anlass der Beauftragung</h3>
             <p className="mt-2 leading-7 text-black">{project.assignmentReason}</p>
           </div>
         ) : null}
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <div className="rounded-md border border-line bg-white p-4">
-            <h3 className="text-base font-semibold text-black">Aufgabenstellung</h3>
-            <p className="mt-2 leading-7 text-black">{project.shortDescription}</p>
+        {projectTextCards.length > 0 ? (
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            {projectTextCards.map((item) => (
+              <div key={item.title} className="rounded-md border border-line bg-white p-4">
+                <h3 className="text-base font-semibold text-black">{item.title}</h3>
+                <p className="mt-2 leading-7 text-black">{item.body}</p>
+              </div>
+            ))}
           </div>
-          <div className="rounded-md border border-line bg-white p-4">
-            <h3 className="text-base font-semibold text-black">Zielsetzung</h3>
-            <p className="mt-2 leading-7 text-black">{project.objective}</p>
-          </div>
-          {project.serviceScope ? (
-            <div className="rounded-md border border-line bg-white p-4">
-              <h3 className="text-base font-semibold text-black">Leistungsrahmen</h3>
-              <p className="mt-2 leading-7 text-black">{project.serviceScope}</p>
-            </div>
-          ) : null}
-          {project.contractorRole ? (
-            <div className="rounded-md border border-line bg-white p-4">
-              <h3 className="text-base font-semibold text-black">Auftragnehmerrolle</h3>
-              <p className="mt-2 leading-7 text-black">{project.contractorRole}</p>
-            </div>
-          ) : null}
-        </div>
-      </section>
+        ) : null}
+        </section>
+      ) : null}
 
       <section className="print-section print-page-break-before border-t border-line py-8">
         <h2 className="text-lg font-semibold text-ink">Leistungsverzeichnis</h2>
@@ -308,31 +325,36 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
         </div>
       </section>
 
-      {project.serviceExclusion ? (
+      {hasText(project.serviceExclusion) ? (
         <section className="print-section print-compact border-t border-line py-6">
           <h2 className="text-lg font-semibold text-ink">Leistungsabgrenzung</h2>
           <p className="mt-3 leading-7 text-black">{project.serviceExclusion}</p>
         </section>
       ) : null}
 
-      {project.changeTerms ? (
+      {hasText(project.changeTerms) ? (
         <section className="print-section print-compact border-t border-line py-6">
           <h2 className="text-lg font-semibold text-ink">Leistungsänderungen</h2>
           <p className="mt-3 leading-7 text-black">{project.changeTerms}</p>
         </section>
       ) : null}
 
-      <section className="print-section print-compact border-t border-line py-6">
+      {hasLegalContent ? (
+        <section className="print-section print-compact border-t border-line py-6">
         <div>
-          <h2 className="text-lg font-semibold text-ink">Zahlungsbedingungen</h2>
-          <p className="mt-3 leading-7 text-black">{project.paymentTerms}</p>
+          {hasText(project.paymentTerms) ? (
+            <>
+              <h2 className="text-lg font-semibold text-ink">Zahlungsbedingungen</h2>
+              <p className="mt-3 leading-7 text-black">{project.paymentTerms}</p>
+            </>
+          ) : null}
           {project.skontoPercent > 0 ? (
             <p className="mt-3 leading-7 text-black">
               Bei Zahlung innerhalb von {project.skontoDays} Tagen wird ein Skonto in Höhe von {project.skontoPercent} % auf den
               netto zahlbaren Rechnungsbetrag gewährt.
             </p>
           ) : null}
-          {project.contractBasis ? (
+          {hasText(project.contractBasis) ? (
             <>
               <h2 className="mt-6 text-lg font-semibold text-ink">Vertragsgrundlage</h2>
               <p className="mt-3 leading-7 text-black">
@@ -340,14 +362,23 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
               </p>
             </>
           ) : null}
-          <h2 className="mt-6 text-lg font-semibold text-ink">Gültigkeit</h2>
-          <p className="mt-3 leading-7 text-black">{project.validityText || `Dieses Angebot ist ${project.validUntil} gültig.`}</p>
-          <h2 className="mt-6 text-lg font-semibold text-ink">Angebotsgrundlagen</h2>
-          <p className="mt-3 leading-7 text-black">{project.offerClarification}</p>
+          {hasText(project.validityText) ? (
+            <>
+              <h2 className="mt-6 text-lg font-semibold text-ink">Gültigkeit</h2>
+              <p className="mt-3 leading-7 text-black">{project.validityText}</p>
+            </>
+          ) : null}
+          {hasText(project.offerClarification) ? (
+            <>
+              <h2 className="mt-6 text-lg font-semibold text-ink">Angebotsgrundlagen</h2>
+              <p className="mt-3 leading-7 text-black">{project.offerClarification}</p>
+            </>
+          ) : null}
         </div>
-      </section>
+        </section>
+      ) : null}
 
-      {project.acceptanceText ? (
+      {hasText(project.acceptanceText) ? (
         <section className="print-section print-compact print-keep border-t border-line py-6">
           <h2 className="text-lg font-semibold text-ink">Auftragserteilung</h2>
           <p className="mt-3 leading-7 text-black">{project.acceptanceText}</p>
@@ -363,21 +394,29 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
 
       <footer className="print-keep mt-16 border-t border-line pt-6 text-base leading-7 text-black">
         <p className="font-medium text-ink">{company.name}</p>
-        <FooterTextBlock text={footerIntro} bookingUrl={bookingUrl} />
-        <div className="mt-5 grid gap-6 md:grid-cols-3">
-          <div className="break-words">
-            <p className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Kontakt</p>
-            <FooterTextBlock text={footerContact} bookingUrl={bookingUrl} className="mt-2" />
+        {hasFooterIntro ? <FooterTextBlock text={footerIntro} bookingUrl={bookingUrl} /> : null}
+        {hasFooterContact || hasFooterLegal || hasFooterBank ? (
+          <div className="mt-5 grid gap-6 md:grid-cols-3">
+            {hasFooterContact ? (
+              <div className="break-words">
+                <p className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Kontakt</p>
+                <FooterTextBlock text={footerContact} bookingUrl={bookingUrl} className="mt-2" />
+              </div>
+            ) : null}
+            {hasFooterLegal ? (
+              <div className="break-words">
+                <p className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Rechtliches & Links</p>
+                <FooterTextBlock text={footerLegal} bookingUrl={bookingUrl} className="mt-2" />
+              </div>
+            ) : null}
+            {hasFooterBank ? (
+              <div className="break-words">
+                <p className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Bankverbindung</p>
+                <FooterTextBlock text={footerBank} bookingUrl={bookingUrl} className="mt-2" />
+              </div>
+            ) : null}
           </div>
-          <div className="break-words">
-            <p className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Rechtliches & Links</p>
-            <FooterTextBlock text={footerLegal} bookingUrl={bookingUrl} className="mt-2" />
-          </div>
-          <div className="break-words">
-            <p className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Bankverbindung</p>
-            <FooterTextBlock text={footerBank} bookingUrl={bookingUrl} className="mt-2" />
-          </div>
-        </div>
+        ) : null}
       </footer>
     </article>
     </>

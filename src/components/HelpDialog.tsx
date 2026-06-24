@@ -176,6 +176,15 @@ const helpSections: HelpSection[] = [
           Prüfen Sie vor dem Versand eines Angebots insbesondere Firmenprofil, Empfänger, Projektdaten, Leistungsumfang, Preise, Umsatzsteuer,
           Zahlungsbedingungen, AGB-Link und Footer.
         </p>
+        <h3>Leere Textfelder</h3>
+        <p>
+          Optionale Textfelder werden nur dann in der LV- und Angebotsvorschau ausgegeben, wenn dort Inhalt eingetragen ist. Wenn Sie ein Textfeld
+          leer lassen oder den Inhalt löschen, erscheinen weder Überschrift noch leerer Platzhalter im Angebot.
+        </p>
+        <p>
+          Das gilt insbesondere für Textbausteine in „Neues Angebot“ sowie für die Footerfelder im Firmenprofil. Eine zusätzliche Aktivierungsbox ist
+          deshalb nicht erforderlich: Text eintragen bedeutet anzeigen, Text entfernen bedeutet ausblenden.
+        </p>
       </>
     )
   },
@@ -187,6 +196,10 @@ const helpSections: HelpSection[] = [
         <p>
           Die LV-Vorschau zeigt die Angebotsstruktur, die Projektinformationen, das Leistungsverzeichnis, Titelsummen, Netto-Summe, Umsatzsteuer,
           Brutto-Summe, rechtliche Textbausteine, Auftragserteilung und Footer.
+        </p>
+        <p>
+          Leere optionale Textbausteine werden in der Vorschau bewusst übersprungen. Dadurch bleiben Angebot und PDF kompakt und enthalten nur die
+          tatsächlich gepflegten Inhalte.
         </p>
         <p>
           Der Abrechnungsstand zeigt, welcher Anteil der Auftragssumme bereits abgerechnet wurde und welcher Betrag noch offen ist. Nachträge und
