@@ -2212,7 +2212,7 @@ function ProjectWorkspace({
 }) {
   const selectedCustomer = customers.find((customer) => customer.companyName === project.client && customer.contactPerson === project.contactPerson);
   const [newOfferCompanyId, setNewOfferCompanyId] = useState<Project["companyId"]>(project.companyId);
-  const activeProfile = profiles.find((profile) => profile.id === project.companyId);
+  const selectedNewOfferProfile = profiles.find((profile) => profile.id === newOfferCompanyId);
 
   return (
     <div className="grid gap-6">
@@ -2222,9 +2222,9 @@ function ProjectWorkspace({
           <section className="rounded-md border border-line bg-white p-4">
             <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
               <div className="grid gap-4 md:grid-cols-[1fr_1fr]">
-                <Field label="Aktives Firmenprofil">
+                <Field label="Ausgewähltes Firmenprofil">
                   <div className="flex min-h-10 items-center rounded-md border border-line bg-slate-50 px-3 text-sm font-semibold text-ink">
-                    {activeProfile?.name ?? "Kein Firmenprofil"}
+                    {selectedNewOfferProfile?.name ?? "Kein Firmenprofil"}
                   </div>
                 </Field>
                 <Field label="Neues Angebot für Firmenprofil">
