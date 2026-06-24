@@ -200,6 +200,15 @@ const helpSections: HelpSection[] = [
           Der optionale Textbaustein „Hinweis“ eignet sich für projektspezifische Zusatzinformationen nach den Angebotsgrundlagen. Bleibt das Feld
           leer, wird der Abschnitt im Angebot nicht angezeigt.
         </p>
+        <h3>Angebot speichern und sichern</h3>
+        <p>
+          Der Button „Angebot speichern“ speichert den aktuellen Arbeitsstand lokal im Browser und zeigt anschließend kurz „Angebot gespeichert“ an.
+          Das ist die schnelle interne Sicherung während der Bearbeitung.
+        </p>
+        <p>
+          „Als JSON sichern“ legt zusätzlich eine Datei auf dem Rechner ab. Diese JSON-Datei kann später wieder geladen, archiviert oder als Vorlage
+          für ein anderes Projekt verwendet werden.
+        </p>
         <h3>Angebot als Link versenden</h3>
         <p>
           In der Angebotsvorschau speichert der Button „Angebot an Kunden versenden“ den aktuellen Angebotsstand in Supabase und kopiert einen kurzen

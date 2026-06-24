@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Printer, Send } from "lucide-react";
+import { Check, Download, Printer, Save, Send } from "lucide-react";
 import { useState } from "react";
 import { activeGroups, calculateSummary, formatCurrency, groupNumber, groupTotal, positionNumber, positionTotal } from "@/lib/calculations";
 import { printElement } from "@/lib/print";
@@ -132,15 +132,20 @@ export function OfferPreview({
   project,
   groups,
   profiles,
-  publicView = false
+  publicView = false,
+  onSaveOffer,
+  onExportJson
 }: {
   project: Project;
   groups: PositionGroup[];
   profiles: CompanyProfile[];
   publicView?: boolean;
+  onSaveOffer?: () => void;
+  onExportJson?: () => void;
 }) {
   const [shareStatus, setShareStatus] = useState<"idle" | "saving" | "copied" | "error">("idle");
   const [shareMessage, setShareMessage] = useState("");
+  const [localSaveStatus, setLocalSaveStatus] = useState<"idle" | "saved">("idle");
   const company = profiles.find((profile) => profile.id === project.companyId) ?? profiles[0];
   const bankDetails = formatBankDetails(company.bank);
   const accountOwner = company.id === "metzger-real-estate" ? "Bernhard Metzger" : bankDetails.owner;
@@ -188,6 +193,12 @@ export function OfferPreview({
   const printOffer = () => {
     printElement(".print-area", `${project.offerNumber} ${project.projectName}`.trim());
   };
+  const saveOffer = () => {
+    onSaveOffer?.();
+    setLocalSaveStatus("saved");
+    setShareMessage("Angebot gespeichert.");
+    window.setTimeout(() => setLocalSaveStatus("idle"), 3500);
+  };
   const shareOffer = async () => {
     try {
       setShareStatus("saving");
@@ -225,6 +236,24 @@ export function OfferPreview({
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={saveOffer}
+            className="inline-flex h-10 items-center gap-2 rounded-md border border-line bg-white px-4 text-sm font-semibold text-ink transition hover:border-slate-300 hover:bg-slate-50"
+          >
+            {localSaveStatus === "saved" ? <Check className="h-4 w-4" /> : <Save className="h-4 w-4" />}
+            {localSaveStatus === "saved" ? "Angebot gespeichert" : "Angebot speichern"}
+          </button>
+          {onExportJson ? (
+            <button
+              type="button"
+              onClick={onExportJson}
+              className="inline-flex h-10 items-center gap-2 rounded-md border border-line bg-white px-4 text-sm font-semibold text-ink transition hover:border-slate-300 hover:bg-slate-50"
+            >
+              <Download className="h-4 w-4" />
+              Als JSON sichern
+            </button>
+          ) : null}
           <button
             type="button"
             onClick={shareOffer}

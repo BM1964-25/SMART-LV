@@ -820,6 +820,14 @@ export default function HomePage() {
     };
   }
 
+  function saveCurrentOffer() {
+    const savedAt = new Date().toISOString();
+    const payload = createStatePayload(savedAt);
+    window.localStorage.setItem(storageKey, JSON.stringify(payload));
+    setLastSavedAt(savedAt);
+    setStorageMessage("Angebot gespeichert");
+  }
+
   function applyState(state: AppStatePayload) {
     setProject(state.project);
     setSelectedProfileId(state.project.companyId);
@@ -1591,7 +1599,9 @@ export default function HomePage() {
             />
           ) : null}
 
-          {activeView === "Angebotsvorschau" ? <OfferPreview project={project} groups={groups} profiles={profiles} /> : null}
+          {activeView === "Angebotsvorschau" ? (
+            <OfferPreview project={project} groups={groups} profiles={profiles} onSaveOffer={saveCurrentOffer} onExportJson={exportJson} />
+          ) : null}
 
           {activeView === "Auftrag & Abrechnung" ? (
             <OrderBillingWorkspace
