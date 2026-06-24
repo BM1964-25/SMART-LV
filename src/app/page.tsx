@@ -3776,16 +3776,16 @@ function TemplateCard({
           </Field>
           <div className="grid gap-2 rounded-md border border-line bg-slate-50 p-2 md:grid-cols-3">
             <div className="flex items-center justify-center gap-2 rounded border border-line bg-white px-3 py-2 text-center">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted">Hauptgruppen</p>
-              <p className="text-sm font-semibold text-ink">{templateGroups.length}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">Hauptgruppen</p>
+              <p className="text-base font-semibold text-ink">{templateGroups.length}</p>
             </div>
             <div className="flex items-center justify-center gap-2 rounded border border-line bg-white px-3 py-2 text-center">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted">Positionen</p>
-              <p className="text-sm font-semibold text-ink">{templatePositions.length}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">Positionen</p>
+              <p className="text-base font-semibold text-ink">{templatePositions.length}</p>
             </div>
             <div className="flex items-center justify-center gap-2 rounded border border-line bg-white px-3 py-2 text-center">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted">LV-Summe</p>
-              <p className="text-sm font-semibold text-ink">{formatCurrency(templateTotal)}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">LV-Summe</p>
+              <p className="text-base font-semibold text-ink">{formatCurrency(templateTotal)}</p>
             </div>
           </div>
         </div>
