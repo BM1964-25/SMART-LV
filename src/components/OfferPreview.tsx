@@ -110,7 +110,17 @@ function hasText(value?: string | null) {
   return Boolean(value?.trim());
 }
 
-export function OfferPreview({ project, groups, profiles }: { project: Project; groups: PositionGroup[]; profiles: CompanyProfile[] }) {
+export function OfferPreview({
+  project,
+  groups,
+  profiles,
+  publicView = false
+}: {
+  project: Project;
+  groups: PositionGroup[];
+  profiles: CompanyProfile[];
+  publicView?: boolean;
+}) {
   const [shareStatus, setShareStatus] = useState<"idle" | "saving" | "copied" | "error">("idle");
   const [shareMessage, setShareMessage] = useState("");
   const company = profiles.find((profile) => profile.id === project.companyId) ?? profiles[0];
@@ -188,6 +198,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
 
   return (
     <>
+      {!publicView ? (
       <div className="no-print mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-line bg-white px-4 py-3 shadow-soft">
         <div>
           <p className="text-sm font-semibold text-ink">LV-Vorschau</p>
@@ -215,6 +226,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
           </button>
         </div>
       </div>
+      ) : null}
       <article className="print-area rounded-lg border border-line bg-white p-8 text-base text-black shadow-soft">
       <section className="print-section pb-8">
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">

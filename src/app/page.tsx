@@ -617,12 +617,16 @@ export default function HomePage() {
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
   const [storageMessage, setStorageMessage] = useState("Automatische Sicherung aktiv");
   const [storageReady, setStorageReady] = useState(false);
+  const [publicOfferMode, setPublicOfferMode] = useState(false);
+  const [publicOfferLoading, setPublicOfferLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const sharedToken = readOfferTokenFromLocation();
     if (sharedToken) {
       queueMicrotask(() => {
+        setPublicOfferMode(true);
+        setPublicOfferLoading(true);
         setStorageMessage("Angebotslink wird geladen");
         setStorageReady(true);
       });
@@ -638,10 +642,12 @@ export default function HomePage() {
           setLastSavedAt(normalized.savedAt);
           setStorageMessage("Angebotslink geladen");
           setActiveView("LV-Vorschau");
+          setPublicOfferLoading(false);
         })
         .catch((error) => {
           const message = error instanceof Error ? error.message : "Angebotslink konnte nicht geladen werden.";
           setStorageMessage(message);
+          setPublicOfferLoading(false);
         });
       return;
     }
@@ -656,6 +662,7 @@ export default function HomePage() {
         profiles: sharedOffer.profiles
       });
       queueMicrotask(() => {
+        setPublicOfferMode(true);
         applyState(normalized);
         setSelectedProfileId(normalized.project.companyId);
         setLastSavedAt(normalized.savedAt);
@@ -691,7 +698,7 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (!storageReady) return;
+    if (!storageReady || publicOfferMode) return;
     const savedAt = new Date().toISOString();
     const payload: AppStatePayload = {
       version: 2,
@@ -709,7 +716,7 @@ export default function HomePage() {
       setLastSavedAt(savedAt);
       setStorageMessage("Automatisch gespeichert");
     });
-  }, [project, groups, profiles, customers, libraryPositions, lvTemplates, orderBilling, storageReady]);
+  }, [project, groups, profiles, customers, libraryPositions, lvTemplates, orderBilling, publicOfferMode, storageReady]);
 
   const company = profiles.find((profile) => profile.id === project.companyId) ?? profiles[0];
   const selectedProfile = profiles.find((profile) => profile.id === selectedProfileId) ?? company;
@@ -1339,6 +1346,28 @@ export default function HomePage() {
       offerNumber: `${current.offerNumber}-KOPIE`,
       status: "Entwurf"
     }));
+  }
+
+  if (publicOfferMode) {
+    return (
+      <main className="min-h-screen bg-canvas px-4 py-6 md:px-8">
+        <div className="mx-auto max-w-6xl">
+          {publicOfferLoading ? (
+            <div className="rounded-lg border border-line bg-white p-8 text-center shadow-sm">
+              <p className="text-lg font-semibold text-ink">Angebot wird geladen</p>
+              <p className="mt-2 text-sm text-muted">{storageMessage}</p>
+            </div>
+          ) : storageMessage.includes("konnte nicht") ? (
+            <div className="rounded-lg border border-rose-100 bg-rose-50 p-8 text-center shadow-sm">
+              <p className="text-lg font-semibold text-rose-900">Angebot konnte nicht geöffnet werden</p>
+              <p className="mt-2 text-sm text-rose-800">{storageMessage}</p>
+            </div>
+          ) : (
+            <OfferPreview project={project} groups={groups} profiles={profiles} publicView />
+          )}
+        </div>
+      </main>
+    );
   }
 
   return (
