@@ -1835,10 +1835,10 @@ function ProjectWorkspace({
               <Field label="Projektbeschreibung">
                 <TextArea value={project.shortDescription} onChange={(event) => updateProject("shortDescription", event.target.value)} className="min-h-28" />
               </Field>
-              <Field label="Projekt- und Leistungsrahmen">
+              <Field label="Leistungsrahmen">
                 <TextArea value={project.serviceScope} onChange={(event) => updateProject("serviceScope", event.target.value)} className="min-h-28" />
               </Field>
-              <Field label="Funktion des Auftragnehmers">
+              <Field label="Auftragnehmerrolle">
                 <TextArea value={project.contractorRole} onChange={(event) => updateProject("contractorRole", event.target.value)} className="min-h-28" />
               </Field>
               <Field label="Zielsetzung">

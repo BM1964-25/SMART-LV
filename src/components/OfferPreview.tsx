@@ -199,24 +199,24 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
             <p className="mt-2 leading-7 text-black">{project.assignmentReason}</p>
           </div>
         ) : null}
-        <div className="mt-6 grid gap-5 md:grid-cols-2">
-          <div>
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <div className="rounded-md border border-line bg-white p-4">
             <h3 className="text-base font-semibold text-black">Projektbeschreibung</h3>
             <p className="mt-2 leading-7 text-black">{project.shortDescription}</p>
           </div>
-          <div>
+          <div className="rounded-md border border-line bg-white p-4">
             <h3 className="text-base font-semibold text-black">Zielsetzung</h3>
             <p className="mt-2 leading-7 text-black">{project.objective}</p>
           </div>
           {project.serviceScope ? (
-            <div className="md:col-span-2">
-              <h3 className="text-base font-semibold text-black">Projekt- und Leistungsrahmen</h3>
+            <div className="rounded-md border border-line bg-white p-4">
+              <h3 className="text-base font-semibold text-black">Leistungsrahmen</h3>
               <p className="mt-2 leading-7 text-black">{project.serviceScope}</p>
             </div>
           ) : null}
           {project.contractorRole ? (
-            <div className="md:col-span-2">
-              <h3 className="text-base font-semibold text-black">Funktion des Auftragnehmers</h3>
+            <div className="rounded-md border border-line bg-white p-4">
+              <h3 className="text-base font-semibold text-black">Auftragnehmerrolle</h3>
               <p className="mt-2 leading-7 text-black">{project.contractorRole}</p>
             </div>
           ) : null}
