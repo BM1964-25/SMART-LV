@@ -59,6 +59,10 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
   const company = profiles.find((profile) => profile.id === project.companyId) ?? profiles[0];
   const bankDetails = formatBankDetails(company.bank);
   const accountOwner = company.id === "metzger-real-estate" ? "Bernhard Metzger" : bankDetails.owner;
+  const bookingUrl =
+    company.id === "metzger-real-estate"
+      ? "https://booking.builtsmart-ai.app/book/profile/metzger-real-estate-advisory?embed=1"
+      : company.bookingUrl;
   const companyAddressLines = formatCompanyAddressLines(company);
   const summary = calculateSummary(groups, project);
   const offerDate = new Intl.DateTimeFormat("de-DE", { dateStyle: "long" }).format(new Date(`${project.offerDate}T12:00:00`));
@@ -330,11 +334,12 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
             {company.ownerLine ? <p className="mt-2">Inhaber: {company.ownerLine}</p> : null}
             <p>Telefon: {company.phone}</p>
             <p>E-Mail: {company.email}</p>
-            {company.bookingUrl ? (
-              <p className="mt-2">
+            {bookingUrl ? (
+              <p>
+                Termin vereinbaren:{" "}
                 <a
-                  className="inline-flex rounded-md border border-line px-3 py-1 font-semibold text-ink underline-offset-2 transition hover:border-slate-300"
-                  href={company.bookingUrl}
+                  className="font-medium text-ink underline underline-offset-2"
+                  href={bookingUrl}
                   target="_blank"
                   rel="noreferrer"
                 >
