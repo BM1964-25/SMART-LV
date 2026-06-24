@@ -463,8 +463,13 @@ function normalizeProfiles(savedProfiles: CompanyProfile[] | undefined) {
       profile.id === "metzger-real-estate" && (!profile.footer || oldMetzgerFooters.includes(profile.footer))
         ? defaultProfile?.footer ?? ""
         : profile.footer ?? defaultProfile?.footer ?? "";
+    const website =
+      profile.id === "metzger-real-estate" && (!profile.website || profile.website === "www.metzger-advisory.de")
+        ? defaultProfile?.website ?? ""
+        : profile.website ?? defaultProfile?.website ?? "";
     return {
       ...profile,
+      website,
       agbUrl: profile.agbUrl ?? defaultProfile?.agbUrl ?? "",
       bookingUrl,
       bank,

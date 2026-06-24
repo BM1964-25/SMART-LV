@@ -326,7 +326,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
         ))}
         <div className="mt-5 grid gap-6 md:grid-cols-3">
           <div className="break-words">
-            <p className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Kontakt & Direktaktion</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Kontakt</p>
             {company.ownerLine ? <p className="mt-2">Inhaber: {company.ownerLine}</p> : null}
             <p>Telefon: {company.phone}</p>
             <p>E-Mail: {company.email}</p>
@@ -357,7 +357,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
             ) : null}
           </div>
           <div className="break-words">
-            <p className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Zahlungsinformationen</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Bankverbindung</p>
             {bankDetails.iban || bankDetails.bic ? (
               <div className="mt-2">
                 {accountOwner ? <p>Kontoinhaber: {accountOwner}</p> : null}
