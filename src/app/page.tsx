@@ -1729,7 +1729,15 @@ export default function HomePage() {
           ) : null}
 
           {activeView === "Neues Angebot" ? (
-            <ProjectWorkspace project={project} customers={customers} updateProject={updateProject} applyCustomerToProject={applyCustomerToProject} setActiveView={setActiveView} />
+            <ProjectWorkspace
+              project={project}
+              customers={customers}
+              profiles={profiles}
+              createNewOffer={createNewOffer}
+              updateProject={updateProject}
+              applyCustomerToProject={applyCustomerToProject}
+              setActiveView={setActiveView}
+            />
           ) : null}
 
           {activeView === "Neues LV" ? (
@@ -2188,23 +2196,56 @@ function Dashboard({
 function ProjectWorkspace({
   project,
   customers,
+  profiles,
+  createNewOffer,
   updateProject,
   applyCustomerToProject,
   setActiveView
 }: {
   project: Project;
   customers: Customer[];
+  profiles: CompanyProfile[];
+  createNewOffer: (companyId: Project["companyId"]) => void;
   updateProject: <K extends keyof Project>(key: K, value: Project[K]) => void;
   applyCustomerToProject: (customerId: string) => void;
   setActiveView: (view: View) => void;
 }) {
   const selectedCustomer = customers.find((customer) => customer.companyName === project.client && customer.contactPerson === project.contactPerson);
+  const [newOfferCompanyId, setNewOfferCompanyId] = useState<Project["companyId"]>(project.companyId);
+  const activeProfile = profiles.find((profile) => profile.id === project.companyId);
 
   return (
     <div className="grid gap-6">
       <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
         <SectionTitle title="Neues Angebot" kicker="Strukturierte Angebotsdaten" />
         <div className="mt-6 grid gap-5">
+          <section className="rounded-md border border-line bg-white p-4">
+            <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
+              <div className="grid gap-4 md:grid-cols-[1fr_1fr]">
+                <Field label="Aktives Firmenprofil">
+                  <div className="flex min-h-10 items-center rounded-md border border-line bg-slate-50 px-3 text-sm font-semibold text-ink">
+                    {activeProfile?.name ?? "Kein Firmenprofil"}
+                  </div>
+                </Field>
+                <Field label="Neues Angebot für Firmenprofil">
+                  <Select value={newOfferCompanyId} onChange={(event) => setNewOfferCompanyId(event.target.value as Project["companyId"])}>
+                    {profiles.map((profile) => (
+                      <option key={profile.id} value={profile.id}>
+                        {profile.name}
+                      </option>
+                    ))}
+                  </Select>
+                </Field>
+              </div>
+              <button
+                type="button"
+                onClick={() => createNewOffer(newOfferCompanyId)}
+                className="inline-flex h-10 items-center justify-center rounded-md bg-ink px-4 text-sm font-semibold text-white transition hover:bg-slate-700"
+              >
+                Neues Angebot anlegen
+              </button>
+            </div>
+          </section>
           <section className="rounded-md border border-line bg-slate-50 p-4">
             <h3 className="font-semibold text-ink">1 Empfänger und Ansprechpartner</h3>
             <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_auto]">
