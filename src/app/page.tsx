@@ -3761,7 +3761,7 @@ function TemplateCard({
     <div className="rounded-lg border border-line bg-white p-4 shadow-sm">
       <div className="grid gap-4 xl:grid-cols-[1fr_244px]">
         <div className="grid gap-3">
-          <div className="grid gap-3 md:grid-cols-[1fr_200px]">
+          <div className="grid gap-3 md:grid-cols-[minmax(280px,0.72fr)_minmax(260px,0.28fr)]">
             <Field label="LV-Name">
               <TextInput value={template.name} onChange={(event) => updateTemplate(template.id, { name: event.target.value })} />
             </Field>
