@@ -446,6 +446,10 @@ function normalizeProfiles(savedProfiles: CompanyProfile[] | undefined) {
   const profiles = savedProfiles ?? companyProfiles;
   return profiles.map((profile) => {
     const defaultProfile = companyProfiles.find((item) => item.id === profile.id);
+    const oldMetzgerFooters = [
+      "Metzger Real Estate Advisory steht für präzise Analyse, belastbare Entscheidungen und digitale Exzellenz in Immobilienprojekten.",
+      "Metzger - Real Estate Advisory unterstützt Investoren, Bauherren und Unternehmen mit unabhängiger Beratung, strategischer Projektsteuerung, Risikomanagement und praxisorientierten Lösungen für anspruchsvolle Bau- und Immobilienprojekte."
+    ];
     const bookingUrl =
       profile.id === "metzger-real-estate" && (!profile.bookingUrl || profile.bookingUrl === "https://www.metzger-rea.de/termin")
         ? defaultProfile?.bookingUrl ?? ""
@@ -455,11 +459,16 @@ function normalizeProfiles(savedProfiles: CompanyProfile[] | undefined) {
       (!profile.bank || profile.bank === "Kontoinhaber Bernhard Metzger, IBAN DE00 0000 0000 0000 0000 03, BIC MREADDE")
         ? defaultProfile?.bank ?? ""
         : profile.bank ?? defaultProfile?.bank ?? "";
+    const footer =
+      profile.id === "metzger-real-estate" && (!profile.footer || oldMetzgerFooters.includes(profile.footer))
+        ? defaultProfile?.footer ?? ""
+        : profile.footer ?? defaultProfile?.footer ?? "";
     return {
       ...profile,
       agbUrl: profile.agbUrl ?? defaultProfile?.agbUrl ?? "",
       bookingUrl,
       bank,
+      footer,
       contactRole: profile.contactRole ?? defaultProfile?.contactRole ?? "",
       ownerLine: profile.ownerLine ?? defaultProfile?.ownerLine ?? ""
     };

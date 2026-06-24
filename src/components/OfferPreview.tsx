@@ -321,7 +321,9 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
 
       <footer className="print-keep mt-16 border-t border-line pt-6 text-base leading-7 text-black">
         <p className="font-medium text-ink">{company.name}</p>
-        <p>{company.footer}</p>
+        {company.footer.split("\n").map((line) => (
+          <p key={line}>{line}</p>
+        ))}
         <div className="mt-5 grid gap-6 md:grid-cols-3">
           <div className="break-words">
             <p className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Kontakt & Direktaktion</p>
