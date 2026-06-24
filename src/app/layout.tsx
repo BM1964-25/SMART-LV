@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "SMART OfferFlow",
-  description: "Angebote, Aufträge und Abrechnung in einem Prozess"
+  description: "Vom Angebot bis zur Abrechnung. KI-gestützt, strukturiert, prüffähig."
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
