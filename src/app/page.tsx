@@ -618,7 +618,7 @@ function createInitialProfileTemplates(profiles: CompanyProfile[] = companyProfi
 }
 
 function isLegacyBuiltSmartAiTemplate(template: LvTemplate) {
-  if (template.companyId !== "builtsmart-ai" || template.id !== "template-builtsmart-ai-standard") return false;
+  if (template.companyId !== "builtsmart-ai") return false;
   const titles = template.groups.map((group) => group.title);
   return (
     titles.includes("Analyse und Konzeption") ||
@@ -648,7 +648,7 @@ function mergeProfileTemplates(savedTemplates: LvTemplate[] | undefined, profile
     };
   });
   const defaultIds = new Set(defaultTemplates.map((template) => template.id));
-  const customTemplates = savedTemplates.filter((template) => !defaultIds.has(template.id));
+  const customTemplates = savedTemplates.filter((template) => !defaultIds.has(template.id) && !isLegacyBuiltSmartAiTemplate(template));
   return [...mergedDefaults, ...customTemplates];
 }
 
