@@ -3677,7 +3677,7 @@ function Templates({
                 key={profile.id}
                 type="button"
                 onClick={() => setActiveTemplateCompanyId(profile.id)}
-                className={`rounded-md border px-4 py-3 text-left transition ${
+                className={`rounded-md border px-4 py-3 text-center transition ${
                   active ? "border-blue-200 bg-blue-50 text-blue-800" : "border-line bg-white text-ink hover:border-slate-300"
                 }`}
               >
