@@ -1832,7 +1832,7 @@ function ProjectWorkspace({
                   className="min-h-28"
                 />
               </Field>
-              <Field label="Projektbeschreibung">
+              <Field label="Aufgabenstellung">
                 <TextArea value={project.shortDescription} onChange={(event) => updateProject("shortDescription", event.target.value)} className="min-h-28" />
               </Field>
               <Field label="Leistungsrahmen">

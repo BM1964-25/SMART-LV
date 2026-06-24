@@ -201,7 +201,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
         ) : null}
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <div className="rounded-md border border-line bg-white p-4">
-            <h3 className="text-base font-semibold text-black">Projektbeschreibung</h3>
+            <h3 className="text-base font-semibold text-black">Aufgabenstellung</h3>
             <p className="mt-2 leading-7 text-black">{project.shortDescription}</p>
           </div>
           <div className="rounded-md border border-line bg-white p-4">
