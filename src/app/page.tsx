@@ -120,6 +120,24 @@ type Customer = {
   notes: string;
 };
 
+type SavedOffer = {
+  id: string;
+  project: Project;
+  groups: PositionGroup[];
+  orderBilling: OrderBilling;
+  createdAt: string;
+  updatedAt: string;
+  version: number;
+};
+
+type OfferNumberSetting = {
+  companyId: Project["companyId"];
+  prefix: string;
+  year: number;
+  nextNumber: number;
+  digits: number;
+};
+
 type AppStatePayload = {
   version: number;
   savedAt: string;
@@ -130,6 +148,8 @@ type AppStatePayload = {
   libraryPositions: Position[];
   lvTemplates: LvTemplate[];
   orderBilling: OrderBilling;
+  savedOffers: SavedOffer[];
+  offerNumberSettings: OfferNumberSetting[];
 };
 
 function createInitialCustomers(): Customer[] {
@@ -163,6 +183,52 @@ function normalizeCustomers(customers: Partial<Customer>[] | undefined): Custome
     customerNumber: customer.customerNumber ?? `KD-${new Date().getFullYear()}-${String(index + 1).padStart(3, "0")}`,
     industry: customer.industry ?? "",
     notes: customer.notes ?? ""
+  }));
+}
+
+function createInitialOfferNumberSettings(profiles = companyProfiles): OfferNumberSetting[] {
+  const currentYear = new Date().getFullYear();
+  return profiles.map((profile) => ({
+    companyId: profile.id,
+    prefix: profile.logoText || profile.name.replace(/[^A-Z0-9]/gi, "").slice(0, 4).toUpperCase() || "ANG",
+    year: currentYear,
+    nextNumber: 1,
+    digits: 3
+  }));
+}
+
+function normalizeOfferNumberSettings(settings: OfferNumberSetting[] | undefined, profiles: CompanyProfile[]) {
+  const defaults = createInitialOfferNumberSettings(profiles);
+  const byCompany = new Map((settings ?? []).map((setting) => [setting.companyId, setting]));
+  return defaults.map((setting) => ({ ...setting, ...(byCompany.get(setting.companyId) ?? {}) }));
+}
+
+function nextOfferNumber(settings: OfferNumberSetting[], companyId: Project["companyId"], savedOffers: SavedOffer[]) {
+  const fallback = createInitialOfferNumberSettings().find((setting) => setting.companyId === companyId) ?? createInitialOfferNumberSettings()[0];
+  const setting = settings.find((item) => item.companyId === companyId) ?? fallback;
+  const escapedPrefix = setting.prefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = new RegExp(`^${escapedPrefix}-${setting.year}-(\\d+)$`);
+  const highestSaved = savedOffers.reduce((highest, offer) => {
+    if (offer.project.companyId !== companyId) return highest;
+    const match = offer.project.offerNumber.match(pattern);
+    return match ? Math.max(highest, Number(match[1])) : highest;
+  }, 0);
+  const next = Math.max(setting.nextNumber, highestSaved + 1);
+  return `${setting.prefix}-${setting.year}-${String(next).padStart(setting.digits, "0")}`;
+}
+
+function bumpOfferNumberSetting(settings: OfferNumberSetting[], companyId: Project["companyId"]) {
+  return settings.map((setting) => (setting.companyId === companyId ? { ...setting, nextNumber: setting.nextNumber + 1 } : setting));
+}
+
+function normalizeSavedOffers(offers: SavedOffer[] | undefined): SavedOffer[] {
+  return (offers ?? []).map((offer) => ({
+    ...offer,
+    version: offer.version ?? 1,
+    groups: (offer.groups ?? initialGroups).map((group) => ({ ...group, active: group.active ?? true })),
+    orderBilling: offer.orderBilling ?? sampleOrderBilling,
+    createdAt: offer.createdAt ?? offer.updatedAt ?? new Date().toISOString(),
+    updatedAt: offer.updatedAt ?? new Date().toISOString()
   }));
 }
 
@@ -633,7 +699,9 @@ function normalizeSavedState(parsed: Partial<AppStatePayload> & { savedAt?: stri
       ...billing,
       changeOrders: billing.changeOrders.map((item) => ({ ...item, billable: item.billable ?? item.status === "Beauftragt" })),
       workLog: billing.workLog.map((item) => ({ ...item, billable: item.billable ?? true }))
-    }
+    },
+    savedOffers: normalizeSavedOffers(parsed.savedOffers),
+    offerNumberSettings: normalizeOfferNumberSettings(parsed.offerNumberSettings, profiles)
   };
 }
 
@@ -657,6 +725,8 @@ export default function HomePage() {
   const [libraryPositions, setLibraryPositions] = useState<Position[]>(createInitialLibraryPositions);
   const [lvTemplates, setLvTemplates] = useState<LvTemplate[]>(createInitialProfileTemplates);
   const [orderBilling, setOrderBilling] = useState<OrderBilling>(sampleOrderBilling);
+  const [savedOffers, setSavedOffers] = useState<SavedOffer[]>([]);
+  const [offerNumberSettings, setOfferNumberSettings] = useState<OfferNumberSetting[]>(() => createInitialOfferNumberSettings());
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -757,14 +827,16 @@ export default function HomePage() {
       customers,
       libraryPositions,
       lvTemplates,
-      orderBilling
+      orderBilling,
+      savedOffers,
+      offerNumberSettings
     };
     window.localStorage.setItem(storageKey, JSON.stringify(payload));
     queueMicrotask(() => {
       setLastSavedAt(savedAt);
       setStorageMessage("Automatisch gespeichert");
     });
-  }, [project, groups, profiles, customers, libraryPositions, lvTemplates, orderBilling, publicOfferMode, storageReady]);
+  }, [project, groups, profiles, customers, libraryPositions, lvTemplates, orderBilling, savedOffers, offerNumberSettings, publicOfferMode, storageReady]);
 
   const company = profiles.find((profile) => profile.id === project.companyId) ?? profiles[0];
   const selectedProfile = profiles.find((profile) => profile.id === selectedProfileId) ?? company;
@@ -816,7 +888,9 @@ export default function HomePage() {
       customers,
       libraryPositions,
       lvTemplates,
-      orderBilling
+      orderBilling,
+      savedOffers,
+      offerNumberSettings
     };
   }
 
@@ -824,8 +898,89 @@ export default function HomePage() {
     const savedAt = new Date().toISOString();
     const payload = createStatePayload(savedAt);
     window.localStorage.setItem(storageKey, JSON.stringify(payload));
+    setSavedOffers((current) => {
+      const existing = current.find((offer) => offer.id === project.id);
+      const savedOffer: SavedOffer = {
+        id: project.id,
+        project,
+        groups: cloneGroups(groups),
+        orderBilling,
+        createdAt: existing?.createdAt ?? savedAt,
+        updatedAt: savedAt,
+        version: (existing?.version ?? 0) + 1
+      };
+      return existing ? current.map((offer) => (offer.id === project.id ? savedOffer : offer)) : [savedOffer, ...current];
+    });
     setLastSavedAt(savedAt);
-    setStorageMessage("Angebot gespeichert");
+    setStorageMessage("Angebot in Angebotsliste gespeichert");
+  }
+
+  function openSavedOffer(offerId: string) {
+    const offer = savedOffers.find((item) => item.id === offerId);
+    if (!offer) return;
+    setProject(offer.project);
+    setSelectedProfileId(offer.project.companyId);
+    setGroups(cloneGroups(offer.groups));
+    setOrderBilling(offer.orderBilling);
+    setStorageMessage(`Angebot geöffnet: ${offer.project.offerNumber}`);
+    setActiveView("Dashboard");
+  }
+
+  function deleteSavedOffer(offerId: string) {
+    const offer = savedOffers.find((item) => item.id === offerId);
+    if (!offer) return;
+    if (!window.confirm(`Angebot "${offer.project.offerNumber}" aus der Angebotsliste löschen?`)) return;
+    setSavedOffers((current) => current.filter((item) => item.id !== offerId));
+    setStorageMessage(`Angebot gelöscht: ${offer.project.offerNumber}`);
+  }
+
+  function updateOfferNumberSetting(companyId: Project["companyId"], changes: Partial<OfferNumberSetting>) {
+    setOfferNumberSettings((current) =>
+      normalizeOfferNumberSettings(current, profiles).map((setting) => (setting.companyId === companyId ? { ...setting, ...changes } : setting))
+    );
+  }
+
+  function createNewOffer(companyId: Project["companyId"]) {
+    saveCurrentOffer();
+    const now = new Date().toISOString();
+    const offerNumber = nextOfferNumber(offerNumberSettings, companyId, savedOffers);
+    const template =
+      lvTemplates.find((item) => item.companyId === companyId && item.id === `template-${companyId}-standard`) ??
+      lvTemplates.find((item) => item.companyId === companyId);
+    const newProject: Project = {
+      ...sampleProject,
+      id: `offer-${Date.now()}`,
+      companyId,
+      client: "",
+      contactPerson: "",
+      projectName: "",
+      projectLocation: "",
+      projectVolume: "",
+      plannedProjectStart: "",
+      offerNumber,
+      offerDate: new Date().toISOString().slice(0, 10),
+      status: "Entwurf"
+    };
+    const newGroups = template ? cloneGroups(template.groups) : [];
+    setProject(newProject);
+    setSelectedProfileId(companyId);
+    setGroups(newGroups);
+    setOrderBilling({ ...sampleOrderBilling, orderNumber: "" });
+    setOfferNumberSettings((current) => bumpOfferNumberSetting(normalizeOfferNumberSettings(current, profiles), companyId));
+    setSavedOffers((current) => [
+      {
+        id: newProject.id,
+        project: newProject,
+        groups: newGroups,
+        orderBilling: { ...sampleOrderBilling, orderNumber: "" },
+        createdAt: now,
+        updatedAt: now,
+        version: 1
+      },
+      ...current
+    ]);
+    setStorageMessage(`Neues Angebot angelegt: ${offerNumber}`);
+    setActiveView("Neues Angebot");
   }
 
   function applyState(state: AppStatePayload) {
@@ -837,6 +992,8 @@ export default function HomePage() {
     setLibraryPositions(state.libraryPositions);
     setLvTemplates(state.lvTemplates);
     setOrderBilling(state.orderBilling);
+    setSavedOffers(state.savedOffers);
+    setOfferNumberSettings(state.offerNumberSettings);
   }
 
   function exportJson() {
@@ -1558,7 +1715,20 @@ export default function HomePage() {
             />
           ) : null}
 
-          {activeView === "Projekte" || activeView === "Neues Angebot" ? (
+          {activeView === "Projekte" ? (
+            <OfferDatabase
+              project={project}
+              savedOffers={savedOffers}
+              profiles={profiles}
+              numberSettings={offerNumberSettings}
+              createNewOffer={createNewOffer}
+              openSavedOffer={openSavedOffer}
+              deleteSavedOffer={deleteSavedOffer}
+              updateNumberSetting={updateOfferNumberSetting}
+            />
+          ) : null}
+
+          {activeView === "Neues Angebot" ? (
             <ProjectWorkspace project={project} customers={customers} updateProject={updateProject} applyCustomerToProject={applyCustomerToProject} setActiveView={setActiveView} />
           ) : null}
 
@@ -1684,6 +1854,132 @@ export default function HomePage() {
       </section>
       <HelpDialog open={helpOpen} onClose={() => setHelpOpen(false)} />
     </main>
+  );
+}
+
+function OfferDatabase({
+  project,
+  savedOffers,
+  profiles,
+  numberSettings,
+  createNewOffer,
+  openSavedOffer,
+  deleteSavedOffer,
+  updateNumberSetting
+}: {
+  project: Project;
+  savedOffers: SavedOffer[];
+  profiles: CompanyProfile[];
+  numberSettings: OfferNumberSetting[];
+  createNewOffer: (companyId: Project["companyId"]) => void;
+  openSavedOffer: (offerId: string) => void;
+  deleteSavedOffer: (offerId: string) => void;
+  updateNumberSetting: (companyId: Project["companyId"], changes: Partial<OfferNumberSetting>) => void;
+}) {
+  const [newOfferCompanyId, setNewOfferCompanyId] = useState<Project["companyId"]>(project.companyId);
+  const sortedOffers = [...savedOffers].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  const offersByCompany = profiles.map((profile) => ({
+    profile,
+    offers: sortedOffers.filter((offer) => offer.project.companyId === profile.id),
+    setting: numberSettings.find((setting) => setting.companyId === profile.id) ?? createInitialOfferNumberSettings(profiles).find((setting) => setting.companyId === profile.id)
+  }));
+
+  return (
+    <div className="grid gap-6">
+      <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
+        <div className="grid gap-5 xl:grid-cols-[1fr_320px] xl:items-end">
+          <div>
+            <SectionTitle title="Angebotsdatenbank" kicker="Alle Angebote, Nummernkreise und Versionen" />
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
+              Angebote werden lokal im Browser gespeichert und beim JSON-Export mitgesichert. Jede Speicherung erhöht die Version des Angebots; die
+              Angebotsnummer kann automatisch erzeugt oder im Angebotskopf manuell überschrieben werden.
+            </p>
+          </div>
+          <div className="grid gap-3">
+            <Field label="Neues Angebot für Firmenprofil">
+              <Select value={newOfferCompanyId} onChange={(event) => setNewOfferCompanyId(event.target.value as Project["companyId"])}>
+                {profiles.map((profile) => (
+                  <option key={profile.id} value={profile.id}>
+                    {profile.name}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+            <button
+              type="button"
+              onClick={() => createNewOffer(newOfferCompanyId)}
+              className="inline-flex h-10 items-center justify-center rounded-md bg-ink px-4 text-sm font-semibold text-white transition hover:bg-slate-700"
+            >
+              Neues Angebot anlegen
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-line bg-white p-6 shadow-sm">
+        <SectionTitle title="Nummernkreise" kicker="Je Firmenprofil einstellbar" />
+        <div className="mt-5 grid gap-4 xl:grid-cols-2">
+          {offersByCompany.map(({ profile, setting }) => (
+            <div key={profile.id} className="grid gap-3 rounded-md border border-line p-4 md:grid-cols-[1fr_100px_100px_90px]">
+              <div>
+                <p className="font-semibold text-ink">{profile.name}</p>
+                <p className="mt-1 text-sm text-muted">
+                  Nächste Nummer: {nextOfferNumber(numberSettings, profile.id, savedOffers)}
+                </p>
+              </div>
+              <Field label="Präfix">
+                <TextInput value={setting?.prefix ?? ""} onChange={(event) => updateNumberSetting(profile.id, { prefix: event.target.value.toUpperCase() })} />
+              </Field>
+              <Field label="Jahr">
+                <TextInput type="number" value={setting?.year ?? new Date().getFullYear()} onChange={(event) => updateNumberSetting(profile.id, { year: Number(event.target.value) })} />
+              </Field>
+              <Field label="Zähler">
+                <TextInput type="number" value={setting?.nextNumber ?? 1} onChange={(event) => updateNumberSetting(profile.id, { nextNumber: Number(event.target.value) })} />
+              </Field>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid gap-4">
+        {sortedOffers.length ? (
+          sortedOffers.map((offer) => {
+            const company = profiles.find((profile) => profile.id === offer.project.companyId);
+            const total = calculateSummary(offer.groups, offer.project).net;
+            return (
+              <article key={offer.id} className="rounded-lg border border-line bg-white p-5 shadow-sm">
+                <div className="grid gap-4 xl:grid-cols-[1fr_auto] xl:items-center">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">{company?.name ?? "Firmenprofil"}</p>
+                    <h3 className="mt-2 text-lg font-semibold text-ink">{offer.project.offerNumber}</h3>
+                    <p className="mt-1 text-sm leading-6 text-muted">{offer.project.projectName || "Ohne Projekttitel"} · {offer.project.client || "Kein Empfänger"}</p>
+                    <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-muted">
+                      <span className="rounded-md bg-slate-100 px-2 py-1">Status: {offer.project.status}</span>
+                      <span className="rounded-md bg-slate-100 px-2 py-1">Version {offer.version}</span>
+                      <span className="rounded-md bg-slate-100 px-2 py-1">Netto {formatCurrency(total)}</span>
+                      <span className="rounded-md bg-slate-100 px-2 py-1">Geändert {new Date(offer.updatedAt).toLocaleString("de-DE")}</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button type="button" onClick={() => openSavedOffer(offer.id)} className="h-10 rounded-md bg-ink px-4 text-sm font-semibold text-white transition hover:bg-slate-700">
+                      Bearbeiten
+                    </button>
+                    <button type="button" onClick={() => deleteSavedOffer(offer.id)} className="h-10 rounded-md border border-line bg-white px-4 text-sm font-semibold text-ink transition hover:border-slate-300">
+                      Löschen
+                    </button>
+                  </div>
+                </div>
+              </article>
+            );
+          })
+        ) : (
+          <div className="rounded-lg border border-dashed border-line bg-white p-8 text-center">
+            <p className="font-semibold text-ink">Noch keine gespeicherten Angebote</p>
+            <p className="mt-2 text-sm text-muted">Lege oben ein neues Angebot an oder speichere den aktuellen Arbeitsstand in der Angebotsvorschau.</p>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 

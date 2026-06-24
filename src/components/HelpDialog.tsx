@@ -174,6 +174,15 @@ const helpSections: HelpSection[] = [
           SMART OfferFlow speichert den Arbeitsstand lokal im Browser und kann zusätzlich JSON-Dateien exportieren und wieder laden. Dadurch lassen
           sich Firmenprofile, Projekte, Kunden, Profil-LVs, LV-Positionen und Abrechnungsdaten sichern.
         </p>
+        <h3>Angebotsdatenbank</h3>
+        <p>
+          Unter „Projekte“ werden gespeicherte Angebote mit Status, Version, Angebotswert und Änderungsdatum angezeigt. Beim Klick auf „Bearbeiten“
+          wird das Angebot wieder als aktueller Arbeitsstand geöffnet.
+        </p>
+        <p>
+          Die Angebotsnummer kann je Firmenprofil über einen Nummernkreis aus Präfix, Jahr und Zähler automatisch erzeugt werden. Im Angebotskopf
+          bleibt sie trotzdem manuell überschreibbar.
+        </p>
         <h3>Profil-LVs</h3>
         <p>
           Vollständige Leistungsverzeichnisse werden unter „Profil-LVs“ gespeichert und jeweils einem Firmenprofil zugeordnet. Beim neuen Angebot
@@ -202,8 +211,8 @@ const helpSections: HelpSection[] = [
         </p>
         <h3>Angebot speichern und sichern</h3>
         <p>
-          Der Button „Angebot speichern“ speichert den aktuellen Arbeitsstand lokal im Browser und zeigt anschließend kurz „Angebot gespeichert“ an.
-          Das ist die schnelle interne Sicherung während der Bearbeitung.
+          Der Button „Angebot speichern“ speichert den aktuellen Arbeitsstand lokal im Browser und aktualisiert zugleich den Eintrag in der
+          Angebotsdatenbank. Jede Speicherung erhöht die Version des Angebots.
         </p>
         <p>
           „Als JSON sichern“ legt zusätzlich eine Datei auf dem Rechner ab. Diese JSON-Datei kann später wieder geladen, archiviert oder als Vorlage
