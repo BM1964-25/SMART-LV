@@ -1761,9 +1761,9 @@ function Dashboard({
             ["Empfänger", project.client || "noch offen"],
             ["Firmenprofil", company.name]
           ].map(([label, value]) => (
-            <div key={label} className="flex min-h-14 items-center justify-between gap-3 rounded-md border border-line bg-slate-50 px-4 py-3">
-              <p className="shrink-0 text-xs font-semibold uppercase tracking-[0.1em] text-muted">{label}</p>
-              <p className="min-w-0 truncate text-right font-semibold text-ink">{value}</p>
+            <div key={label} className="flex min-h-20 flex-col items-center justify-center rounded-md border border-line bg-slate-50 px-4 py-3 text-center">
+              <p className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">{label}</p>
+              <p className="mt-2 max-w-full truncate font-semibold text-ink">{value}</p>
             </div>
           ))}
         </div>
