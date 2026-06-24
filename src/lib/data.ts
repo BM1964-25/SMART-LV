@@ -76,6 +76,11 @@ export const companyProfiles: CompanyProfile[] = [
     contactRole: "Inhaber | Senior Consultant",
     ownerLine: "Dipl.-Ing. (FH) Bernhard Metzger",
     footer: "BuiltSmart Hub verbindet digitale Immobilienprozesse, Beratung und umsetzungsstarke Technologieprojekte.",
+    footerIntro: "BuiltSmart Hub verbindet digitale Immobilienprozesse, Beratung und umsetzungsstarke Technologieprojekte.",
+    footerContact:
+      "Inhaber: Dipl.-Ing. (FH) Bernhard Metzger\nTelefon: +49 711 000 000\nE-Mail: angebote@builtsmart-hub.de\nTermin vereinbaren: Online-Terminbuchung",
+    footerLegal: "Web: www.builtsmart-hub.de\nUSt-ID: DE000000001\nAGB: https://www.builtsmart-hub.de/agb",
+    footerBank: "IBAN: DE00 0000 0000 0000 0000 01\nBIC: BUILDEFF",
     liability: "Alle Leistungsangaben verstehen sich vorbehaltlich finaler technischer Prüfung und abgestimmter Mitwirkungspflichten.",
     offerText: "Wir strukturieren das Vorhaben so, dass fachliche Anforderungen, technische Architektur und wirtschaftliche Zielsetzung sauber ineinandergreifen.",
     colors: { primary: "#35516B", secondary: "#E8EDF2", accent: "#6D879F" },
@@ -97,6 +102,11 @@ export const companyProfiles: CompanyProfile[] = [
     contactRole: "Projektverantwortung",
     ownerLine: "BuiltSmart AI GmbH",
     footer: "BuiltSmart AI entwickelt produktive KI-Anwendungen mit belastbarer Architektur, klarer Nutzerführung und messbarem Nutzen.",
+    footerIntro: "BuiltSmart AI entwickelt produktive KI-Anwendungen mit belastbarer Architektur, klarer Nutzerführung und messbarem Nutzen.",
+    footerContact:
+      "Inhaber: BuiltSmart AI GmbH\nTelefon: +49 89 000 000\nE-Mail: hello@builtsmart-ai.de\nTermin vereinbaren: Online-Terminbuchung",
+    footerLegal: "Web: www.builtsmart-ai.de\nUSt-ID: DE000000002\nAGB: https://www.builtsmart-ai.de/agb",
+    footerBank: "IBAN: DE00 0000 0000 0000 0000 02\nBIC: BSAIDEFF",
     liability: "KI-Ausgaben werden durch geeignete Prüf-, Logging- und Freigabemechanismen abgesichert; produktive Nutzung erfolgt nach gemeinsam definierten Qualitätskriterien.",
     offerText: "Die Lösung wird auf robuste KI-Workflows, transparente Wissensquellen und eine anwenderfreundliche Oberfläche ausgerichtet.",
     colors: { primary: "#527DF6", secondary: "#EAF0FF", accent: "#13B8A7" },
@@ -119,6 +129,12 @@ export const companyProfiles: CompanyProfile[] = [
     ownerLine: "Dipl.-Ing. (FH) Bernhard Metzger",
     footer:
       "Unabhängige Beratung, Projektsteuerung und Risikomanagement für anspruchsvolle Bau- und Immobilienprojekte.\nKompetenzfelder: Projektsteuerung · Troubleshooting · Risikomanagement · Baurevision · Sachverständigenleistungen",
+    footerIntro:
+      "Unabhängige Beratung, Projektsteuerung und Risikomanagement für anspruchsvolle Bau- und Immobilienprojekte.\nKompetenzfelder: Projektsteuerung · Troubleshooting · Risikomanagement · Baurevision · Sachverständigenleistungen",
+    footerContact:
+      "Inhaber: Dipl.-Ing. (FH) Bernhard Metzger\nTelefon: +49 162 7111 911\nE-Mail: metzger@metzger-rea.de\nTermin vereinbaren: Online-Terminbuchung",
+    footerLegal: "Web: www.metzger-rea.de\nUSt-ID: DE204260488\nAGB: https://www.metzger-rea.de/agb",
+    footerBank: "Kontoinhaber: Bernhard Metzger\nIBAN: DE29 7008 0000 0454 4456 00\nBIC: DRESDEFF700",
     liability: "Dieses Angebot basiert auf den zum Angebotszeitpunkt bekannten Rahmenbedingungen und ersetzt keine rechtliche oder steuerliche Prüfung.",
     offerText: "Die Leistungen werden mit besonderem Blick auf belastbare Immobilienprozesse, Entscheidungsqualität und nachhaltige Betriebsfähigkeit strukturiert.",
     colors: { primary: "#FFF200", secondary: "#EEF0F2", accent: "#9C7A42" },
@@ -140,6 +156,11 @@ export const companyProfiles: CompanyProfile[] = [
     contactRole: "Projektverantwortung",
     ownerLine: "Musterfirma GmbH",
     footer: "Individuell konfigurierbares Firmenprofil für weitere Marken, Geschäftsbereiche oder Angebotslinien.",
+    footerIntro: "Individuell konfigurierbares Firmenprofil für weitere Marken, Geschäftsbereiche oder Angebotslinien.",
+    footerContact:
+      "Inhaber: Musterfirma GmbH\nTelefon: +49 30 000 000\nE-Mail: angebot@musterfirma.de\nTermin vereinbaren: Online-Terminbuchung",
+    footerLegal: "Web: www.musterfirma.de\nUSt-ID: DE000000004\nAGB: https://www.musterfirma.de/agb",
+    footerBank: "IBAN: DE00 0000 0000 0000 0000 04\nBIC: FREEDEFF",
     liability: "Standard-Haftungshinweise können je Firmenprofil angepasst und in Exporte übernommen werden.",
     offerText: "Auf Basis der Anforderungen erstellen wir ein transparentes Leistungsbild mit klarer Kalkulation und nachvollziehbarer Umsetzungslogik.",
     colors: { primary: "#1F7A6D", secondary: "#E9F4F1", accent: "#E08D3C" },

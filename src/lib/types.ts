@@ -32,6 +32,10 @@ export type CompanyProfile = {
   contactRole: string;
   ownerLine: string;
   footer: string;
+  footerIntro: string;
+  footerContact: string;
+  footerLegal: string;
+  footerBank: string;
   liability: string;
   offerText: string;
   colors: {

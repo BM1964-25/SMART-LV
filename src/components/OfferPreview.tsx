@@ -55,14 +55,65 @@ function formatBankDetails(bank: string) {
   return { owner, iban, bic, raw };
 }
 
+function hrefForToken(token: string, bookingUrl: string) {
+  if (token === "Online-Terminbuchung") return bookingUrl;
+  if (/^www\./i.test(token)) return `https://${token}`;
+  if (/^https?:\/\//i.test(token)) return token;
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/i.test(token)) return `mailto:${token}`;
+  return token;
+}
+
+function renderLinkedFooterLine(line: string, bookingUrl: string) {
+  const tokenPattern = /(Online-Terminbuchung|https?:\/\/[^\s]+|www\.[^\s]+|[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})/gi;
+  const parts = line.split(tokenPattern);
+  return parts.map((part, index) => {
+    if (!part) return null;
+    if (tokenPattern.test(part)) {
+      tokenPattern.lastIndex = 0;
+      return (
+        <a key={`${part}-${index}`} className="font-medium text-ink underline underline-offset-2" href={hrefForToken(part, bookingUrl)} target="_blank" rel="noreferrer">
+          {part}
+        </a>
+      );
+    }
+    tokenPattern.lastIndex = 0;
+    return part;
+  });
+}
+
+function FooterTextBlock({ text, bookingUrl, className = "" }: { text: string; bookingUrl: string; className?: string }) {
+  return (
+    <>
+      {text
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line, index) => (
+          <p key={`${line}-${index}`} className={index === 0 ? className : ""}>
+            {renderLinkedFooterLine(line, bookingUrl)}
+          </p>
+        ))}
+    </>
+  );
+}
+
 export function OfferPreview({ project, groups, profiles }: { project: Project; groups: PositionGroup[]; profiles: CompanyProfile[] }) {
   const company = profiles.find((profile) => profile.id === project.companyId) ?? profiles[0];
   const bankDetails = formatBankDetails(company.bank);
   const accountOwner = company.id === "metzger-real-estate" ? "Bernhard Metzger" : bankDetails.owner;
-  const bookingUrl =
-    company.id === "metzger-real-estate"
-      ? "https://booking.builtsmart-ai.app/book/profile/metzger-real-estate-advisory?embed=1"
-      : company.bookingUrl;
+  const bookingUrl = company.bookingUrl;
+  const footerIntro = company.footerIntro || company.footer;
+  const footerContact =
+    company.footerContact ||
+    [company.ownerLine ? `Inhaber: ${company.ownerLine}` : "", `Telefon: ${company.phone}`, `E-Mail: ${company.email}`, bookingUrl ? "Termin vereinbaren: Online-Terminbuchung" : ""]
+      .filter(Boolean)
+      .join("\n");
+  const footerLegal = company.footerLegal || [`Web: ${company.website}`, `USt-ID: ${company.vatId}`, company.agbUrl ? `AGB: ${company.agbUrl}` : ""].filter(Boolean).join("\n");
+  const footerBank =
+    company.footerBank ||
+    [accountOwner ? `Kontoinhaber: ${accountOwner}` : "", bankDetails.iban ? `IBAN: ${bankDetails.iban}` : "", bankDetails.bic ? `BIC: ${bankDetails.bic}` : bankDetails.raw]
+      .filter(Boolean)
+      .join("\n");
   const companyAddressLines = formatCompanyAddressLines(company);
   const summary = calculateSummary(groups, project);
   const offerDate = new Intl.DateTimeFormat("de-DE", { dateStyle: "long" }).format(new Date(`${project.offerDate}T12:00:00`));
@@ -325,53 +376,19 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
 
       <footer className="print-keep mt-16 border-t border-line pt-6 text-base leading-7 text-black">
         <p className="font-medium text-ink">{company.name}</p>
-        {company.footer.split("\n").map((line) => (
-          <p key={line}>{line}</p>
-        ))}
+        <FooterTextBlock text={footerIntro} bookingUrl={bookingUrl} />
         <div className="mt-5 grid gap-6 md:grid-cols-3">
           <div className="break-words">
             <p className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Kontakt</p>
-            {company.ownerLine ? <p className="mt-2">Inhaber: {company.ownerLine}</p> : null}
-            <p>Telefon: {company.phone}</p>
-            <p>E-Mail: {company.email}</p>
-            {bookingUrl ? (
-              <p>
-                Termin vereinbaren:{" "}
-                <a
-                  className="font-medium text-ink underline underline-offset-2"
-                  href={bookingUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Online-Terminbuchung
-                </a>
-              </p>
-            ) : null}
+            <FooterTextBlock text={footerContact} bookingUrl={bookingUrl} className="mt-2" />
           </div>
           <div className="break-words">
             <p className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Rechtliches & Links</p>
-            <p className="mt-2">Web: {company.website}</p>
-            <p>USt-ID: {company.vatId}</p>
-            {company.agbUrl ? (
-              <p>
-                AGB:{" "}
-                <a className="font-medium text-ink underline underline-offset-2" href={company.agbUrl} target="_blank" rel="noreferrer">
-                  {company.agbUrl}
-                </a>
-              </p>
-            ) : null}
+            <FooterTextBlock text={footerLegal} bookingUrl={bookingUrl} className="mt-2" />
           </div>
           <div className="break-words">
             <p className="text-sm font-semibold uppercase tracking-[0.12em] text-black">Bankverbindung</p>
-            {bankDetails.iban || bankDetails.bic ? (
-              <div className="mt-2">
-                {accountOwner ? <p>Kontoinhaber: {accountOwner}</p> : null}
-                {bankDetails.iban ? <p>IBAN: {bankDetails.iban}</p> : null}
-                {bankDetails.bic ? <p>BIC: {bankDetails.bic}</p> : null}
-              </div>
-            ) : (
-              <p className="mt-2">{bankDetails.raw}</p>
-            )}
+            <FooterTextBlock text={footerBank} bookingUrl={bookingUrl} className="mt-2" />
           </div>
         </div>
       </footer>

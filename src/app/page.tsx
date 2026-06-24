@@ -463,6 +463,10 @@ function normalizeProfiles(savedProfiles: CompanyProfile[] | undefined) {
       profile.id === "metzger-real-estate" && (!profile.footer || oldMetzgerFooters.includes(profile.footer))
         ? defaultProfile?.footer ?? ""
         : profile.footer ?? defaultProfile?.footer ?? "";
+    const footerIntro =
+      profile.id === "metzger-real-estate" && (!profile.footerIntro || oldMetzgerFooters.includes(profile.footerIntro))
+        ? defaultProfile?.footerIntro ?? footer
+        : profile.footerIntro ?? profile.footer ?? defaultProfile?.footerIntro ?? footer;
     const website =
       profile.id === "metzger-real-estate" && (!profile.website || profile.website === "www.metzger-advisory.de")
         ? defaultProfile?.website ?? ""
@@ -474,6 +478,10 @@ function normalizeProfiles(savedProfiles: CompanyProfile[] | undefined) {
       bookingUrl,
       bank,
       footer,
+      footerIntro,
+      footerContact: profile.footerContact ?? defaultProfile?.footerContact ?? "",
+      footerLegal: profile.footerLegal ?? defaultProfile?.footerLegal ?? "",
+      footerBank: profile.footerBank ?? defaultProfile?.footerBank ?? "",
       contactRole: profile.contactRole ?? defaultProfile?.contactRole ?? "",
       ownerLine: profile.ownerLine ?? defaultProfile?.ownerLine ?? ""
     };
@@ -2456,8 +2464,25 @@ function CompanyProfiles({
             <Field label="Exportlayout">
               <TextArea value={activeProfile.exportLayout} onChange={(event) => updateCompanyProfile(activeProfile.id, { exportLayout: event.target.value })} />
             </Field>
-            <Field label="Footer">
-              <TextArea value={activeProfile.footer} onChange={(event) => updateCompanyProfile(activeProfile.id, { footer: event.target.value })} />
+            <Field label="Footer Einleitung">
+              <TextArea
+                value={activeProfile.footerIntro}
+                onChange={(event) =>
+                  updateCompanyProfile(activeProfile.id, {
+                    footerIntro: event.target.value,
+                    footer: event.target.value
+                  })
+                }
+              />
+            </Field>
+            <Field label="Footer Kontakt">
+              <TextArea value={activeProfile.footerContact} onChange={(event) => updateCompanyProfile(activeProfile.id, { footerContact: event.target.value })} />
+            </Field>
+            <Field label="Footer Rechtliches & Links">
+              <TextArea value={activeProfile.footerLegal} onChange={(event) => updateCompanyProfile(activeProfile.id, { footerLegal: event.target.value })} />
+            </Field>
+            <Field label="Footer Bankverbindung">
+              <TextArea value={activeProfile.footerBank} onChange={(event) => updateCompanyProfile(activeProfile.id, { footerBank: event.target.value })} />
             </Field>
           </div>
         </div>
