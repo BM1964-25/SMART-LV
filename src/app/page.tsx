@@ -493,6 +493,9 @@ function contractBasisForProfile(profile?: CompanyProfile) {
   return `Die Leistungserbringung erfolgt auf Grundlage dieses Angebots sowie der Allgemeinen Geschäftsbedingungen von ${profile?.name ?? "dem Auftragnehmer"}.${agbPart} Mit Auftragserteilung erkennt der Auftraggeber diese als Vertragsbestandteil an.`;
 }
 
+const oldServiceDirectoryIntro =
+  "Die nachfolgende Darstellung weist Mengen, Einheiten, Einzelpreise und Positionssummen transparent aus. Alternativ kann dieselbe interne Kalkulation als Abschnittspauschale angeboten werden, wenn einzelne Preisansätze im Angebot nicht offengelegt werden sollen.";
+
 function sanitizeProject(project: Project, profiles: CompanyProfile[] = companyProfiles): Project {
   const profileDefaults = companyProfiles.find((profile) => profile.id === project.companyId) ?? companyProfiles[0];
   const activeProfile = profiles.find((profile) => profile.id === project.companyId) ?? profileDefaults;
@@ -516,7 +519,7 @@ function sanitizeProject(project: Project, profiles: CompanyProfile[] = companyP
     assignmentReason: project.assignmentReason ?? defaultAssignmentReason,
     serviceScope: project.serviceScope ?? defaultServiceScope,
     contractorRole: project.contractorRole ?? defaultContractorRole,
-    serviceDirectoryIntro: project.serviceDirectoryIntro ?? defaultServiceDirectoryIntro,
+    serviceDirectoryIntro: !project.serviceDirectoryIntro || project.serviceDirectoryIntro === oldServiceDirectoryIntro ? defaultServiceDirectoryIntro : project.serviceDirectoryIntro,
     serviceExclusion: project.serviceExclusion ?? defaultServiceExclusion,
     meetingBillingNote: project.meetingBillingNote ?? defaultMeetingBillingNote,
     changeTerms: project.changeTerms ?? defaultChangeTerms,

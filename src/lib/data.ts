@@ -30,7 +30,7 @@ export const defaultAssignmentReason =
   "Die nachfolgend angebotenen Leistungen basieren auf den bislang geführten Gesprächen sowie den derzeit bekannten Projektanforderungen. Ziel ist die professionelle Unterstützung des Auftraggebers bei der Analyse, Steuerung, Bewertung und Umsetzung der vereinbarten Aufgabenstellungen.";
 
 export const defaultServiceDirectoryIntro =
-  "Die nachfolgende Darstellung weist Mengen, Einheiten, Einzelpreise und Positionssummen transparent aus. Alternativ kann dieselbe interne Kalkulation als Abschnittspauschale angeboten werden, wenn einzelne Preisansätze im Angebot nicht offengelegt werden sollen.";
+  "Die nachfolgende Leistungsübersicht enthält die vereinbarten Leistungen einschließlich Mengenansätzen, Einheiten, Vergütungssätzen und Positionssummen.";
 
 export const defaultServiceScope =
   "Die Leistungen werden als unabhängige Beratungs-, Steuerungs-, Analyse- und Unterstützungsleistungen erbracht. Der konkrete Umfang richtet sich nach den Anforderungen des Projekts und den jeweils abgestimmten Leistungsabrufen.";

@@ -224,12 +224,6 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
       </section>
 
       <section className="print-section print-page-break-before border-t border-line py-8">
-        {project.plannedProjectStart ? (
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold text-ink">Leistungszeitraum</h2>
-            <p className="mt-3 leading-7 text-black">{project.plannedProjectStart}</p>
-          </div>
-        ) : null}
         <h2 className="text-lg font-semibold text-ink">Leistungsverzeichnis</h2>
         {project.serviceDirectoryIntro ? <p className="mt-2 max-w-4xl text-base leading-7 text-black">{project.serviceDirectoryIntro}</p> : null}
         <div className="print-table mt-5 overflow-hidden rounded-lg border border-line">
