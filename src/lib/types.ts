@@ -70,6 +70,7 @@ export type Project = {
   contractBasis: string;
   validityText: string;
   offerClarification: string;
+  offerNote: string;
   acceptanceText: string;
   objective: string;
   technicalContext: string;

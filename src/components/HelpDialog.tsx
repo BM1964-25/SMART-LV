@@ -186,6 +186,10 @@ const helpSections: HelpSection[] = [
           Das gilt insbesondere für Textbausteine in „Neues Angebot“ sowie für die Footerfelder im Firmenprofil. Eine zusätzliche Aktivierungsbox ist
           deshalb nicht erforderlich: Text eintragen bedeutet anzeigen, Text entfernen bedeutet ausblenden.
         </p>
+        <p>
+          Der optionale Textbaustein „Hinweis“ eignet sich für projektspezifische Zusatzinformationen nach den Angebotsgrundlagen. Bleibt das Feld
+          leer, wird der Abschnitt im Angebot nicht angezeigt.
+        </p>
         <h3>Angebot als Link versenden</h3>
         <p>
           In der LV-Vorschau erstellt der Button „Angebot an Kunden versenden“ einen teilbaren Angebotslink. Der Link enthält die aktuellen

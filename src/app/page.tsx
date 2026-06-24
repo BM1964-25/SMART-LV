@@ -527,6 +527,7 @@ function sanitizeProject(project: Project, profiles: CompanyProfile[] = companyP
     contractBasis: !project.contractBasis || project.contractBasis === defaultContractBasis || project.contractBasis === oldContractBasis ? contractBasisForProfile(activeProfile) : project.contractBasis,
     validityText: project.validityText ?? defaultValidityText,
     offerClarification: !project.offerClarification || oldOfferClarifications.has(project.offerClarification) ? defaultOfferBasis : project.offerClarification,
+    offerNote: project.offerNote ?? "",
     acceptanceText: project.acceptanceText ?? defaultAcceptanceText,
     offerDate: project.offerDate ?? sampleProject.offerDate,
     paymentTerms: !project.paymentTerms || project.paymentTerms === oldSoftwarePaymentTerms || project.paymentTerms === oldSimplePaymentTerms ? sampleProject.paymentTerms : project.paymentTerms,
@@ -1884,8 +1885,8 @@ function ProjectWorkspace({
               <Field label="Angebotsgrundlagen">
                 <TextArea value={project.offerClarification} onChange={(event) => updateProject("offerClarification", event.target.value)} className="min-h-28" />
               </Field>
-              <Field label="Technische oder fachliche Rahmenbedingungen">
-                <TextArea value={project.technicalContext} onChange={(event) => updateProject("technicalContext", event.target.value)} />
+              <Field label="Hinweis">
+                <TextArea value={project.offerNote} onChange={(event) => updateProject("offerNote", event.target.value)} className="min-h-28" />
               </Field>
               <Field label="Module / Leistungsbereiche">
                 <TextArea value={project.modules.join("\n")} onChange={(event) => updateProject("modules", event.target.value.split("\n").filter(Boolean))} />

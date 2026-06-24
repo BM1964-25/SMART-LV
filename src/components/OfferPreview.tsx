@@ -155,7 +155,8 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
     project.skontoPercent > 0 ||
     hasText(project.contractBasis) ||
     hasText(project.validityText) ||
-    hasText(project.offerClarification);
+    hasText(project.offerClarification) ||
+    hasText(project.offerNote);
   const printOffer = () => {
     printElement(".print-area", `${project.offerNumber} ${project.projectName}`.trim());
   };
@@ -408,6 +409,12 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
             <>
               <h2 className="mt-6 text-lg font-semibold text-ink">Angebotsgrundlagen</h2>
               <p className="mt-3 leading-7 text-black">{project.offerClarification}</p>
+            </>
+          ) : null}
+          {hasText(project.offerNote) ? (
+            <>
+              <h2 className="mt-6 text-lg font-semibold text-ink">Hinweis</h2>
+              <p className="mt-3 leading-7 text-black">{project.offerNote}</p>
             </>
           ) : null}
         </div>

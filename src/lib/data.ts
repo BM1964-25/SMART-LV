@@ -190,6 +190,7 @@ export const sampleProject: Project = {
   contractBasis: defaultContractBasis,
   validityText: defaultValidityText,
   offerClarification: defaultOfferBasis,
+  offerNote: "",
   acceptanceText: defaultAcceptanceText,
   objective:
     "Ziel ist eine leistungsfähige, anwenderfreundliche und zukunftsfähige Lösung, die wiederkehrende Arbeitsabläufe beschleunigt, Informationen konsolidiert und fundierte Entscheidungen unterstützt.",
