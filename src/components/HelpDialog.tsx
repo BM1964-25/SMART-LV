@@ -193,7 +193,7 @@ const helpSections: HelpSection[] = [
         <h3>Angebot als Link versenden</h3>
         <p>
           In der LV-Vorschau erstellt der Button „Angebot an Kunden versenden“ einen teilbaren Angebotslink. Der Link enthält die aktuellen
-          Angebotsdaten, kopiert ihn in die Zwischenablage und öffnet einen vorbereiteten E-Mail-Entwurf.
+          Angebotsdaten und wird in die Zwischenablage kopiert. Fügen Sie den kopierten Link anschließend in Ihre E-Mail an den Kunden ein.
         </p>
         <p>
           Für den Kundenversand muss die App über eine öffentliche Adresse geöffnet sein. Links von localhost funktionieren nur auf dem eigenen

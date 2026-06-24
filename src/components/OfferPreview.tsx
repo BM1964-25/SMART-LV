@@ -162,19 +162,15 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
   };
   const shareOffer = async () => {
     const link = createOfferShareLink(project, groups, profiles);
-    const subject = `Angebot ${project.offerNumber}`;
-    const body = `Sehr geehrte Damen und Herren,\n\nunter folgendem Link können Sie das Angebot einsehen:\n${link}\n\nMit freundlichen Grüßen`;
 
     try {
       await navigator.clipboard.writeText(link);
       setShareStatus("copied");
-      window.setTimeout(() => setShareStatus("idle"), 3500);
+      window.setTimeout(() => setShareStatus("idle"), 6500);
     } catch {
       setShareStatus("idle");
+      window.prompt("Angebotslink kopieren:", link);
     }
-
-    const mailto = `mailto:${encodeURIComponent("")}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = mailto;
   };
 
   return (
@@ -182,7 +178,11 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
       <div className="no-print mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-line bg-white px-4 py-3 shadow-soft">
         <div>
           <p className="text-sm font-semibold text-ink">LV-Vorschau</p>
-          <p className="text-xs text-muted">Für Kundenversand öffentliche App-Adresse verwenden, nicht localhost.</p>
+          <p className="text-xs text-muted">
+            {shareStatus === "copied"
+              ? "Angebotslink wurde kopiert. Jetzt in eine E-Mail einfügen; localhost-Links funktionieren nur auf diesem Rechner."
+              : "Für Kundenversand öffentliche App-Adresse verwenden, nicht localhost."}
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
