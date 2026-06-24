@@ -1634,7 +1634,7 @@ export default function HomePage() {
           </div>
           <div className={sidebarCollapsed ? "hidden" : ""}>
             <p className="text-lg font-semibold leading-tight text-ink">SMART OfferFlow</p>
-            <p className="text-xs leading-4 text-muted">Vom Angebot bis zur Abrechnung. KI-gestützt, strukturiert, prüffähig.</p>
+            <p className="text-[11px] leading-4 text-muted">Vom Angebot bis zur Abrechnung. KI-gestützt, strukturiert, prüffähig.</p>
           </div>
         </div>
         <div className={`mt-5 flex ${sidebarCollapsed ? "justify-center" : "justify-start"}`}>
