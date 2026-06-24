@@ -58,6 +58,7 @@ import {
   sampleProject
 } from "@/lib/data";
 import { printElement } from "@/lib/print";
+import { readOfferSharePayloadFromLocation } from "@/lib/share";
 import { ChangeOrder, CompanyProfile, InvoicePlanItem, OrderBilling, Position, PositionGroup, Project, WorkLogItem } from "@/lib/types";
 
 type View =
@@ -618,6 +619,26 @@ export default function HomePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    const sharedOffer = readOfferSharePayloadFromLocation();
+    if (sharedOffer) {
+      const normalized = normalizeSavedState({
+        version: 2,
+        savedAt: sharedOffer.sharedAt,
+        project: sharedOffer.project,
+        groups: sharedOffer.groups,
+        profiles: sharedOffer.profiles
+      });
+      queueMicrotask(() => {
+        applyState(normalized);
+        setSelectedProfileId(normalized.project.companyId);
+        setLastSavedAt(normalized.savedAt);
+        setStorageMessage("Angebotslink geladen");
+        setActiveView("LV-Vorschau");
+        setStorageReady(true);
+      });
+      return;
+    }
+
     const saved = window.localStorage.getItem(storageKey);
     if (!saved) {
       queueMicrotask(() => setStorageReady(true));

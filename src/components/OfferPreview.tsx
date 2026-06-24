@@ -1,8 +1,10 @@
 "use client";
 
-import { Printer } from "lucide-react";
+import { Check, Printer, Send } from "lucide-react";
+import { useState } from "react";
 import { activeGroups, calculateSummary, formatCurrency, groupNumber, groupTotal, positionNumber, positionTotal } from "@/lib/calculations";
 import { printElement } from "@/lib/print";
+import { createOfferShareLink } from "@/lib/share";
 import { CompanyProfile, PositionGroup, Project } from "@/lib/types";
 
 function readableTextColor(background: string) {
@@ -110,6 +112,7 @@ function hasText(value?: string | null) {
 }
 
 export function OfferPreview({ project, groups, profiles }: { project: Project; groups: PositionGroup[]; profiles: CompanyProfile[] }) {
+  const [shareStatus, setShareStatus] = useState<"idle" | "copied">("idle");
   const company = profiles.find((profile) => profile.id === project.companyId) ?? profiles[0];
   const bankDetails = formatBankDetails(company.bank);
   const accountOwner = company.id === "metzger-real-estate" ? "Bernhard Metzger" : bankDetails.owner;
@@ -156,21 +159,48 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
   const printOffer = () => {
     printElement(".print-area", `${project.offerNumber} ${project.projectName}`.trim());
   };
+  const shareOffer = async () => {
+    const link = createOfferShareLink(project, groups, profiles);
+    const subject = `Angebot ${project.offerNumber}`;
+    const body = `Sehr geehrte Damen und Herren,\n\nunter folgendem Link können Sie das Angebot einsehen:\n${link}\n\nMit freundlichen Grüßen`;
+
+    try {
+      await navigator.clipboard.writeText(link);
+      setShareStatus("copied");
+      window.setTimeout(() => setShareStatus("idle"), 3500);
+    } catch {
+      setShareStatus("idle");
+    }
+
+    const mailto = `mailto:${encodeURIComponent("")}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailto;
+  };
 
   return (
     <>
       <div className="no-print mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-line bg-white px-4 py-3 shadow-soft">
         <div>
           <p className="text-sm font-semibold text-ink">LV-Vorschau</p>
+          <p className="text-xs text-muted">Für Kundenversand öffentliche App-Adresse verwenden, nicht localhost.</p>
         </div>
-        <button
-          type="button"
-          onClick={printOffer}
-          className="inline-flex h-10 items-center gap-2 rounded-md bg-ink px-4 text-sm font-semibold text-white transition hover:bg-slate-700"
-        >
-          <Printer className="h-4 w-4" />
-          PDF erstellen
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={shareOffer}
+            className="inline-flex h-10 items-center gap-2 rounded-md border border-blue-100 bg-blue-50 px-4 text-sm font-semibold text-blue-800 transition hover:border-blue-200 hover:bg-blue-100"
+          >
+            {shareStatus === "copied" ? <Check className="h-4 w-4" /> : <Send className="h-4 w-4" />}
+            {shareStatus === "copied" ? "Link kopiert" : "Angebot an Kunden versenden"}
+          </button>
+          <button
+            type="button"
+            onClick={printOffer}
+            className="inline-flex h-10 items-center gap-2 rounded-md bg-ink px-4 text-sm font-semibold text-white transition hover:bg-slate-700"
+          >
+            <Printer className="h-4 w-4" />
+            PDF erstellen
+          </button>
+        </div>
       </div>
       <article className="print-area rounded-lg border border-line bg-white p-8 text-base text-black shadow-soft">
       <section className="print-section border-b border-line pb-8">

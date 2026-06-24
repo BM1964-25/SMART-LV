@@ -133,6 +133,7 @@ const helpSections: HelpSection[] = [
           <li>Leistungsverzeichnisse aus Master-LVs übernehmen, bearbeiten und zurück in Vorlagen übertragen.</li>
           <li>Positionen und Titel löschen, duplizieren, bearbeiten und neu nummerieren.</li>
           <li>LV-Vorschau, Summen, Netto, Umsatzsteuer und Brutto prüfen.</li>
+          <li>Angebot als teilbaren Link vorbereiten, kopieren und per E-Mail an Kunden versenden.</li>
           <li>Auftrag, Nachträge, Leistungsnachweise, Rechnungsplan und offenen Rest verfolgen.</li>
           <li>Qualitätsmanagement für Plausibilität, Profilzuordnung und Datenstand nutzen.</li>
         </ul>
@@ -157,7 +158,7 @@ const helpSections: HelpSection[] = [
           <li>Neues Angebot mit Projektangaben, Einleitung, Anlass, Zielsetzung und Konditionen erstellen.</li>
           <li>Passendes Master-LV übernehmen oder ein leeres LV starten.</li>
           <li>Titel und Positionen anpassen, löschen oder ergänzen.</li>
-          <li>Vorschau prüfen, Summen kontrollieren und PDF erstellen.</li>
+          <li>Vorschau prüfen, Summen kontrollieren und PDF erstellen oder Angebot als Link versenden.</li>
           <li>Nach Beauftragung Auftrag, Abrechnung, Nachträge und Leistungsnachweise fortführen.</li>
         </ol>
       </>
@@ -185,6 +186,15 @@ const helpSections: HelpSection[] = [
           Das gilt insbesondere für Textbausteine in „Neues Angebot“ sowie für die Footerfelder im Firmenprofil. Eine zusätzliche Aktivierungsbox ist
           deshalb nicht erforderlich: Text eintragen bedeutet anzeigen, Text entfernen bedeutet ausblenden.
         </p>
+        <h3>Angebot als Link versenden</h3>
+        <p>
+          In der LV-Vorschau erstellt der Button „Angebot an Kunden versenden“ einen teilbaren Angebotslink. Der Link enthält die aktuellen
+          Angebotsdaten, kopiert ihn in die Zwischenablage und öffnet einen vorbereiteten E-Mail-Entwurf.
+        </p>
+        <p>
+          Für den Kundenversand muss die App über eine öffentliche Adresse geöffnet sein. Links von localhost funktionieren nur auf dem eigenen
+          Rechner und sind nicht für Kunden erreichbar.
+        </p>
       </>
     )
   },
@@ -200,6 +210,10 @@ const helpSections: HelpSection[] = [
         <p>
           Leere optionale Textbausteine werden in der Vorschau bewusst übersprungen. Dadurch bleiben Angebot und PDF kompakt und enthalten nur die
           tatsächlich gepflegten Inhalte.
+        </p>
+        <p>
+          Wird ein Angebotslink geöffnet, lädt SMART OfferFlow das enthaltene Angebot direkt in die LV-Vorschau. Der Empfänger benötigt dafür keine
+          lokale JSON-Datei.
         </p>
         <p>
           Der Abrechnungsstand zeigt, welcher Anteil der Auftragssumme bereits abgerechnet wurde und welcher Betrag noch offen ist. Nachträge und
