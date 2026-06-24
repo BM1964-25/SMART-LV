@@ -3758,56 +3758,56 @@ function TemplateCard({
   }
 
   return (
-    <div className="rounded-lg border border-line bg-white p-5 shadow-sm">
-      <div className="grid gap-4 xl:grid-cols-[1fr_260px]">
-        <div className="grid gap-4">
-          <div className="grid gap-3 md:grid-cols-[1fr_220px]">
+    <div className="rounded-lg border border-line bg-white p-4 shadow-sm">
+      <div className="grid gap-4 xl:grid-cols-[1fr_244px]">
+        <div className="grid gap-3">
+          <div className="grid gap-3 md:grid-cols-[1fr_200px]">
             <Field label="LV-Name">
               <TextInput value={template.name} onChange={(event) => updateTemplate(template.id, { name: event.target.value })} />
             </Field>
             <Field label="Zugeordnet zu">
-              <div className="flex min-h-10 items-center rounded-md border border-line bg-slate-50 px-3 text-sm font-semibold text-ink">
+              <div className="flex min-h-10 items-center justify-center rounded-md border border-line bg-slate-50 px-3 text-sm font-semibold text-ink">
                 {assignedProfile?.name ?? "Kein Firmenprofil"}
               </div>
             </Field>
           </div>
           <Field label="Beschreibung">
-            <TextArea value={template.description} onChange={(event) => updateTemplate(template.id, { description: event.target.value })} />
+            <TextArea value={template.description} onChange={(event) => updateTemplate(template.id, { description: event.target.value })} className="min-h-16" />
           </Field>
-          <div className="grid gap-3 md:grid-cols-3">
-            <div className="rounded-md border border-line bg-slate-50 px-3 py-2 text-center">
+          <div className="grid gap-2 rounded-md border border-line bg-slate-50 p-2 md:grid-cols-3">
+            <div className="flex items-center justify-center gap-2 rounded border border-line bg-white px-3 py-2 text-center">
               <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted">Hauptgruppen</p>
-              <p className="mt-1 text-base font-semibold text-ink">{templateGroups.length}</p>
+              <p className="text-sm font-semibold text-ink">{templateGroups.length}</p>
             </div>
-            <div className="rounded-md border border-line bg-slate-50 px-3 py-2 text-center">
+            <div className="flex items-center justify-center gap-2 rounded border border-line bg-white px-3 py-2 text-center">
               <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted">Positionen</p>
-              <p className="mt-1 text-base font-semibold text-ink">{templatePositions.length}</p>
+              <p className="text-sm font-semibold text-ink">{templatePositions.length}</p>
             </div>
-            <div className="rounded-md border border-line bg-slate-50 px-3 py-2 text-center">
+            <div className="flex items-center justify-center gap-2 rounded border border-line bg-white px-3 py-2 text-center">
               <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted">LV-Summe</p>
-              <p className="mt-1 text-base font-semibold text-ink">{formatCurrency(templateTotal)}</p>
+              <p className="text-sm font-semibold text-ink">{formatCurrency(templateTotal)}</p>
             </div>
           </div>
         </div>
-        <div className="grid content-start gap-3 rounded-md border border-line bg-slate-50 p-4">
-          <button type="button" onClick={() => applyTemplate(template.id)} className="inline-flex h-10 items-center justify-center rounded-md bg-ink px-4 text-sm font-semibold text-white transition hover:bg-slate-700">
+        <div className="grid content-start gap-2 rounded-md border border-line bg-slate-50 p-3">
+          <button type="button" onClick={() => applyTemplate(template.id)} className="inline-flex h-9 items-center justify-center rounded-md bg-ink px-3 text-sm font-semibold text-white transition hover:bg-slate-700">
             Zum Bearbeiten laden
           </button>
-          <button type="button" onClick={() => overwriteTemplate(template.id)} className="inline-flex h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-ink transition hover:border-slate-300">
+          <button type="button" onClick={() => overwriteTemplate(template.id)} className="inline-flex h-9 items-center justify-center rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink transition hover:border-slate-300">
             Mit aktuellem LV aktualisieren
           </button>
           <div className="grid grid-cols-2 gap-2">
-            <button type="button" onClick={() => duplicateTemplate(template.id)} className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink transition hover:border-slate-300">
+            <button type="button" onClick={() => duplicateTemplate(template.id)} className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink transition hover:border-slate-300">
               <Copy className="h-4 w-4" />
               Duplizieren
             </button>
-            <button type="button" onClick={() => deleteTemplate(template.id)} className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink transition hover:border-slate-300">
+            <button type="button" onClick={() => deleteTemplate(template.id)} className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink transition hover:border-slate-300">
               <Trash2 className="h-4 w-4" />
               Löschen
             </button>
           </div>
           {otherProfiles.length ? (
-            <div className="grid gap-2 border-t border-line pt-3">
+            <div className="grid gap-2 border-t border-line pt-2">
               <p className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">Zuordnung ändern</p>
               <Select value={targetProfileId} onChange={(event) => setTargetProfileId(event.target.value)}>
                 <option value="">Firmenprofil wählen</option>
@@ -3821,7 +3821,7 @@ function TemplateCard({
                 type="button"
                 onClick={copyTemplateToProfile}
                 disabled={!targetProfileId}
-                className="inline-flex h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-ink transition hover:border-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex h-9 items-center justify-center rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink transition hover:border-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 In anderes Profil kopieren
               </button>
@@ -3829,18 +3829,18 @@ function TemplateCard({
                 type="button"
                 onClick={moveTemplate}
                 disabled={!targetProfileId}
-                className="inline-flex h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-ink transition hover:border-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex h-9 items-center justify-center rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink transition hover:border-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Zu anderem Profil verschieben
               </button>
             </div>
           ) : null}
-          <div className="divide-y divide-line border-t border-line pt-2 text-sm">
-            <div className="flex items-center justify-between py-2">
+          <div className="divide-y divide-line border-t border-line pt-1 text-sm">
+            <div className="flex items-center justify-between py-1.5">
               <span className="text-muted">Aktuelles LV</span>
               <span className="font-semibold text-ink">{formatCurrency(currentTotal)}</span>
             </div>
-            <div className="flex items-center justify-between py-2">
+            <div className="flex items-center justify-between py-1.5">
               <span className="text-muted">Gespeichert</span>
               <span className="font-semibold text-ink">{new Date(template.updatedAt).toLocaleDateString("de-DE")}</span>
             </div>
