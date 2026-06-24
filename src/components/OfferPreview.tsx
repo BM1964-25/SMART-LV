@@ -216,7 +216,7 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
         </div>
       </div>
       <article className="print-area rounded-lg border border-line bg-white p-8 text-base text-black shadow-soft">
-      <section className="print-section border-b border-line pb-8">
+      <section className="print-section pb-8">
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           <div>
             {company.id === "metzger-real-estate" ? (
