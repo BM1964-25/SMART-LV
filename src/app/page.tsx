@@ -2585,12 +2585,6 @@ function CompanyProfiles({
             <Field label="USt-ID / Steuernummer">
               <TextInput value={activeProfile.vatId} onChange={(event) => updateCompanyProfile(activeProfile.id, { vatId: event.target.value })} />
             </Field>
-            <Field label="Bankverbindung">
-              <TextArea value={activeProfile.bank} onChange={(event) => updateCompanyProfile(activeProfile.id, { bank: event.target.value })} />
-            </Field>
-            <Field label="Exportlayout">
-              <TextArea value={activeProfile.exportLayout} onChange={(event) => updateCompanyProfile(activeProfile.id, { exportLayout: event.target.value })} />
-            </Field>
             <Field label="Footer Einleitung">
               <TextArea
                 value={activeProfile.footerIntro}
