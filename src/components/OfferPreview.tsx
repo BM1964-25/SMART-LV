@@ -30,6 +30,24 @@ function LinkedAgbText({ text, url }: { text: string; url?: string }) {
   );
 }
 
+function TextBlock({ text, className = "", linkedAgbUrl }: { text: string; className?: string; linkedAgbUrl?: string }) {
+  const paragraphs = text
+    .split(/\n\s*\n/g)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+  if (!paragraphs.length) return null;
+
+  return (
+    <>
+      {paragraphs.map((paragraph, index) => (
+        <p key={`${paragraph}-${index}`} className={`${className} ${index > 0 ? "mt-4" : ""}`.trim()}>
+          {linkedAgbUrl ? <LinkedAgbText text={paragraph} url={linkedAgbUrl} /> : paragraph}
+        </p>
+      ))}
+    </>
+  );
+}
+
 function formatCompanyAddressLines(profile: CompanyProfile) {
   const nameWithoutSeparators = profile.name.replace(/\s*-\s*/g, " ");
   const withoutDuplicateName = profile.address
@@ -248,7 +266,7 @@ export function OfferPreview({
             )}
             <p className="text-lg font-bold uppercase tracking-[0.16em] text-black">Angebot</p>
             <h1 className="mt-3 max-w-2xl text-4xl font-semibold tracking-normal text-black">{project.projectName}</h1>
-            {hasText(project.offerIntro) ? <p className="mt-5 max-w-3xl text-lg leading-8 text-black">{project.offerIntro}</p> : null}
+            {hasText(project.offerIntro) ? <TextBlock text={project.offerIntro} className="mt-5 max-w-3xl whitespace-pre-line text-lg leading-8 text-black" /> : null}
           </div>
           <div className="min-w-64 rounded-lg border border-line p-4 text-base text-black">
             <p className="text-lg font-semibold leading-6 text-black">{company.name}</p>
@@ -285,7 +303,7 @@ export function OfferPreview({
         {hasText(project.assignmentReason) ? (
           <div className="mt-6">
             <h3 className="text-base font-semibold text-black">Anlass der Beauftragung</h3>
-            <p className="mt-2 leading-7 text-black">{project.assignmentReason}</p>
+            <TextBlock text={project.assignmentReason} className="mt-2 whitespace-pre-line leading-7 text-black" />
           </div>
         ) : null}
         {projectTextCards.length > 0 ? (
@@ -293,7 +311,7 @@ export function OfferPreview({
             {projectTextCards.map((item) => (
               <div key={item.title} className="rounded-md border border-[#D9DEE5] bg-[#F3F4F6] p-4">
                 <h3 className="text-base font-semibold text-black">{item.title}</h3>
-                <p className="mt-2 leading-7 text-black">{item.body}</p>
+                <TextBlock text={item.body} className="mt-2 whitespace-pre-line leading-7 text-black" />
               </div>
             ))}
           </div>
@@ -303,7 +321,7 @@ export function OfferPreview({
 
       <section className="print-section print-page-break-before screen-page-break-before border-t border-line py-8">
         <h2 className="text-lg font-semibold text-ink">Leistungsverzeichnis</h2>
-        {project.serviceDirectoryIntro ? <p className="mt-2 max-w-4xl text-base leading-7 text-black">{project.serviceDirectoryIntro}</p> : null}
+        {project.serviceDirectoryIntro ? <TextBlock text={project.serviceDirectoryIntro} className="mt-2 max-w-4xl whitespace-pre-line text-base leading-7 text-black" /> : null}
         <div className="print-table mt-5 overflow-hidden rounded-lg border border-[#D9DEE5]">
           {visibleGroups.map((group) => {
             const activePositions = group.positions.filter((position) => position.active);
@@ -316,7 +334,7 @@ export function OfferPreview({
                     <h3 className="font-semibold text-ink">
                       {groupNumber(groups, group.id)} {group.title}
                     </h3>
-                    <p className="mt-1 text-sm text-black">{group.intro}</p>
+                    <TextBlock text={group.intro} className="mt-1 whitespace-pre-line text-sm text-black" />
                   </div>
                   <p className="w-fit shrink-0 rounded-md border border-[#D9DEE5] bg-white px-3 py-2 text-right text-sm font-semibold text-ink">
                     {formatCurrency(groupTotal(group))}
@@ -341,8 +359,8 @@ export function OfferPreview({
                       <p className="font-semibold text-black">{positionNumber(groups, group.id, position.id)}</p>
                       <div className="min-w-0">
                         <p className="font-semibold text-ink">{position.title}</p>
-                        <p className="mt-1 leading-6 text-black">{position.description}</p>
-                        {position.note ? <p className="mt-2 text-xs font-medium text-black">{position.note}</p> : null}
+                        <TextBlock text={position.description} className="mt-1 whitespace-pre-line leading-6 text-black" />
+                        {position.note ? <TextBlock text={position.note} className="mt-2 whitespace-pre-line text-xs font-medium text-black" /> : null}
                       </div>
                       <p className="text-right text-black">{position.unit}</p>
                       <p className="text-right text-black">{position.quantity}</p>
@@ -389,14 +407,14 @@ export function OfferPreview({
       {hasText(project.serviceExclusion) ? (
         <section className="print-section print-compact border-t border-line py-6">
           <h2 className="text-lg font-semibold text-ink">Leistungsabgrenzung</h2>
-          <p className="mt-3 leading-7 text-black">{project.serviceExclusion}</p>
+          <TextBlock text={project.serviceExclusion} className="mt-3 whitespace-pre-line leading-7 text-black" />
         </section>
       ) : null}
 
       {hasText(project.changeTerms) ? (
         <section className="print-section print-compact border-t border-line py-6">
           <h2 className="text-lg font-semibold text-ink">Leistungsänderungen</h2>
-          <p className="mt-3 leading-7 text-black">{project.changeTerms}</p>
+          <TextBlock text={project.changeTerms} className="mt-3 whitespace-pre-line leading-7 text-black" />
         </section>
       ) : null}
 
@@ -406,15 +424,13 @@ export function OfferPreview({
           {hasText(project.contractBasis) ? (
             <>
               <h2 className="text-lg font-semibold text-ink">Vertragsgrundlage</h2>
-              <p className="mt-3 leading-7 text-black">
-                <LinkedAgbText text={project.contractBasis} url={company.agbUrl} />
-              </p>
+              <TextBlock text={project.contractBasis} linkedAgbUrl={company.agbUrl} className="mt-3 whitespace-pre-line leading-7 text-black" />
             </>
           ) : null}
           {hasText(project.paymentTerms) ? (
             <>
               <h2 className="mt-6 text-lg font-semibold text-ink">Zahlungsbedingungen</h2>
-              <p className="mt-3 leading-7 text-black">{project.paymentTerms}</p>
+              <TextBlock text={project.paymentTerms} className="mt-3 whitespace-pre-line leading-7 text-black" />
             </>
           ) : null}
           {project.skontoPercent > 0 ? (
@@ -426,19 +442,19 @@ export function OfferPreview({
           {hasText(project.validityText) ? (
             <>
               <h2 className="mt-6 text-lg font-semibold text-ink">Gültigkeit</h2>
-              <p className="mt-3 leading-7 text-black">{project.validityText}</p>
+              <TextBlock text={project.validityText} className="mt-3 whitespace-pre-line leading-7 text-black" />
             </>
           ) : null}
           {hasText(project.offerClarification) ? (
             <>
               <h2 className="mt-6 text-lg font-semibold text-ink">Angebotsgrundlagen</h2>
-              <p className="mt-3 leading-7 text-black">{project.offerClarification}</p>
+              <TextBlock text={project.offerClarification} className="mt-3 whitespace-pre-line leading-7 text-black" />
             </>
           ) : null}
           {hasText(project.offerNote) ? (
             <>
               <h2 className="mt-6 text-lg font-semibold text-ink">Hinweis</h2>
-              <p className="mt-3 leading-7 text-black">{project.offerNote}</p>
+              <TextBlock text={project.offerNote} className="mt-3 whitespace-pre-line leading-7 text-black" />
             </>
           ) : null}
         </div>
@@ -448,7 +464,7 @@ export function OfferPreview({
       {hasText(project.acceptanceText) ? (
         <section className="print-section print-compact print-keep border-t border-line py-6">
           <h2 className="text-lg font-semibold text-ink">Auftragserteilung</h2>
-          <p className="mt-3 leading-7 text-black">{project.acceptanceText}</p>
+          <TextBlock text={project.acceptanceText} className="mt-3 whitespace-pre-line leading-7 text-black" />
           <div className="mt-28 grid gap-6 md:grid-cols-4">
             {["Ort, Datum", "Name", "Funktion", "Unterschrift"].map((label) => (
               <div key={label} className="border-t border-line pt-3 text-sm font-medium text-black">
