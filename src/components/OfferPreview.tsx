@@ -379,9 +379,17 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
       {hasLegalContent ? (
         <section className="print-section print-compact border-t border-line py-6">
         <div>
+          {hasText(project.contractBasis) ? (
+            <>
+              <h2 className="text-lg font-semibold text-ink">Vertragsgrundlage</h2>
+              <p className="mt-3 leading-7 text-black">
+                <LinkedAgbText text={project.contractBasis} url={company.agbUrl} />
+              </p>
+            </>
+          ) : null}
           {hasText(project.paymentTerms) ? (
             <>
-              <h2 className="text-lg font-semibold text-ink">Zahlungsbedingungen</h2>
+              <h2 className="mt-6 text-lg font-semibold text-ink">Zahlungsbedingungen</h2>
               <p className="mt-3 leading-7 text-black">{project.paymentTerms}</p>
             </>
           ) : null}
@@ -390,14 +398,6 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
               Bei Zahlung innerhalb von {project.skontoDays} Tagen wird ein Skonto in Höhe von {project.skontoPercent} % auf den
               netto zahlbaren Rechnungsbetrag gewährt.
             </p>
-          ) : null}
-          {hasText(project.contractBasis) ? (
-            <>
-              <h2 className="mt-6 text-lg font-semibold text-ink">Vertragsgrundlage</h2>
-              <p className="mt-3 leading-7 text-black">
-                <LinkedAgbText text={project.contractBasis} url={company.agbUrl} />
-              </p>
-            </>
           ) : null}
           {hasText(project.validityText) ? (
             <>
