@@ -89,8 +89,8 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
           <div>
             {company.id === "metzger-real-estate" ? (
               <div className="mb-20">
-                <p className="text-3xl font-semibold uppercase leading-tight tracking-[0.12em] text-slate-700 sm:text-4xl">
-                  Metzger - Real Estate Advisory
+                <p className="text-3xl font-semibold uppercase leading-tight tracking-[0.12em] text-[#5F6671] sm:text-4xl">
+                  METZGER - REAL ESTATE ADVISORY
                 </p>
                 <p className="mt-2 text-base text-black">use experience - secure values</p>
               </div>
