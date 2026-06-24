@@ -283,13 +283,6 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
         </div>
       </section>
 
-      {project.meetingBillingNote ? (
-        <section className="print-section print-compact border-t border-line py-6">
-          <h2 className="text-lg font-semibold text-ink">Projektbesprechungen und Ortstermine</h2>
-          <p className="mt-3 leading-7 text-black">{project.meetingBillingNote}</p>
-        </section>
-      ) : null}
-
       <section className="print-section print-compact print-keep border-t border-line py-6">
         <h2 className="text-lg font-semibold text-ink">Zusammenfassung der Leistungsbereiche</h2>
         <div className="mt-5 overflow-hidden rounded-lg border border-line">
