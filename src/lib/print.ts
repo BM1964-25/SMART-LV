@@ -50,6 +50,20 @@ export function printElement(selector: string, title: string) {
         padding-top: 14px !important;
         padding-bottom: 14px !important;
       }
+      .print-page-break-before {
+        display: block !important;
+        break-before: page !important;
+        break-before: always !important;
+        page-break-before: always !important;
+        -webkit-column-break-before: always !important;
+      }
+      .print-page-break-before.border-t {
+        border-top: 0 !important;
+      }
+      .screen-page-break-before {
+        margin-top: 0 !important;
+        padding-top: 14px !important;
+      }
       .break-inside-avoid,
       .print-keep {
         break-inside: avoid;

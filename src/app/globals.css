@@ -73,6 +73,11 @@ input[type="number"]::-webkit-outer-spin-button {
   margin-top: 0.4rem;
 }
 
+.screen-page-break-before {
+  margin-top: 4rem;
+  padding-top: 3rem;
+}
+
 @media print {
   @page {
     size: A4;
@@ -158,6 +163,11 @@ input[type="number"]::-webkit-outer-spin-button {
 
   .print-page-break-before.border-t {
     border-top: 0 !important;
+  }
+
+  .screen-page-break-before {
+    margin-top: 0 !important;
+    padding-top: 14px !important;
   }
 
   .print-compact {
