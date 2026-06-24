@@ -9,6 +9,7 @@ export type OfferSharePayload = {
 };
 
 const offerShareKey = "offer";
+const offerTokenKey = "offerToken";
 const publicOfferFlowUrl = "https://bm1964-25.github.io/SMART-OfferFlow/";
 
 function encodeBase64Url(value: string) {
@@ -45,6 +46,12 @@ export function createOfferShareLink(project: Project, groups: PositionGroup[], 
   const isLocalhost = ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
   const baseUrl = isLocalhost ? publicOfferFlowUrl : `${window.location.origin}${window.location.pathname}`;
   return `${baseUrl}#${offerShareKey}=${encoded}`;
+}
+
+export function readOfferTokenFromLocation() {
+  if (!window.location.hash.startsWith(`#${offerTokenKey}=`)) return null;
+  const token = window.location.hash.slice(`#${offerTokenKey}=`.length).trim();
+  return token ? decodeURIComponent(token) : null;
 }
 
 export function readOfferSharePayloadFromLocation(): OfferSharePayload | null {

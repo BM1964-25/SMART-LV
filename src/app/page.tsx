@@ -58,7 +58,7 @@ import {
   sampleProject
 } from "@/lib/data";
 import { printElement } from "@/lib/print";
-import { readOfferSharePayloadFromLocation } from "@/lib/share";
+import { readOfferSharePayloadFromLocation, readOfferTokenFromLocation } from "@/lib/share";
 import { ChangeOrder, CompanyProfile, InvoicePlanItem, OrderBilling, Position, PositionGroup, Project, WorkLogItem } from "@/lib/types";
 
 type View =
@@ -620,6 +620,32 @@ export default function HomePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    const sharedToken = readOfferTokenFromLocation();
+    if (sharedToken) {
+      queueMicrotask(() => {
+        setStorageMessage("Angebotslink wird geladen");
+        setStorageReady(true);
+      });
+      fetch(`/api/offers?token=${encodeURIComponent(sharedToken)}`)
+        .then(async (response) => {
+          const result = (await response.json()) as { payload?: Partial<AppStatePayload>; error?: string };
+          if (!response.ok || !result.payload) throw new Error(result.error || "Angebot konnte nicht geladen werden.");
+          return normalizeSavedState(result.payload);
+        })
+        .then((normalized) => {
+          applyState(normalized);
+          setSelectedProfileId(normalized.project.companyId);
+          setLastSavedAt(normalized.savedAt);
+          setStorageMessage("Angebotslink geladen");
+          setActiveView("LV-Vorschau");
+        })
+        .catch((error) => {
+          const message = error instanceof Error ? error.message : "Angebotslink konnte nicht geladen werden.";
+          setStorageMessage(message);
+        });
+      return;
+    }
+
     const sharedOffer = readOfferSharePayloadFromLocation();
     if (sharedOffer) {
       const normalized = normalizeSavedState({

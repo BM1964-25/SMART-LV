@@ -192,17 +192,15 @@ const helpSections: HelpSection[] = [
         </p>
         <h3>Angebot als Link versenden</h3>
         <p>
-          In der LV-Vorschau erstellt der Button „Angebot an Kunden versenden“ einen teilbaren Angebotslink. Der Link enthält die aktuellen
-          Angebotsdaten und wird in die Zwischenablage kopiert. Fügen Sie den kopierten Link anschließend in Ihre E-Mail an den Kunden ein.
+          In der LV-Vorschau speichert der Button „Angebot an Kunden versenden“ den aktuellen Angebotsstand in Supabase und kopiert einen kurzen
+          Kundenlink in die Zwischenablage. Fügen Sie den kopierten Link anschließend in Ihre E-Mail an den Kunden ein.
         </p>
         <p>
-          Für den Kundenversand muss die App über eine öffentliche Adresse geöffnet sein. Links von localhost funktionieren nur auf dem eigenen
-          Rechner und sind nicht für Kunden erreichbar. Beim lokalen Arbeiten erzeugt SMART OfferFlow deshalb automatisch einen Link mit der
-          öffentlichen GitHub-Pages-Adresse.
+          Für kurze Kundenlinks muss SMART OfferFlow auf einem Server wie Vercel laufen und mit Supabase verbunden sein. GitHub Pages ist statisch und
+          kann die dafür nötigen API-Routen nicht ausführen.
         </p>
         <p>
-          Der Link kann lang sein, weil er ohne Datenbank die Angebotsdaten direkt enthält. Für kurze, professionelle Kundenlinks ist später eine
-          Server-/Datenbankablage mit kurzer Angebots-ID sinnvoll.
+          Der Kundenlink enthält nur einen Token. Das eigentliche Angebot liegt in Supabase und kann über denselben Link wieder geladen werden.
         </p>
       </>
     )

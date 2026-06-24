@@ -4,7 +4,6 @@ import { Check, Printer, Send } from "lucide-react";
 import { useState } from "react";
 import { activeGroups, calculateSummary, formatCurrency, groupNumber, groupTotal, positionNumber, positionTotal } from "@/lib/calculations";
 import { printElement } from "@/lib/print";
-import { createOfferShareLink } from "@/lib/share";
 import { CompanyProfile, PositionGroup, Project } from "@/lib/types";
 
 function readableTextColor(background: string) {
@@ -112,7 +111,8 @@ function hasText(value?: string | null) {
 }
 
 export function OfferPreview({ project, groups, profiles }: { project: Project; groups: PositionGroup[]; profiles: CompanyProfile[] }) {
-  const [shareStatus, setShareStatus] = useState<"idle" | "copied">("idle");
+  const [shareStatus, setShareStatus] = useState<"idle" | "saving" | "copied" | "error">("idle");
+  const [shareMessage, setShareMessage] = useState("");
   const company = profiles.find((profile) => profile.id === project.companyId) ?? profiles[0];
   const bankDetails = formatBankDetails(company.bank);
   const accountOwner = company.id === "metzger-real-estate" ? "Bernhard Metzger" : bankDetails.owner;
@@ -161,15 +161,28 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
     printElement(".print-area", `${project.offerNumber} ${project.projectName}`.trim());
   };
   const shareOffer = async () => {
-    const link = createOfferShareLink(project, groups, profiles);
-
     try {
+      setShareStatus("saving");
+      setShareMessage("Angebot wird gespeichert und kurzer Kundenlink wird erstellt.");
+      const response = await fetch("/api/offers", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ project, groups, profiles })
+      });
+      const result = (await response.json()) as { link?: string; error?: string };
+      if (!response.ok || !result.link) {
+        throw new Error(result.error || "Kundenlink konnte nicht erstellt werden.");
+      }
+
+      const link = result.link;
       await navigator.clipboard.writeText(link);
       setShareStatus("copied");
+      setShareMessage("Kurzer Kundenlink wurde kopiert. Jetzt in eine E-Mail einfügen.");
       window.setTimeout(() => setShareStatus("idle"), 6500);
-    } catch {
-      setShareStatus("idle");
-      window.prompt("Angebotslink kopieren:", link);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Kundenlink konnte nicht erstellt werden.";
+      setShareStatus("error");
+      setShareMessage(`${message} Bitte Supabase-Konfiguration prüfen.`);
     }
   };
 
@@ -179,19 +192,18 @@ export function OfferPreview({ project, groups, profiles }: { project: Project; 
         <div>
           <p className="text-sm font-semibold text-ink">LV-Vorschau</p>
           <p className="text-xs text-muted">
-            {shareStatus === "copied"
-              ? "Öffentlicher Angebotslink wurde kopiert. Jetzt in eine E-Mail einfügen."
-              : "Beim lokalen Arbeiten wird automatisch die öffentliche OfferFlow-Adresse für den Link verwendet."}
+            {shareMessage || "Kundenlink speichert das Angebot in Supabase und kopiert einen kurzen Link."}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={shareOffer}
+            disabled={shareStatus === "saving"}
             className="inline-flex h-10 items-center gap-2 rounded-md border border-blue-100 bg-blue-50 px-4 text-sm font-semibold text-blue-800 transition hover:border-blue-200 hover:bg-blue-100"
           >
             {shareStatus === "copied" ? <Check className="h-4 w-4" /> : <Send className="h-4 w-4" />}
-            {shareStatus === "copied" ? "Link kopiert" : "Angebot an Kunden versenden"}
+            {shareStatus === "saving" ? "Speichere ..." : shareStatus === "copied" ? "Link kopiert" : "Angebot an Kunden versenden"}
           </button>
           <button
             type="button"
