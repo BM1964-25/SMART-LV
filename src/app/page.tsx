@@ -808,9 +808,303 @@ function createMetzgerReaStandardGroups(): PositionGroup[] {
   return renumberGroups(groups);
 }
 
+function createMetzgerReaBaurevisionGroups(): PositionGroup[] {
+  const groups: PositionGroup[] = [
+    {
+      id: "mrea-baurevision-mandat",
+      title: "Mandatsklärung und Prüfauftrag",
+      intro: "Klärung des Prüfgegenstands, der Zielsetzung, der verfügbaren Unterlagen und der Abgrenzung der Baurevision.",
+      active: true,
+      positions: [
+        makeMetzgerPosition(
+          "mrea-baurevision-mandat",
+          1,
+          "Auftaktgespräch und Prüfzieldefinition",
+          "Gemeinsamer Starttermin zur Klärung von Anlass, Zielsetzung, Projektstand, Beteiligten, Prüfinteresse und gewünschter Ergebnisform.",
+          "strategy",
+          "Std.",
+          4,
+          250,
+          "Baurevision"
+        ),
+        makeMetzgerPosition(
+          "mrea-baurevision-mandat",
+          2,
+          "Abgrenzung Prüfgegenstand und Prüftiefe",
+          "Festlegung, welche Leistungen, Verträge, Nachträge, Rechnungen, Bauabläufe, Dokumentationen oder Qualitätsaspekte geprüft werden sollen.",
+          "concept",
+          "Std.",
+          6,
+          250,
+          "Baurevision"
+        ),
+        makeMetzgerPosition(
+          "mrea-baurevision-mandat",
+          3,
+          "Prüfplan und Unterlagenanforderung",
+          "Erstellung eines strukturierten Prüfplans einschließlich benötigter Unterlagen, Ansprechpartner, Terminlogik und Prioritäten.",
+          "concept",
+          "Std.",
+          6,
+          250,
+          "Baurevision"
+        )
+      ]
+    },
+    {
+      id: "mrea-baurevision-documents",
+      title: "Unterlagenprüfung und Vertragsgrundlagen",
+      intro: "Sichtung und Plausibilisierung der relevanten Projekt-, Vertrags-, Abrechnungs- und Nachtragsunterlagen.",
+      active: true,
+      positions: [
+        makeMetzgerPosition(
+          "mrea-baurevision-documents",
+          1,
+          "Sichtung Projekt- und Vertragsunterlagen",
+          "Prüfung von Verträgen, Leistungsverzeichnissen, Angeboten, Auftragsbestätigungen, Nachträgen, Protokollen und sonstigen Projektunterlagen.",
+          "concept",
+          "Std.",
+          12,
+          250,
+          "Unterlagenprüfung"
+        ),
+        makeMetzgerPosition(
+          "mrea-baurevision-documents",
+          2,
+          "Plausibilisierung Leistungsverzeichnis und Beauftragungsstand",
+          "Abgleich von beauftragtem Leistungsumfang, Nachtragsstand, Leistungsänderungen, Vertragsgrundlagen und erkennbaren Unklarheiten.",
+          "concept",
+          "Std.",
+          10,
+          250,
+          "Unterlagenprüfung"
+        ),
+        makeMetzgerPosition(
+          "mrea-baurevision-documents",
+          3,
+          "Prüfung Dokumentationsstand",
+          "Bewertung, ob Bauprotokolle, Freigaben, Aufmaße, Behinderungsanzeigen, Mängellisten, Fotodokumentationen und Nachweise ausreichend vorliegen.",
+          "concept",
+          "Std.",
+          8,
+          250,
+          "Dokumentation"
+        )
+      ]
+    },
+    {
+      id: "mrea-baurevision-site",
+      title: "Baufortschritt und Leistungsstand",
+      intro: "Prüfung des tatsächlichen Leistungsstands vor Ort und Abgleich mit Abrechnung, Baufortschritt und Dokumentation.",
+      active: true,
+      positions: [
+        makeMetzgerPosition(
+          "mrea-baurevision-site",
+          1,
+          "Ortstermin zur Leistungsstandprüfung",
+          "Begehung der Baustelle oder des Objekts zur Aufnahme des erkennbaren Baufortschritts, offener Leistungen, Mängel, Risiken und Abweichungen.",
+          "project",
+          "Std.",
+          8,
+          220,
+          "Ortstermin"
+        ),
+        makeMetzgerPosition(
+          "mrea-baurevision-site",
+          2,
+          "Abgleich Baufortschritt mit Abrechnung",
+          "Plausibilisierung, ob abgerechnete oder zur Zahlung gestellte Leistungen dem erkennbaren Leistungsstand entsprechen.",
+          "project",
+          "Std.",
+          12,
+          220,
+          "Leistungsstand"
+        ),
+        makeMetzgerPosition(
+          "mrea-baurevision-site",
+          3,
+          "Fotodokumentation und Befundübersicht",
+          "Strukturierte Fotodokumentation der wesentlichen Feststellungen mit Zuordnung zu Bauteilen, Gewerken, Leistungen oder Prüfhinweisen.",
+          "project",
+          "Std.",
+          6,
+          220,
+          "Dokumentation"
+        )
+      ]
+    },
+    {
+      id: "mrea-baurevision-billing",
+      title: "Nachträge, Aufmaß und Abrechnung",
+      intro: "Prüfung und Plausibilisierung von Nachträgen, Aufmaßen, Rechnungen, Leistungsänderungen und abrechnungsrelevanten Grundlagen.",
+      active: true,
+      positions: [
+        makeMetzgerPosition(
+          "mrea-baurevision-billing",
+          1,
+          "Nachtragsprüfung dem Grunde nach",
+          "Fachliche Prüfung, ob geltend gemachte Nachträge nachvollziehbar aus Leistungsänderungen, Zusatzleistungen, Bauumständen oder Projektentscheidungen hergeleitet werden.",
+          "concept",
+          "Std.",
+          14,
+          250,
+          "Nachtragsprüfung"
+        ),
+        makeMetzgerPosition(
+          "mrea-baurevision-billing",
+          2,
+          "Plausibilisierung Aufmaß und Mengenansätze",
+          "Prüfung von Aufmaßen, Mengenansätzen, Abrechnungswegen und Nachweisen auf Plausibilität, Vollständigkeit und erkennbare Abweichungen.",
+          "concept",
+          "Std.",
+          14,
+          250,
+          "Abrechnung"
+        ),
+        makeMetzgerPosition(
+          "mrea-baurevision-billing",
+          3,
+          "Rechnungs- und Zahlungsstandsprüfung",
+          "Abgleich von Rechnungen, Abschlägen, Zahlungsstand, Leistungsstand und dokumentierten offenen Punkten.",
+          "concept",
+          "Std.",
+          10,
+          250,
+          "Abrechnung"
+        )
+      ]
+    },
+    {
+      id: "mrea-baurevision-quality",
+      title: "Qualität, Mängel und Risiken",
+      intro: "Bewertung von Qualitätsrisiken, Mängelthemen, Ausführungsabweichungen und deren Auswirkungen auf Kosten, Termine oder Abnahmefähigkeit.",
+      active: true,
+      positions: [
+        makeMetzgerPosition(
+          "mrea-baurevision-quality",
+          1,
+          "Qualitäts- und Mängelreview",
+          "Prüfung vorhandener Mängelübersichten, Qualitätsdokumentationen, Abnahmeprotokolle und erkennbarer Ausführungsrisiken.",
+          "project",
+          "Std.",
+          10,
+          220,
+          "Qualität"
+        ),
+        makeMetzgerPosition(
+          "mrea-baurevision-quality",
+          2,
+          "Bewertung Kosten-, Termin- und Projektrisiken",
+          "Einordnung der festgestellten Abweichungen hinsichtlich möglicher Auswirkungen auf Kosten, Termine, Qualität, Abnahme oder weitere Projektsteuerung.",
+          "strategy",
+          "Std.",
+          8,
+          250,
+          "Risikomanagement"
+        ),
+        makeMetzgerPosition(
+          "mrea-baurevision-quality",
+          3,
+          "Maßnahmen- und Prioritätenliste",
+          "Erstellung einer priorisierten Übersicht offener Punkte mit empfohlenen Maßnahmen, Verantwortlichkeiten und weiterem Klärungsbedarf.",
+          "project",
+          "Std.",
+          8,
+          220,
+          "Maßnahmen"
+        )
+      ]
+    },
+    {
+      id: "mrea-baurevision-report",
+      title: "Revisionsbericht und Ergebnisbesprechung",
+      intro: "Zusammenfassung der Prüfungsergebnisse in einem nachvollziehbaren Bericht mit Feststellungen, Bewertung und Handlungsempfehlungen.",
+      active: true,
+      positions: [
+        makeMetzgerPosition(
+          "mrea-baurevision-report",
+          1,
+          "Baurevisionsbericht",
+          "Erstellung eines strukturierten Berichts mit Prüfgegenstand, Unterlagenbasis, Feststellungen, Bewertung, Risiken, Empfehlungen und Anlagen.",
+          "concept",
+          "Std.",
+          18,
+          250,
+          "Bericht"
+        ),
+        makeMetzgerPosition(
+          "mrea-baurevision-report",
+          2,
+          "Ergebnispräsentation",
+          "Vorstellung der wesentlichen Ergebnisse gegenüber Auftraggeber, Projektbeteiligten oder Entscheidungsgremium einschließlich Erläuterung offener Punkte.",
+          "strategy",
+          "Std.",
+          4,
+          250,
+          "Bericht"
+        ),
+        makeMetzgerPosition(
+          "mrea-baurevision-report",
+          3,
+          "Nachbesprechung und Umsetzungsbegleitung",
+          "Fachliche Nachbesprechung der Feststellungen sowie Unterstützung bei Priorisierung, Maßnahmenverfolgung oder weiterer Prüfstrategie.",
+          "project",
+          "Std.",
+          6,
+          220,
+          "Umsetzung"
+        )
+      ]
+    },
+    {
+      id: "mrea-baurevision-expenses",
+      title: "Reisezeiten, Fahrtkosten und Auslagen",
+      intro: "Gesondert abrechenbare Reisezeiten, Fahrtkosten und Auslagen im Zusammenhang mit Ortsterminen oder auswärtigen Einsätzen.",
+      active: true,
+      positions: [
+        makeMetzgerPosition(
+          "mrea-baurevision-expenses",
+          1,
+          "Reisezeit",
+          "Vergütungspflichtige Reise- und Fahrtzeit im Zusammenhang mit Ortsterminen, Baustellenbegehungen oder sonstigen auswärtigen Einsätzen.",
+          "support",
+          "Std.",
+          1,
+          180,
+          "Auslagen"
+        ),
+        makeMetzgerPosition(
+          "mrea-baurevision-expenses",
+          2,
+          "Kilometerpauschale",
+          "Abrechnung projektbezogener Fahrten mit dem Kraftfahrzeug auf Basis der vereinbarten Kilometerpauschale.",
+          "support",
+          "Kilometer",
+          1,
+          0.75,
+          "Auslagen"
+        ),
+        makeMetzgerPosition(
+          "mrea-baurevision-expenses",
+          3,
+          "Reisekosten nach Aufwand",
+          "Abrechnung notwendiger Bahn-, Flug-, Taxi-, Mietwagen-, Park-, Maut- und Übernachtungskosten nach tatsächlichem Aufwand und Nachweis.",
+          "support",
+          "Pauschal",
+          1,
+          0,
+          "Auslagen"
+        )
+      ]
+    }
+  ];
+
+  return renumberGroups(groups);
+}
+
 function createInitialProfileTemplates(profiles: CompanyProfile[] = companyProfiles): LvTemplate[] {
   const createdAt = "2026-06-20T00:00:00.000Z";
-  return profiles.map((profile) => ({
+  const standardTemplates = profiles.map((profile) => ({
     id: `template-${profile.id}-standard`,
     companyId: profile.id,
     name: `${profile.name} Angebotsvorlage`,
@@ -830,6 +1124,34 @@ function createInitialProfileTemplates(profiles: CompanyProfile[] = companyProfi
           ? createBuiltSmartAiStandardGroups()
           : cloneGroups(initialGroups)
   }));
+  const metzgerProfile = profiles.find((profile) => profile.id === "metzger-real-estate");
+  if (!metzgerProfile) return standardTemplates;
+  return [
+    ...standardTemplates,
+    {
+      id: "template-metzger-real-estate-baurevision",
+      companyId: "metzger-real-estate",
+      name: "Metzger - Real Estate Advisory Baurevision",
+      description:
+        "Themenspezifische Angebotsvorlage für Baurevision: Mandatsklärung, Unterlagenprüfung, Baufortschritt, Nachträge, Abrechnung, Qualität, Risiken und Revisionsbericht.",
+      createdAt,
+      updatedAt: createdAt,
+      textFields: {
+        ...defaultOfferTemplateText(metzgerProfile),
+        shortDescription:
+          "Baurevision zur unabhängigen Prüfung von Bauprojekt, Leistungsstand, Unterlagen, Nachträgen, Abrechnung, Qualität, Mängeln und Projektrisiken.",
+        objective:
+          "Ziel ist eine nachvollziehbare, prüffähige und entscheidungsorientierte Bewertung des Bauprojekts mit klaren Feststellungen, Risiken und Handlungsempfehlungen.",
+        serviceScope:
+          "Die Leistungen umfassen die Sichtung relevanter Projekt- und Vertragsunterlagen, die Prüfung von Baufortschritt, Leistungsstand, Nachträgen, Abrechnung, Qualität und Dokumentation sowie die Erstellung eines strukturierten Revisionsberichts.",
+        contractorRole:
+          "Der Auftragnehmer erbringt die Leistungen als unabhängiger Berater, Projektsteuerer und technischer Prüfer. Eine Übernahme gesetzlicher Bauleitungs-, Fachbauleitungs- oder öffentlich-rechtlicher Funktionen erfolgt nicht, sofern dies nicht ausdrücklich schriftlich vereinbart ist.",
+        serviceDirectoryIntro:
+          "Die nachfolgende Leistungsübersicht enthält die für die Baurevision vorgesehenen Leistungen einschließlich Mengenansätzen, Einheiten, Vergütungssätzen und Positionssummen."
+      },
+      groups: createMetzgerReaBaurevisionGroups()
+    }
+  ];
 }
 
 function isLegacyBuiltSmartAiTemplate(template: LvTemplate) {
