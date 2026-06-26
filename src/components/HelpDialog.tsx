@@ -93,11 +93,11 @@ const helpSections: HelpSection[] = [
         <ol>
           <li>Lizenzschlüssel aktivieren, falls Ihre Version eine Lizenzprüfung verwendet.</li>
           <li>Optional den Anthropic API-Key unter „KI-Assistenz“ eintragen und prüfen.</li>
-          <li>Firmenprofil auswählen oder anpassen.</li>
-          <li>Kunden- und Projektdaten unter „Neues Angebot“ erfassen.</li>
-          <li>Passende Angebotsvorlage übernehmen oder das LV individuell bearbeiten.</li>
-          <li>Angebotsvorschau prüfen und als PDF über den Druckdialog ausgeben.</li>
-          <li>Auftrag, Nachträge, Leistungsnachweise und Abrechnungsstand weiterführen.</li>
+          <li>Unter „Neues Angebot“ Firmenprofil, Kunde, Projektdaten, Angebotsnummer und Textbausteine erfassen.</li>
+          <li>Unter „Vorlage wählen“ die passende Angebotsvorlage für Firmenprofil und Thema übernehmen.</li>
+          <li>Unter „Leistungen bearbeiten“ Titel, Positionen, Mengen, Einheiten und Preise anpassen.</li>
+          <li>Unter „Prüfen & versenden“ das Angebot kontrollieren, speichern, als PDF ausgeben oder als Kundenlink versenden.</li>
+          <li>Nach Beauftragung unter „Auftrag & Abrechnung“ Nachträge, Leistungsnachweise und Abrechnungsstand weiterführen.</li>
         </ol>
         <p>
           Die Einrichtung von Lizenzschlüssel und API-Key ist im Kapitel „Einrichtung & Zugang“ beschrieben. Ohne API-Key bleiben alle nicht
@@ -135,9 +135,9 @@ const helpSections: HelpSection[] = [
           <li>Firmenprofile mit Kontaktdaten, Farben, Footer, AGB-Link und Terminbuchung pflegen.</li>
           <li>Kunden speichern und in Angebote übernehmen.</li>
           <li>Angebotskopf, Projektinformationen, Textbausteine und Konditionen erfassen.</li>
-          <li>Leistungsverzeichnisse aus Angebotsvorlagen übernehmen, bearbeiten und wieder als Angebotsvorlage speichern.</li>
+          <li>Leistungsverzeichnisse aus „Vorlagen verwalten“ übernehmen, bearbeiten und wieder als Angebotsvorlage speichern.</li>
           <li>Positionen und Titel löschen, duplizieren, bearbeiten und neu nummerieren.</li>
-          <li>Angebotsvorschau, Summen, Netto, Umsatzsteuer und Brutto prüfen.</li>
+          <li>Unter „Prüfen & versenden“ Angebotsaufbau, Summen, Netto, Umsatzsteuer und Brutto prüfen.</li>
           <li>Angebot als teilbaren Link vorbereiten, kopieren und per E-Mail an Kunden versenden.</li>
           <li>Auftrag, Nachträge, Leistungsnachweise, Rechnungsplan und offenen Rest verfolgen.</li>
           <li>Prüfung für Plausibilität, Profilzuordnung und Datenstand nutzen.</li>
@@ -174,11 +174,11 @@ const helpSections: HelpSection[] = [
       <>
         <p>
           SMART OfferFlow speichert den Arbeitsstand lokal im Browser und kann zusätzlich JSON-Dateien exportieren und wieder laden. Dadurch lassen
-          sich Firmenprofile, Projekte, Kunden, Angebotsvorlagen, LV-Positionen und Abrechnungsdaten sichern.
+          sich Firmenprofile, Angebote, Kunden, Angebotsvorlagen, LV-Positionen und Abrechnungsdaten sichern.
         </p>
         <h3>Angebotsdatenbank</h3>
         <p>
-          Unter „Projekte“ werden gespeicherte Angebote mit Status, Version, Angebotswert und Änderungsdatum angezeigt. Beim Klick auf „Bearbeiten“
+          Unter „Angebote“ werden gespeicherte Angebote mit Status, Version, Angebotswert und Änderungsdatum angezeigt. Beim Klick auf „Bearbeiten“
           wird das Angebot wieder als aktueller Arbeitsstand geöffnet.
         </p>
         <p>
@@ -187,12 +187,13 @@ const helpSections: HelpSection[] = [
         </p>
         <h3>Angebotsvorlagen</h3>
         <p>
-          Vollständige Leistungsverzeichnisse werden unter „Angebotsvorlagen“ gespeichert und jeweils einem Firmenprofil zugeordnet. Beim neuen Angebot
-          werden nur die Angebotsvorlagen des aktiven Firmenprofils angeboten, damit keine fremden Demo- oder Projektinhalte in ein anderes Profil rutschen.
+          Vollständige Leistungsverzeichnisse werden unter „Vorlagen verwalten“ gespeichert und jeweils einem Firmenprofil zugeordnet. Innerhalb eines
+          Firmenprofils werden mehrere Vorlagen als eigene Tabs angezeigt, zum Beispiel eine allgemeine Vorlage und eine Baurevisionsvorlage.
         </p>
         <p>
-          Eine Angebotsvorlage kann geladen, bearbeitet, dupliziert, gelöscht oder mit dem aktuell bearbeiteten Angebots-LV aktualisiert werden. Angebotsvorlagen
-          sind Teil des lokalen Arbeitsstands und werden beim JSON-Export vollständig mitgesichert.
+          Beim neuen Angebot werden nur die passenden Vorlagen des aktiven Firmenprofils angeboten, damit keine fremden Demo- oder Projektinhalte in ein
+          anderes Profil rutschen. Eine Angebotsvorlage kann geladen, bearbeitet, dupliziert, gelöscht oder mit dem aktuell bearbeiteten Angebots-LV
+          aktualisiert werden.
         </p>
         <p>
           Prüfen Sie vor dem Versand eines Angebots insbesondere Firmenprofil, Empfänger, Projektdaten, Leistungsumfang, Preise, Umsatzsteuer,
@@ -200,7 +201,7 @@ const helpSections: HelpSection[] = [
         </p>
         <h3>Leere Textfelder</h3>
         <p>
-          Optionale Textfelder werden nur dann in der Angebotsvorschau ausgegeben, wenn dort Inhalt eingetragen ist. Wenn Sie ein Textfeld
+          Optionale Textfelder werden nur dann unter „Prüfen & versenden“ ausgegeben, wenn dort Inhalt eingetragen ist. Wenn Sie ein Textfeld
           leer lassen oder den Inhalt löschen, erscheinen weder Überschrift noch leerer Platzhalter im Angebot.
         </p>
         <p>
@@ -235,7 +236,7 @@ const helpSections: HelpSection[] = [
         </p>
         <h3>Angebot als Link versenden</h3>
         <p>
-          In der Angebotsvorschau speichert der Button „Angebot an Kunden versenden“ den aktuellen Angebotsstand in Supabase und kopiert einen kurzen
+          Unter „Prüfen & versenden“ speichert der Button „Angebot an Kunden versenden“ den aktuellen Angebotsstand in Supabase und kopiert einen kurzen
           Kundenlink in die Zwischenablage. Danach wird das Angebot in der Angebotsdatenbank als „Versendet“ markiert und der Kundenlink am Angebot
           hinterlegt.
         </p>
@@ -255,7 +256,7 @@ const helpSections: HelpSection[] = [
     body: (
       <>
         <p>
-          Die Angebotsvorschau zeigt die Angebotsstruktur, die Projektinformationen, das Leistungsverzeichnis, Titelsummen, Netto-Summe, Umsatzsteuer,
+          „Prüfen & versenden“ zeigt die Angebotsstruktur, die Projektinformationen, das Leistungsverzeichnis, Titelsummen, Netto-Summe, Umsatzsteuer,
           Brutto-Summe, rechtliche Textbausteine, Auftragserteilung und Footer.
         </p>
         <p>
@@ -263,7 +264,7 @@ const helpSections: HelpSection[] = [
           tatsächlich gepflegten Inhalte.
         </p>
         <p>
-          Wird ein Angebotslink geöffnet, lädt SMART OfferFlow das enthaltene Angebot direkt in die Angebotsvorschau. Der Empfänger benötigt dafür keine
+          Wird ein Angebotslink geöffnet, lädt SMART OfferFlow das enthaltene Angebot direkt in die Angebotsdarstellung. Der Empfänger benötigt dafür keine
           lokale JSON-Datei.
         </p>
         <p>
@@ -294,6 +295,39 @@ const helpSections: HelpSection[] = [
           </li>
           <li>
             <strong>Daten fehlen:</strong> JSON-Sicherung laden oder den lokalen Browser-Speicher prüfen.
+          </li>
+        </ul>
+      </>
+    )
+  },
+  {
+    id: "improvements",
+    title: "Empfohlene nächste Ausbauschritte",
+    body: (
+      <>
+        <ul>
+          <li>
+            <strong>Zentrale Cloud-Datenbank:</strong> Firmenprofile, Kunden, Angebote, Vorlagen, Versionen, Nummernkreise und Abrechnung dauerhaft in
+            Supabase speichern, damit derselbe Stand auf mehreren Rechnern verfügbar ist.
+          </li>
+          <li>
+            <strong>Einzelnes Angebot exportieren:</strong> Zusätzlich zur kompletten JSON-Sicherung sollte ein einzelnes Angebot mit LV und Textbausteinen
+            als eigene Projektdatei exportiert und wieder importiert werden können.
+          </li>
+          <li>
+            <strong>Angebotsliste ausbauen:</strong> Filter nach Firmenprofil, Status, Kunde, Jahr und Thema sowie Aktionen wie duplizieren, archivieren,
+            als Vorlage speichern und Version anzeigen.
+          </li>
+          <li>
+            <strong>Vorlagenführung verbessern:</strong> Für jedes Firmenprofil mehrere Themenvorlagen mit klaren Kategorien, zum Beispiel Baurevision,
+            Due Diligence, Projektsteuerung oder Sachverständigenleistungen.
+          </li>
+          <li>
+            <strong>PDF-Ausgabe absichern:</strong> Einheitliche Drucklogik mit Seitenumbrüchen, Kopf-/Fußbereich, wiederholten Tabellenköpfen und stabiler
+            Darstellung unabhängig vom Browser.
+          </li>
+          <li>
+            <strong>Assistent für Neueinsteiger:</strong> Ein kleiner Startdialog kann durch die fünf Schritte führen und fehlende Pflichtangaben markieren.
           </li>
         </ul>
       </>
