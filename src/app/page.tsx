@@ -254,6 +254,61 @@ function normalizeSavedOffers(offers: SavedOffer[] | undefined): SavedOffer[] {
   }));
 }
 
+function makeSavedOfferSnapshot(
+  project: Project,
+  groups: PositionGroup[],
+  orderBilling: OrderBilling,
+  savedAt: string,
+  existing?: SavedOffer,
+  bumpVersion = false
+): SavedOffer {
+  return {
+    id: project.id,
+    project,
+    groups: cloneGroups(groups),
+    orderBilling,
+    createdAt: existing?.createdAt ?? savedAt,
+    updatedAt: savedAt,
+    version: bumpVersion ? (existing?.version ?? 0) + 1 : existing?.version ?? 1
+  };
+}
+
+function savedOfferSnapshotChanged(existing: SavedOffer | undefined, next: SavedOffer) {
+  if (!existing) return true;
+  const existingPositionCount = activeGroups(existing.groups).reduce(
+    (sum, group) => sum + group.positions.filter((position) => position.active).length,
+    0
+  );
+  const nextPositionCount = activeGroups(next.groups).reduce((sum, group) => sum + group.positions.filter((position) => position.active).length, 0);
+  return (
+    existing.project.projectName !== next.project.projectName ||
+    existing.project.client !== next.project.client ||
+    existing.project.contactPerson !== next.project.contactPerson ||
+    existing.project.offerNumber !== next.project.offerNumber ||
+    existing.project.companyId !== next.project.companyId ||
+    existing.groups.length !== next.groups.length ||
+    existingPositionCount !== nextPositionCount ||
+    existing.orderBilling.invoicePlan.length !== next.orderBilling.invoicePlan.length ||
+    existing.orderBilling.changeOrders.length !== next.orderBilling.changeOrders.length ||
+    existing.orderBilling.workLog.length !== next.orderBilling.workLog.length ||
+    calculateSummary(existing.groups, existing.project).net !== calculateSummary(next.groups, next.project).net
+  );
+}
+
+function upsertSavedOfferSnapshot(
+  current: SavedOffer[],
+  project: Project,
+  groups: PositionGroup[],
+  orderBilling: OrderBilling,
+  savedAt: string,
+  bumpVersion = false
+) {
+  const existing = current.find((offer) => offer.id === project.id);
+  const next = makeSavedOfferSnapshot(project, groups, orderBilling, savedAt, existing, bumpVersion);
+  if (!savedOfferSnapshotChanged(existing, next)) return current;
+  return existing ? current.map((offer) => (offer.id === project.id ? next : offer)) : [next, ...current];
+}
+
 function createInitialLibraryPositions() {
   return initialGroups.flatMap((group) =>
     group.positions.map((position) => ({
@@ -1111,6 +1166,14 @@ export default function HomePage() {
     });
   }, [project, groups, profiles, customers, libraryPositions, lvTemplates, orderBilling, savedOffers, offerNumberSettings, publicOfferMode, storageReady]);
 
+  useEffect(() => {
+    if (!storageReady || publicOfferMode) return;
+    const savedAt = new Date().toISOString();
+    queueMicrotask(() => {
+      setSavedOffers((current) => upsertSavedOfferSnapshot(current, project, groups, orderBilling, savedAt));
+    });
+  }, [groups, orderBilling, project, publicOfferMode, storageReady]);
+
   const company = profiles.find((profile) => profile.id === project.companyId) ?? profiles[0];
   const selectedProfile = profiles.find((profile) => profile.id === selectedProfileId) ?? company;
   const workspaceTitle = activeView === "Dashboard" ? "Projektzentrale" : activeView;
@@ -1169,20 +1232,10 @@ export default function HomePage() {
 
   function saveCurrentOffer() {
     const savedAt = new Date().toISOString();
-    const payload = createStatePayload(savedAt);
-    window.localStorage.setItem(storageKey, JSON.stringify(payload));
     setSavedOffers((current) => {
-      const existing = current.find((offer) => offer.id === project.id);
-      const savedOffer: SavedOffer = {
-        id: project.id,
-        project,
-        groups: cloneGroups(groups),
-        orderBilling,
-        createdAt: existing?.createdAt ?? savedAt,
-        updatedAt: savedAt,
-        version: (existing?.version ?? 0) + 1
-      };
-      return existing ? current.map((offer) => (offer.id === project.id ? savedOffer : offer)) : [savedOffer, ...current];
+      const next = upsertSavedOfferSnapshot(current, project, groups, orderBilling, savedAt, true);
+      window.localStorage.setItem(storageKey, JSON.stringify({ ...createStatePayload(savedAt), savedOffers: next }));
+      return next;
     });
     setLastSavedAt(savedAt);
     setStorageMessage("Angebot in Angebotsliste gespeichert");
@@ -1198,17 +1251,9 @@ export default function HomePage() {
     };
     setProject(sentProject);
     setSavedOffers((current) => {
-      const existing = current.find((offer) => offer.id === sentProject.id);
-      const savedOffer: SavedOffer = {
-        id: sentProject.id,
-        project: sentProject,
-        groups: cloneGroups(groups),
-        orderBilling,
-        createdAt: existing?.createdAt ?? sentAt,
-        updatedAt: sentAt,
-        version: (existing?.version ?? 0) + 1
-      };
-      return existing ? current.map((offer) => (offer.id === sentProject.id ? savedOffer : offer)) : [savedOffer, ...current];
+      const next = upsertSavedOfferSnapshot(current, sentProject, groups, orderBilling, sentAt, true);
+      window.localStorage.setItem(storageKey, JSON.stringify({ ...createStatePayload(sentAt), project: sentProject, savedOffers: next }));
+      return next;
     });
     setLastSavedAt(sentAt);
     setStorageMessage("Angebot als versendet gespeichert");
@@ -1267,18 +1312,7 @@ export default function HomePage() {
     setGroups(newGroups);
     setOrderBilling({ ...sampleOrderBilling, orderNumber: "" });
     setOfferNumberSettings((current) => bumpOfferNumberSetting(normalizeOfferNumberSettings(current, profiles), companyId));
-    setSavedOffers((current) => [
-      {
-        id: newProject.id,
-        project: newProject,
-        groups: newGroups,
-        orderBilling: { ...sampleOrderBilling, orderNumber: "" },
-        createdAt: now,
-        updatedAt: now,
-        version: 1
-      },
-      ...current
-    ]);
+    setSavedOffers((current) => upsertSavedOfferSnapshot(current, newProject, newGroups, { ...sampleOrderBilling, orderNumber: "" }, now));
     setStorageMessage(`Neues Angebot angelegt: ${offerNumber}`);
     setActiveView("Neues Angebot");
   }
@@ -2127,6 +2161,7 @@ export default function HomePage() {
               groups={groups}
               profiles={profiles}
               customers={customers}
+              savedOffers={savedOffers}
               templates={lvTemplates}
               lastSavedAt={lastSavedAt}
               storageMessage={storageMessage}
@@ -3394,6 +3429,7 @@ function QualityManagement({
   groups,
   profiles,
   customers,
+  savedOffers,
   templates,
   lastSavedAt,
   storageMessage,
@@ -3405,6 +3441,7 @@ function QualityManagement({
   groups: PositionGroup[];
   profiles: CompanyProfile[];
   customers: Customer[];
+  savedOffers: SavedOffer[];
   templates: LvTemplate[];
   lastSavedAt: string | null;
   storageMessage: string;
@@ -3417,12 +3454,93 @@ function QualityManagement({
   const activePositions = visibleGroups.flatMap((group) => group.positions.filter((position) => position.active));
   const summary = calculateSummary(groups, project);
   const masterTemplate = templates.find((template) => template.companyId === project.companyId && template.id === `template-${project.companyId}-standard`);
+  const activeSavedOffer = savedOffers.find((offer) => offer.id === project.id);
+  const matchingCompanyTemplates = templates.filter((template) => template.companyId === project.companyId);
+  const textFieldCount = Object.values(offerTemplateTextFromProject(project)).filter((value) => `${value ?? ""}`.trim()).length;
+  const templateTextCount = masterTemplate ? Object.values(masterTemplate.textFields ?? {}).filter((value) => `${value ?? ""}`.trim()).length : 0;
   const aiDemoFindings = collectAiDemoFindings(project, groups);
   const hasAiDemoLanguage = aiDemoFindings.length > 0;
   const hasMetzgerStructure = groups.some((group) => group.id.startsWith("mrea-"));
   const staleSave = !lastSavedAt;
 
   const issues: QualityIssue[] = [];
+
+  if (!project.projectName.trim()) {
+    issues.push({
+      id: "project-title-missing",
+      severity: "Fehler",
+      area: "Angebotsdaten",
+      title: "Projekttitel fehlt",
+      detail:
+        "In der Angebotsliste erscheint dadurch „Ohne Projekttitel“. Trage im neuen Angebot unter Projektinformationen den Mandats- oder Projektnamen ein, zum Beispiel „Projektstabilisierung und Unterstützungsleistungen“.",
+      action: "Angebotsdaten öffnen"
+    });
+  }
+
+  if (!activeSavedOffer) {
+    issues.push({
+      id: "offer-not-in-database",
+      severity: "Fehler",
+      area: "Angebotsdatenbank",
+      title: "Aktives Angebot fehlt in der Angebotsliste",
+      detail:
+        "Das aktuell geöffnete Angebot war nicht als eigener Datensatz in der Projektliste verknüpft. Die App synchronisiert dies künftig automatisch; öffne Projekte zur Kontrolle.",
+      action: "Projekte öffnen"
+    });
+  } else {
+    const savedNet = calculateSummary(activeSavedOffer.groups, activeSavedOffer.project).net;
+    const activeNet = summary.net;
+    const savedMismatch =
+      activeSavedOffer.project.projectName !== project.projectName ||
+      activeSavedOffer.project.client !== project.client ||
+      activeSavedOffer.project.companyId !== project.companyId ||
+      activeSavedOffer.groups.length !== groups.length ||
+      savedNet !== activeNet;
+    if (savedMismatch) {
+      issues.push({
+        id: "offer-database-stale",
+        severity: "Warnung",
+        area: "Angebotsdatenbank",
+        title: "Projektliste war nicht synchron mit dem aktiven Angebot",
+        detail:
+          "Die gespeicherte Angebotsliste enthält abweichende Projekt-, Firmenprofil-, LV- oder Summendaten. Die App synchronisiert aktive Angebote künftig automatisch mit der Projektliste.",
+        action: "Projekte öffnen"
+      });
+    }
+  }
+
+  if (!matchingCompanyTemplates.length) {
+    issues.push({
+      id: "no-company-templates",
+      severity: "Fehler",
+      area: "Angebotsvorlagen",
+      title: "Keine Angebotsvorlage für das aktive Firmenprofil",
+      detail: "Für jedes Firmenprofil sollte mindestens eine Angebotsvorlage mit Textbausteinen und LV vorhanden sein.",
+      action: "Angebotsvorlagen öffnen"
+    });
+  }
+
+  if (textFieldCount < 10) {
+    issues.push({
+      id: "offer-texts-incomplete",
+      severity: "Warnung",
+      area: "Textbausteine",
+      title: "Zu wenige Angebotsklarstellungen gepflegt",
+      detail: `Aktuell sind ${textFieldCount} von ${offerTemplateTextFieldLabels.length} möglichen Textfeldern gefüllt. Prüfe Inhalt, Angebotsklarstellung, Vertragsgrundlage, Zahlungsbedingungen und Auftragserteilung.`,
+      action: "Angebotsdaten öffnen"
+    });
+  }
+
+  if (masterTemplate && templateTextCount < 10) {
+    issues.push({
+      id: "template-texts-incomplete",
+      severity: "Hinweis",
+      area: "Angebotsvorlage",
+      title: "Angebotsvorlage enthält wenige Textbausteine",
+      detail: `Die Standardvorlage für ${company.name} enthält ${templateTextCount} gepflegte Textfelder. Für wiederverwendbare Themenvorlagen sollten die wichtigsten Klarstellungen hinterlegt sein.`,
+      action: "Angebotsvorlagen öffnen"
+    });
+  }
 
   if (project.companyId === "metzger-real-estate" && hasAiDemoLanguage) {
     issues.push({
@@ -3556,6 +3674,7 @@ function QualityManagement({
     if (issue.id === "mrea-ai-copy") repairCompanyLvAlignment();
     else if (issue.id === "mrea-master-missing") applyMasterLv();
     else if (issue.action === "Angebotsdaten öffnen") setActiveView("Neues Angebot");
+    else if (issue.action === "Projekte öffnen") setActiveView("Projekte");
     else if (issue.action === "Kunden öffnen") setActiveView("Kunden");
     else if (issue.action === "Firmenprofil öffnen") setActiveView("Firmenprofile");
     else if (issue.action === "LV bearbeiten") setActiveView("LV bearbeiten");
