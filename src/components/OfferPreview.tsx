@@ -233,17 +233,18 @@ export function OfferPreview({
   return (
     <>
       {!publicView ? (
-      <div className="no-print mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-line bg-white px-4 py-3 shadow-soft">
-        <div>
-          <p className="text-sm font-semibold text-ink">Angebotsvorschau</p>
-          <p className="text-xs text-muted">
-            {shareMessage || "Kundenlink speichert das Angebot in Supabase und kopiert einen kurzen Link."}
-          </p>
-          <p className="mt-1 text-xs text-muted">
-            PDF-Hinweis: Im Druckdialog A4, Skalierung 100 %, Hintergrundgrafiken aktivieren und Browser-Kopf-/Fußzeilen deaktivieren.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
+      <div className="no-print mb-4 rounded-lg border border-line bg-white px-4 py-3 shadow-soft">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-ink">Angebotsvorschau</p>
+            <p className="text-xs text-muted">
+              {shareMessage || "Kundenlink speichert das Angebot in Supabase und kopiert einen kurzen Link."}
+            </p>
+            <p className="mt-1 text-xs text-muted">
+              PDF-Hinweis: Im Druckdialog A4, Skalierung 100 %, Hintergrundgrafiken aktivieren und Browser-Kopf-/Fußzeilen deaktivieren.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={saveOffer}
@@ -289,7 +290,11 @@ export function OfferPreview({
             <Printer className="h-4 w-4" />
             PDF erstellen
           </button>
+          </div>
         </div>
+        <p className="mt-3 border-t border-line pt-3 text-xs leading-5 text-muted">
+          Speichern aktualisiert die lokale Angebotsliste. JSON sichert den gesamten App-Stand. Einzelangebot sichert nur dieses Angebot als Datei.
+        </p>
       </div>
       ) : null}
       <article className="print-area rounded-lg border border-line bg-white p-8 text-base text-black shadow-soft">
