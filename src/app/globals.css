@@ -125,6 +125,8 @@ input[type="number"]::-webkit-outer-spin-button {
     box-shadow: none !important;
     border: none !important;
     border-radius: 0 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 
   .print-area h1 {
@@ -182,6 +184,16 @@ input[type="number"]::-webkit-outer-spin-button {
   .print-table > div {
     break-inside: auto;
     page-break-inside: auto;
+  }
+
+  .print-table [data-print-group] {
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+
+  .print-table [data-print-position] {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   .print-table .grid {

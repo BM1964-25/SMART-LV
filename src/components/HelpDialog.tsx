@@ -117,7 +117,7 @@ const helpSections: HelpSection[] = [
         </p>
         <p>
           Stammdaten wie Kunden und Firmenprofile sowie Prüfung, Verwaltung und Expertenfunktionen sind darunter getrennt angeordnet. Über die unteren
-          Symbole speichern oder laden Sie den aktuellen App-Stand als JSON-Datei.
+          Symbole speichern oder laden Sie den kompletten App-Stand als JSON-Datei oder laden ein einzelnes Angebot als Projektdatei.
         </p>
         <p>
           Oberhalb des Arbeitsbereichs zeigt die Prozessleiste die fünf wichtigsten Schritte bis zum versendbaren Angebot. Jeder Schritt kann direkt
@@ -178,8 +178,12 @@ const helpSections: HelpSection[] = [
         </p>
         <h3>Angebotsdatenbank</h3>
         <p>
-          Unter „Angebote“ werden gespeicherte Angebote mit Status, Version, Angebotswert und Änderungsdatum angezeigt. Beim Klick auf „Bearbeiten“
-          wird das Angebot wieder als aktueller Arbeitsstand geöffnet.
+          Unter „Angebote“ werden gespeicherte Angebote mit Firmenprofil, Status, Version, Angebotswert und Änderungsdatum angezeigt. Die Liste kann
+          nach Suchbegriff, Firmenprofil und Status gefiltert werden.
+        </p>
+        <p>
+          Beim Klick auf „Bearbeiten“ wird das Angebot wieder als aktueller Arbeitsstand geöffnet. Zusätzlich können Angebote dupliziert, archiviert,
+          reaktiviert, gelöscht oder als Einzelangebot exportiert werden.
         </p>
         <p>
           Die Angebotsnummer kann je Firmenprofil über einen Nummernkreis aus Präfix, Jahr und Zähler automatisch erzeugt werden. Im Angebotskopf
@@ -234,6 +238,14 @@ const helpSections: HelpSection[] = [
           Wichtig: Die JSON-Datei ist derzeit keine reine Einzel-Projektdatei, sondern eine Sicherung des vollständigen App-Arbeitsstands einschließlich
           Firmenprofilen, Kunden, Angebotsliste, Angebotsvorlagen, aktuellem Angebot, LV und Abrechnung.
         </p>
+        <p>
+          „Einzelangebot sichern“ erstellt dagegen eine kleinere Datei nur für das aktuelle beziehungsweise ausgewählte Angebot. Enthalten sind
+          Projektdaten, Textbausteine, LV, Abrechnungsstand und Version dieses einen Angebots.
+        </p>
+        <p>
+          „Einzelangebot laden“ importiert eine solche Datei in die Angebotsdatenbank und öffnet sie zur Bearbeitung. Das überschreibt nicht den
+          kompletten App-Stand und ist deshalb besser geeignet, wenn nur ein Angebot zwischen Rechnern übertragen werden soll.
+        </p>
         <h3>Angebot als Link versenden</h3>
         <p>
           Unter „Prüfen & versenden“ speichert der Button „Angebot an Kunden versenden“ den aktuellen Angebotsstand in Supabase und kopiert einen kurzen
@@ -258,6 +270,10 @@ const helpSections: HelpSection[] = [
         <p>
           „Prüfen & versenden“ zeigt die Angebotsstruktur, die Projektinformationen, das Leistungsverzeichnis, Titelsummen, Netto-Summe, Umsatzsteuer,
           Brutto-Summe, rechtliche Textbausteine, Auftragserteilung und Footer.
+        </p>
+        <p>
+          Für eine saubere PDF-Ausgabe nutzen Sie in der Angebotsvorschau „PDF erstellen“. Im Druckdialog sollten A4, Skalierung 100 %, aktivierte
+          Hintergrundgrafiken und deaktivierte Browser-Kopf-/Fußzeilen eingestellt werden.
         </p>
         <p>
           Leere optionale Textbausteine werden in der Vorschau bewusst übersprungen. Dadurch bleiben Angebot und PDF kompakt und enthalten nur die
@@ -296,6 +312,10 @@ const helpSections: HelpSection[] = [
           <li>
             <strong>Daten fehlen:</strong> JSON-Sicherung laden oder den lokalen Browser-Speicher prüfen.
           </li>
+          <li>
+            <strong>Nur ein Angebot übertragen:</strong> Nicht die komplette JSON-Sicherung laden, sondern „Einzelangebot sichern“ und auf dem anderen
+            Rechner „Einzelangebot laden“ verwenden.
+          </li>
         </ul>
       </>
     )
@@ -311,23 +331,16 @@ const helpSections: HelpSection[] = [
             Supabase speichern, damit derselbe Stand auf mehreren Rechnern verfügbar ist.
           </li>
           <li>
-            <strong>Einzelnes Angebot exportieren:</strong> Zusätzlich zur kompletten JSON-Sicherung sollte ein einzelnes Angebot mit LV und Textbausteinen
-            als eigene Projektdatei exportiert und wieder importiert werden können.
-          </li>
-          <li>
-            <strong>Angebotsliste ausbauen:</strong> Filter nach Firmenprofil, Status, Kunde, Jahr und Thema sowie Aktionen wie duplizieren, archivieren,
-            als Vorlage speichern und Version anzeigen.
-          </li>
-          <li>
             <strong>Vorlagenführung verbessern:</strong> Für jedes Firmenprofil mehrere Themenvorlagen mit klaren Kategorien, zum Beispiel Baurevision,
             Due Diligence, Projektsteuerung oder Sachverständigenleistungen.
           </li>
           <li>
-            <strong>PDF-Ausgabe absichern:</strong> Einheitliche Drucklogik mit Seitenumbrüchen, Kopf-/Fußbereich, wiederholten Tabellenköpfen und stabiler
-            Darstellung unabhängig vom Browser.
+            <strong>PDF-Ausgabe weiter absichern:</strong> Mittelfristig kann ein serverseitiger PDF-Generator ergänzt werden, damit Angebote unabhängig
+            vom Browser exakt gleich gerendert werden.
           </li>
           <li>
-            <strong>Assistent für Neueinsteiger:</strong> Ein kleiner Startdialog kann durch die fünf Schritte führen und fehlende Pflichtangaben markieren.
+            <strong>Cloud-Arbeitsstand:</strong> Wenn Supabase später erweitert wird, sollten vollständige Arbeitsstände, Angebote, Vorlagen und
+            Nummernkreise zentral gespeichert werden.
           </li>
         </ul>
       </>

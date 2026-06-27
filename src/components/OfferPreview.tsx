@@ -135,6 +135,7 @@ export function OfferPreview({
   publicView = false,
   onSaveOffer,
   onExportJson,
+  onExportOffer,
   onOfferSent
 }: {
   project: Project;
@@ -143,6 +144,7 @@ export function OfferPreview({
   publicView?: boolean;
   onSaveOffer?: () => void;
   onExportJson?: () => void;
+  onExportOffer?: () => void;
   onOfferSent?: (link: string) => void;
 }) {
   const [shareStatus, setShareStatus] = useState<"idle" | "saving" | "copied" | "error">("idle");
@@ -237,6 +239,9 @@ export function OfferPreview({
           <p className="text-xs text-muted">
             {shareMessage || "Kundenlink speichert das Angebot in Supabase und kopiert einen kurzen Link."}
           </p>
+          <p className="mt-1 text-xs text-muted">
+            PDF-Hinweis: Im Druckdialog A4, Skalierung 100 %, Hintergrundgrafiken aktivieren und Browser-Kopf-/Fußzeilen deaktivieren.
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
@@ -255,6 +260,16 @@ export function OfferPreview({
             >
               <Download className="h-4 w-4" />
               Als JSON sichern
+            </button>
+          ) : null}
+          {onExportOffer ? (
+            <button
+              type="button"
+              onClick={onExportOffer}
+              className="inline-flex h-10 items-center gap-2 rounded-md border border-line bg-white px-4 text-sm font-semibold text-ink transition hover:border-slate-300 hover:bg-slate-50"
+            >
+              <Download className="h-4 w-4" />
+              Einzelangebot sichern
             </button>
           ) : null}
           <button
@@ -360,7 +375,7 @@ export function OfferPreview({
             if (activePositions.length === 0) return null;
 
             return (
-              <div key={group.id} className="border-b border-[#D9DEE5] last:border-b-0">
+              <div key={group.id} data-print-group className="border-b border-[#D9DEE5] last:border-b-0">
                 <div className="print-keep flex flex-col gap-3 bg-[#F3F4F6] px-5 py-4 lg:flex-row lg:items-start lg:justify-between">
                   <div>
                     <h3 className="font-semibold text-ink">
@@ -386,6 +401,7 @@ export function OfferPreview({
                   {activePositions.map((position) => (
                     <div
                       key={position.id}
+                      data-print-position
                       className="break-inside-avoid grid gap-4 px-5 py-4 text-sm lg:grid-cols-[56px_minmax(260px,1fr)_76px_68px_116px_126px]"
                     >
                       <p className="font-semibold text-black">{positionNumber(groups, group.id, position.id)}</p>

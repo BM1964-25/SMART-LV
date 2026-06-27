@@ -59,7 +59,7 @@ import {
 } from "@/lib/data";
 import { printElement } from "@/lib/print";
 import { readOfferSharePayloadFromLocation, readOfferTokenFromLocation } from "@/lib/share";
-import { ChangeOrder, CompanyProfile, InvoicePlanItem, OrderBilling, Position, PositionGroup, Project, WorkLogItem } from "@/lib/types";
+import { ChangeOrder, CompanyProfile, InvoicePlanItem, OfferStatus, OrderBilling, Position, PositionGroup, Project, WorkLogItem } from "@/lib/types";
 
 type View =
   | "Dashboard"
@@ -182,6 +182,13 @@ type SavedOffer = {
   createdAt: string;
   updatedAt: string;
   version: number;
+};
+
+type OfferFilePayload = {
+  fileType: "smart-offerflow-offer";
+  version: number;
+  exportedAt: string;
+  offer: SavedOffer;
 };
 
 type OfferNumberSetting = {
@@ -363,6 +370,10 @@ function createAppStateFileName(project: Project, profiles: CompanyProfile[]) {
   const clientPart = slugifyFilePart(project.client, "ohne-kunde");
   const projectPart = slugifyFilePart(project.projectName, "ohne-projekt");
   return `${offerNumber}-${companyPart}-${clientPart}-${projectPart}-${dateStamp()}-smart-offerflow.json`;
+}
+
+function createSingleOfferFileName(project: Project, profiles: CompanyProfile[]) {
+  return createAppStateFileName(project, profiles).replace("-smart-offerflow.json", "-angebot.smart-offerflow.json");
 }
 
 function createInitialLibraryPositions() {
@@ -1444,6 +1455,7 @@ export default function HomePage() {
   const [publicOfferMode, setPublicOfferMode] = useState(false);
   const [publicOfferLoading, setPublicOfferLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const offerFileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const sharedToken = readOfferTokenFromLocation();
@@ -1656,6 +1668,49 @@ export default function HomePage() {
     setStorageMessage(`Angebot gelöscht: ${offer.project.offerNumber}`);
   }
 
+  function duplicateSavedOffer(offerId: string) {
+    const offer = savedOffers.find((item) => item.id === offerId);
+    if (!offer) return;
+    const now = new Date().toISOString();
+    const duplicatedProject: Project = {
+      ...offer.project,
+      id: `offer-${Date.now()}`,
+      offerNumber: `${offer.project.offerNumber}-KOPIE`,
+      status: "Entwurf",
+      customerLink: undefined,
+      sentAt: undefined
+    };
+    const duplicatedOffer: SavedOffer = {
+      ...offer,
+      id: duplicatedProject.id,
+      project: duplicatedProject,
+      groups: cloneGroups(offer.groups),
+      orderBilling: { ...offer.orderBilling, invoicePlan: [...offer.orderBilling.invoicePlan], changeOrders: [...offer.orderBilling.changeOrders], workLog: [...offer.orderBilling.workLog] },
+      createdAt: now,
+      updatedAt: now,
+      version: 1
+    };
+    setSavedOffers((current) => [duplicatedOffer, ...current]);
+    setStorageMessage(`Angebot dupliziert: ${duplicatedProject.offerNumber}`);
+  }
+
+  function archiveSavedOffer(offerId: string) {
+    const now = new Date().toISOString();
+    setSavedOffers((current) =>
+      current.map((offer) =>
+        offer.id === offerId
+          ? {
+              ...offer,
+              project: { ...offer.project, status: offer.project.status === "Archiviert" ? "Entwurf" : "Archiviert" },
+              updatedAt: now,
+              version: offer.version + 1
+            }
+          : offer
+      )
+    );
+    setStorageMessage("Angebotsstatus aktualisiert");
+  }
+
   function updateOfferNumberSetting(companyId: Project["companyId"], changes: Partial<OfferNumberSetting>) {
     setOfferNumberSettings((current) =>
       normalizeOfferNumberSettings(current, profiles).map((setting) => (setting.companyId === companyId ? { ...setting, ...changes } : setting))
@@ -1722,6 +1777,60 @@ export default function HomePage() {
     setStorageMessage("JSON-Datei gespeichert");
   }
 
+  function exportSingleOffer(offer: SavedOffer = makeSavedOfferSnapshot(project, groups, orderBilling, new Date().toISOString(), savedOffers.find((item) => item.id === project.id))) {
+    const exportedAt = new Date().toISOString();
+    const payload: OfferFilePayload = {
+      fileType: "smart-offerflow-offer",
+      version: 1,
+      exportedAt,
+      offer: {
+        ...offer,
+        groups: cloneGroups(offer.groups),
+        updatedAt: exportedAt
+      }
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = createSingleOfferFileName(payload.offer.project, profiles);
+    link.click();
+    URL.revokeObjectURL(url);
+    setStorageMessage(`Einzelangebot exportiert: ${payload.offer.project.offerNumber}`);
+  }
+
+  function importSingleOfferFile(file: File) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(String(reader.result)) as Partial<OfferFilePayload>;
+        if (parsed.fileType !== "smart-offerflow-offer" || !parsed.offer?.project || !parsed.offer.groups) {
+          throw new Error("Keine Einzelangebots-Datei");
+        }
+        const importedAt = new Date().toISOString();
+        const importedOffer: SavedOffer = {
+          id: parsed.offer.id || parsed.offer.project.id || `offer-${Date.now()}`,
+          project: sanitizeProject(parsed.offer.project, profiles),
+          groups: renumberGroups(cloneGroups(parsed.offer.groups)),
+          orderBilling: parsed.offer.orderBilling ?? sampleOrderBilling,
+          createdAt: parsed.offer.createdAt ?? importedAt,
+          updatedAt: importedAt,
+          version: parsed.offer.version ?? 1
+        };
+        setSavedOffers((current) => upsertSavedOfferSnapshot(current, importedOffer.project, importedOffer.groups, importedOffer.orderBilling, importedAt, true));
+        setProject(importedOffer.project);
+        setSelectedProfileId(importedOffer.project.companyId);
+        setGroups(importedOffer.groups);
+        setOrderBilling(importedOffer.orderBilling);
+        setStorageMessage(`Einzelangebot geladen: ${file.name}`);
+        setActiveView("Projekte");
+      } catch {
+        setStorageMessage("Einzelangebot konnte nicht geladen werden");
+      }
+    };
+    reader.readAsText(file);
+  }
+
   function handleJsonFile(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -1742,6 +1851,13 @@ export default function HomePage() {
       }
     };
     reader.readAsText(file);
+  }
+
+  function handleOfferFile(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    importSingleOfferFile(file);
+    event.target.value = "";
   }
 
   function selectCompany(companyId: Project["companyId"]) {
@@ -2363,8 +2479,10 @@ export default function HomePage() {
         </nav>
         <div className={`mt-6 border-t border-line pt-4 ${sidebarCollapsed ? "grid justify-center gap-2" : "grid gap-3"}`}>
           <input ref={fileInputRef} type="file" accept="application/json,.json" onChange={handleJsonFile} className="hidden" />
+          <input ref={offerFileInputRef} type="file" accept="application/json,.json" onChange={handleOfferFile} className="hidden" />
           <IconButton icon={Save} label="Stand als JSON speichern" onClick={exportJson} />
           <IconButton icon={Upload} label="Stand aus JSON laden" onClick={() => fileInputRef.current?.click()} />
+          <IconButton icon={FileText} label="Einzelangebot laden" onClick={() => offerFileInputRef.current?.click()} />
           {!sidebarCollapsed ? (
             <div className="rounded-md bg-slate-50 px-3 py-2 text-xs leading-5 text-muted">
               <p className="font-semibold text-ink">{storageMessage}</p>
@@ -2396,6 +2514,7 @@ export default function HomePage() {
               <IconButton icon={Copy} label="Angebot duplizieren" onClick={duplicateOffer} />
               <IconButton icon={Download} label="CSV exportieren" onClick={exportCsv} />
               <IconButton icon={Braces} label="JSON exportieren" onClick={exportJson} />
+              <IconButton icon={FileText} label="Einzelangebot exportieren" onClick={() => exportSingleOffer()} />
               <IconButton icon={Printer} label="PDF/DOCX über Druckdialog vorbereiten" onClick={printOfferArea} />
               <button
                 type="button"
@@ -2425,6 +2544,7 @@ export default function HomePage() {
 
         <div className="px-4 py-6 md:px-8">
           <ProcessGuide activeView={activeView} setActiveView={setActiveView} />
+          <StartAssistant project={project} groups={groups} profiles={profiles} customers={customers} savedOffers={savedOffers} setActiveView={setActiveView} />
 
           {activeView === "Dashboard" ? (
             <Dashboard
@@ -2449,6 +2569,10 @@ export default function HomePage() {
               createNewOffer={createNewOffer}
               openSavedOffer={openSavedOffer}
               deleteSavedOffer={deleteSavedOffer}
+              duplicateSavedOffer={duplicateSavedOffer}
+              archiveSavedOffer={archiveSavedOffer}
+              exportSavedOffer={exportSingleOffer}
+              importOfferFile={() => offerFileInputRef.current?.click()}
               updateNumberSetting={updateOfferNumberSetting}
             />
           ) : null}
@@ -2505,7 +2629,7 @@ export default function HomePage() {
           ) : null}
 
           {activeView === "Angebotsvorschau" ? (
-            <OfferPreview project={project} groups={groups} profiles={profiles} onSaveOffer={saveCurrentOffer} onExportJson={exportJson} onOfferSent={markOfferAsSent} />
+            <OfferPreview project={project} groups={groups} profiles={profiles} onSaveOffer={saveCurrentOffer} onExportJson={exportJson} onExportOffer={() => exportSingleOffer()} onOfferSent={markOfferAsSent} />
           ) : null}
 
           {activeView === "Auftrag & Abrechnung" ? (
@@ -2629,6 +2753,90 @@ function ProcessGuide({ activeView, setActiveView }: { activeView: View; setActi
   );
 }
 
+function StartAssistant({
+  project,
+  groups,
+  profiles,
+  customers,
+  savedOffers,
+  setActiveView
+}: {
+  project: Project;
+  groups: PositionGroup[];
+  profiles: CompanyProfile[];
+  customers: Customer[];
+  savedOffers: SavedOffer[];
+  setActiveView: (view: View) => void;
+}) {
+  const summary = calculateSummary(groups, project);
+  const company = profiles.find((profile) => profile.id === project.companyId);
+  const positionCount = activeGroups(groups).reduce((sum, group) => sum + group.positions.filter((position) => position.active).length, 0);
+  const steps = [
+    {
+      label: "Firmenprofil",
+      done: Boolean(company),
+      hint: company?.name ?? "Profil wählen",
+      view: "Firmenprofile" as View
+    },
+    {
+      label: "Kunde",
+      done: Boolean(project.client.trim()),
+      hint: project.client || `${customers.length} Kunden verfügbar`,
+      view: "Kunden" as View
+    },
+    {
+      label: "Angebotsdaten",
+      done: Boolean(project.offerNumber.trim() && project.projectName.trim() && project.offerDate.trim()),
+      hint: project.offerNumber || "Nummer, Datum und Mandat erfassen",
+      view: "Neues Angebot" as View
+    },
+    {
+      label: "LV",
+      done: positionCount > 0,
+      hint: positionCount > 0 ? `${positionCount} aktive Positionen` : "Vorlage wählen oder Positionen anlegen",
+      view: "Neues LV" as View
+    },
+    {
+      label: "Prüfung",
+      done: summary.net > 0 && savedOffers.some((offer) => offer.id === project.id),
+      hint: summary.net > 0 ? `${formatCurrency(summary.net)} netto` : "Speichern und prüfen",
+      view: "Angebotsvorschau" as View
+    }
+  ];
+  const completed = steps.filter((step) => step.done).length;
+
+  return (
+    <div className="no-print mb-6 rounded-lg border border-line bg-white p-4 shadow-sm">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+        <div>
+          <p className="text-sm font-semibold text-ink">Start-Assistent</p>
+          <p className="mt-1 text-xs text-muted">
+            {completed} von {steps.length} Schritten erledigt. Fehlende Punkte können direkt geöffnet werden.
+          </p>
+        </div>
+        <div className="grid gap-2 md:grid-cols-5 xl:min-w-[900px]">
+          {steps.map((step) => (
+            <button
+              key={step.label}
+              type="button"
+              onClick={() => setActiveView(step.view)}
+              className={`rounded-md border px-3 py-3 text-center transition ${
+                step.done ? "border-emerald-100 bg-emerald-50 text-emerald-900" : "border-amber-100 bg-amber-50 text-amber-900"
+              }`}
+            >
+              <span className="mx-auto flex h-6 w-6 items-center justify-center rounded-full bg-white">
+                {step.done ? <CheckCircle2 className="h-4 w-4 text-emerald-600" /> : <AlertTriangle className="h-4 w-4 text-amber-600" />}
+              </span>
+              <span className="mt-2 block text-xs font-semibold uppercase tracking-[0.12em]">{step.label}</span>
+              <span className="mt-1 block truncate text-[11px]">{step.hint}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function OfferDatabase({
   project,
   savedOffers,
@@ -2637,6 +2845,10 @@ function OfferDatabase({
   createNewOffer,
   openSavedOffer,
   deleteSavedOffer,
+  duplicateSavedOffer,
+  archiveSavedOffer,
+  exportSavedOffer,
+  importOfferFile,
   updateNumberSetting
 }: {
   project: Project;
@@ -2646,10 +2858,29 @@ function OfferDatabase({
   createNewOffer: (companyId: Project["companyId"]) => void;
   openSavedOffer: (offerId: string) => void;
   deleteSavedOffer: (offerId: string) => void;
+  duplicateSavedOffer: (offerId: string) => void;
+  archiveSavedOffer: (offerId: string) => void;
+  exportSavedOffer: (offer: SavedOffer) => void;
+  importOfferFile: () => void;
   updateNumberSetting: (companyId: Project["companyId"], changes: Partial<OfferNumberSetting>) => void;
 }) {
   const [newOfferCompanyId, setNewOfferCompanyId] = useState<Project["companyId"]>(project.companyId);
+  const [companyFilter, setCompanyFilter] = useState<Project["companyId"] | "Alle">("Alle");
+  const [statusFilter, setStatusFilter] = useState<OfferStatus | "Alle">("Alle");
+  const [offerQuery, setOfferQuery] = useState("");
   const sortedOffers = [...savedOffers].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  const filteredOffers = sortedOffers.filter((offer) => {
+    const query = offerQuery.trim().toLowerCase();
+    const matchesCompany = companyFilter === "Alle" || offer.project.companyId === companyFilter;
+    const matchesStatus = statusFilter === "Alle" || offer.project.status === statusFilter;
+    const matchesQuery =
+      !query ||
+      [offer.project.offerNumber, offer.project.projectName, offer.project.client, offer.project.contactPerson]
+        .join(" ")
+        .toLowerCase()
+        .includes(query);
+    return matchesCompany && matchesStatus && matchesQuery;
+  });
   const offersByCompany = profiles.map((profile) => ({
     profile,
     offers: sortedOffers.filter((offer) => offer.project.companyId === profile.id),
@@ -2684,6 +2915,13 @@ function OfferDatabase({
             >
               Neues Angebot anlegen
             </button>
+            <button
+              type="button"
+              onClick={importOfferFile}
+              className="inline-flex h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-ink transition hover:border-slate-300"
+            >
+              Einzelangebot laden
+            </button>
           </div>
         </div>
       </div>
@@ -2713,9 +2951,40 @@ function OfferDatabase({
         </div>
       </div>
 
+      <div className="rounded-lg border border-line bg-white p-4 shadow-sm">
+        <div className="grid gap-3 lg:grid-cols-[1fr_220px_180px]">
+          <Field label="Suche">
+            <TextInput value={offerQuery} onChange={(event) => setOfferQuery(event.target.value)} placeholder="Angebotsnummer, Kunde, Projekt" />
+          </Field>
+          <Field label="Firmenprofil">
+            <Select value={companyFilter} onChange={(event) => setCompanyFilter(event.target.value as Project["companyId"] | "Alle")}>
+              <option value="Alle">Alle Firmenprofile</option>
+              {profiles.map((profile) => (
+                <option key={profile.id} value={profile.id}>
+                  {profile.name}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <Field label="Status">
+            <Select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as OfferStatus | "Alle")}>
+              <option value="Alle">Alle Status</option>
+              <option>Entwurf</option>
+              <option>In Prüfung</option>
+              <option>Versendet</option>
+              <option>Beauftragt</option>
+              <option>Archiviert</option>
+            </Select>
+          </Field>
+        </div>
+        <p className="mt-3 text-sm text-muted">
+          {filteredOffers.length} von {sortedOffers.length} Angeboten angezeigt.
+        </p>
+      </div>
+
       <div className="grid gap-4">
-        {sortedOffers.length ? (
-          sortedOffers.map((offer) => {
+        {filteredOffers.length ? (
+          filteredOffers.map((offer) => {
             const company = profiles.find((profile) => profile.id === offer.project.companyId);
             const total = calculateSummary(offer.groups, offer.project).net;
             return (
@@ -2738,9 +3007,18 @@ function OfferDatabase({
                       </a>
                     ) : null}
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 xl:max-w-[420px] xl:justify-end">
                     <button type="button" onClick={() => openSavedOffer(offer.id)} className="h-10 rounded-md bg-ink px-4 text-sm font-semibold text-white transition hover:bg-slate-700">
                       Bearbeiten
+                    </button>
+                    <button type="button" onClick={() => duplicateSavedOffer(offer.id)} className="h-10 rounded-md border border-line bg-white px-4 text-sm font-semibold text-ink transition hover:border-slate-300">
+                      Duplizieren
+                    </button>
+                    <button type="button" onClick={() => exportSavedOffer(offer)} className="h-10 rounded-md border border-line bg-white px-4 text-sm font-semibold text-ink transition hover:border-slate-300">
+                      Exportieren
+                    </button>
+                    <button type="button" onClick={() => archiveSavedOffer(offer.id)} className="h-10 rounded-md border border-line bg-white px-4 text-sm font-semibold text-ink transition hover:border-slate-300">
+                      {offer.project.status === "Archiviert" ? "Reaktivieren" : "Archivieren"}
                     </button>
                     <button type="button" onClick={() => deleteSavedOffer(offer.id)} className="h-10 rounded-md border border-line bg-white px-4 text-sm font-semibold text-ink transition hover:border-slate-300">
                       Löschen
@@ -2753,7 +3031,7 @@ function OfferDatabase({
         ) : (
           <div className="rounded-lg border border-dashed border-line bg-white p-8 text-center">
             <p className="font-semibold text-ink">Noch keine gespeicherten Angebote</p>
-            <p className="mt-2 text-sm text-muted">Lege oben ein neues Angebot an oder speichere den aktuellen Arbeitsstand in der Angebotsvorschau.</p>
+            <p className="mt-2 text-sm text-muted">Lege oben ein neues Angebot an, lade ein Einzelangebot oder speichere den aktuellen Arbeitsstand unter „Prüfen & versenden“.</p>
           </div>
         )}
       </div>
