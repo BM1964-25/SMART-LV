@@ -2480,9 +2480,52 @@ export default function HomePage() {
         <div className={`mt-6 border-t border-line pt-4 ${sidebarCollapsed ? "grid justify-center gap-2" : "grid gap-3"}`}>
           <input ref={fileInputRef} type="file" accept="application/json,.json" onChange={handleJsonFile} className="hidden" />
           <input ref={offerFileInputRef} type="file" accept="application/json,.json" onChange={handleOfferFile} className="hidden" />
-          <IconButton icon={Save} label="Stand als JSON speichern" onClick={exportJson} />
-          <IconButton icon={Upload} label="Stand aus JSON laden" onClick={() => fileInputRef.current?.click()} />
-          <IconButton icon={FileText} label="Einzelangebot laden" onClick={() => offerFileInputRef.current?.click()} />
+          {[
+            {
+              icon: Save,
+              label: "Gesamten Stand sichern",
+              shortLabel: "Sichern",
+              description: "Profile, Kunden, Angebote, Vorlagen und Abrechnung als JSON speichern.",
+              onClick: exportJson
+            },
+            {
+              icon: Upload,
+              label: "Gesamten Stand laden",
+              shortLabel: "Laden",
+              description: "Eine vollständige SMART-OfferFlow-JSON-Datei wiederherstellen.",
+              onClick: () => fileInputRef.current?.click()
+            },
+            {
+              icon: FileText,
+              label: "Einzelangebot laden",
+              shortLabel: "Angebot",
+              description: "Nur ein einzelnes Angebot importieren, ohne den ganzen App-Stand zu ersetzen.",
+              onClick: () => offerFileInputRef.current?.click()
+            }
+          ].map((action) => (
+            <button
+              key={action.label}
+              type="button"
+              aria-label={action.label}
+              title={`${action.label}: ${action.description}`}
+              onClick={action.onClick}
+              className={`rounded-md border border-line bg-white text-muted transition hover:border-slate-300 hover:bg-slate-50 hover:text-ink ${
+                sidebarCollapsed
+                  ? "flex h-14 w-12 flex-col items-center justify-center gap-1 px-1 text-[10px] font-semibold"
+                  : "flex w-full items-start gap-3 px-3 py-3 text-left"
+              }`}
+            >
+              <action.icon className={sidebarCollapsed ? "h-4 w-4" : "mt-0.5 h-4 w-4 shrink-0"} />
+              {sidebarCollapsed ? (
+                <span className="leading-none">{action.shortLabel}</span>
+              ) : (
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold text-ink">{action.label}</span>
+                  <span className="mt-1 block text-xs leading-4 text-muted">{action.description}</span>
+                </span>
+              )}
+            </button>
+          ))}
           {!sidebarCollapsed ? (
             <div className="rounded-md bg-slate-50 px-3 py-2 text-xs leading-5 text-muted">
               <p className="font-semibold text-ink">{storageMessage}</p>
