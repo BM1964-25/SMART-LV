@@ -2722,8 +2722,8 @@ function ProcessGuide({ activeView, setActiveView }: { activeView: View; setActi
     <div className="no-print mb-6 rounded-lg border border-line bg-white p-4 shadow-sm">
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         <div>
-          <p className="text-sm font-semibold text-ink">Geführter Angebotsprozess</p>
-          <p className="mt-1 text-xs text-muted">Von der Erfassung bis zum Versand in fünf Schritten.</p>
+          <p className="text-sm font-semibold text-ink">Prozessnavigation</p>
+          <p className="mt-1 text-xs text-muted">Fester Ablauf vom Angebot bis zur Abrechnung.</p>
         </div>
         <div className="grid gap-2 md:grid-cols-5 xl:min-w-[820px]">
           {processSteps.map((step, index) => {
@@ -2809,9 +2809,9 @@ function StartAssistant({
     <div className="no-print mb-6 rounded-lg border border-line bg-white p-4 shadow-sm">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         <div>
-          <p className="text-sm font-semibold text-ink">Start-Assistent</p>
+          <p className="text-sm font-semibold text-ink">Angebots-Check</p>
           <p className="mt-1 text-xs text-muted">
-            {completed} von {steps.length} Schritten erledigt. Fehlende Punkte können direkt geöffnet werden.
+            {completed} von {steps.length} Prüfpunkten erledigt. Fehlende Angaben können direkt geöffnet werden.
           </p>
         </div>
         <div className="grid gap-2 md:grid-cols-5 xl:min-w-[900px]">
@@ -2824,8 +2824,8 @@ function StartAssistant({
                 step.done ? "border-emerald-100 bg-emerald-50 text-emerald-900" : "border-amber-100 bg-amber-50 text-amber-900"
               }`}
             >
-              <span className="mx-auto flex h-6 w-6 items-center justify-center rounded-full bg-white">
-                {step.done ? <CheckCircle2 className="h-4 w-4 text-emerald-600" /> : <AlertTriangle className="h-4 w-4 text-amber-600" />}
+              <span className="mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm">
+                {step.done ? <CheckCircle2 className="h-6 w-6 text-emerald-600" /> : <AlertTriangle className="h-6 w-6 text-amber-600" />}
               </span>
               <span className="mt-2 block text-xs font-semibold uppercase tracking-[0.12em]">{step.label}</span>
               <span className="mt-1 block truncate text-[11px]">{step.hint}</span>
